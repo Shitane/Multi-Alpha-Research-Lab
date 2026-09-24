@@ -6,15 +6,10 @@
 #property link      "https://goldendeltaea.com/"
 #property version   "1.00"
 #property strict
-#property description "Educational four-mode Renko + Bollinger Expert Advisor for MetaTrader 5."
-#property description "Four independent internal Renko engines: Breakout, Re-entry, Midline Cross and Squeeze Breakout."
-#property description "All four modes are enabled by default; each can be disabled and configured independently."
-#property description "Bollinger bands use previous completed Renko closes only; the current brick is excluded."
-#property description "Max positions defaults to four on hedging accounts; netting accounts are automatically limited to one symbol position."
-#property description "An optional same-tick conflict filter can skip new entries when enabled modes disagree."
-#property description "TP/SL are virtual: the EA and terminal must remain running."
-#property description "Requested volume is normalized to the symbol minimum, maximum and volume step."
-#property description "No external indicators, DLLs, custom symbols or offline charts are required."
+#property description "A10 NoOrders reproduction candidate."
+#property description "Four independent Renko+Bollinger modes."
+#property description "Virtual positions only. No broker orders."
+#property description "For baseline parity research."
 
 enum ENUM_GDS_BB_MODE
   {

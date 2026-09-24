@@ -1,0 +1,13 @@
+test,item,expected,actual,result
+A11 NoOrders parity,ticks,2571204,2571204,PASS
+A11 NoOrders parity,newbars,920,920,PASS
+A11 NoOrders parity,raw signals,4,4,PASS
+A11 NoOrders parity,entries,4,4,PASS
+A11 NoOrders parity,EA exits,3,3,PASS
+A11 NoOrders parity,end open,1,1,PASS
+entry 1,time/dir/price,2026-08-17 04:30 BUY 4407.72,2026-08-17 04:30 BUY 4407.72,PASS
+reversal 1,time/price,2026-08-18 20:45 4358.38,2026-08-18 20:45 4358.38,PASS
+reversal 2,time/price,2026-08-19 18:00 4488.41,2026-08-19 18:00 4488.41,PASS
+reversal 3,time/price,2026-08-26 20:30 4597.53,2026-08-26 20:30 4597.53,PASS
+safety,NO_ORDERS,1,1,PASS
+safety,VIRTUAL_NOT_FILL,1,1,PASS

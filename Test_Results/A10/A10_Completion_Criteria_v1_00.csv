@@ -1,7 +1,7 @@
 stage,item,status,acceptance
 1,Original source frozen,PASS,Original_EA/A10 is preserved unchanged
-2,Original baseline backtest,PENDING,Run original A10 on XAUUSD_DUKA M15 2026-08-16 to 2026-08-29 real ticks with default inputs
-3,Reference trade log,PENDING,Capture entries exits mode direction executable price time and exit reason
+2,Original baseline backtest,PASS,Run original A10 on XAUUSD_DUKA M15 2026-08-16 to 2026-08-29 real ticks with default inputs
+3,Reference trade log,PASS,Capture entries exits mode direction executable price time and exit reason
 4,NoOrders decision reproduction,PENDING,Same tick/brick/mode signals and virtual lifecycle as reference
 5,Mode parity,PENDING,Breakout Re-entry Midline Squeeze each verified
 6,Queue/conflict parity,PENDING,Same-tick conflict filter and deterministic queue priority reproduced

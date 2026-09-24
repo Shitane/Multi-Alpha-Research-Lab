@@ -145,7 +145,7 @@ public:
 class CA15EntryModule
   {
 private:
-   static const int MAX_HISTORY=512;
+   int m_max_history;
    SA15Brick m_history[];
    int m_donchian_period;
    double m_breakout_buffer_bricks;
@@ -155,7 +155,7 @@ private:
    void PushHistory(const SA15Brick &brick)
      {
       int n=ArraySize(m_history);
-      if(n>=MAX_HISTORY)
+      if(n>=m_max_history)
         {
          for(int i=1;i<n;i++) m_history[i-1]=m_history[i];
          n--;
@@ -191,6 +191,7 @@ public:
       m_donchian_period=donchian_period;
       m_breakout_buffer_bricks=breakout_buffer_bricks;
       m_entry_run_bricks=entry_run_bricks;
+      m_max_history=512;
       ArrayResize(m_history,0);
      }
 

@@ -8,5 +8,5 @@ stage,item,status,acceptance
 7,Cooldown parity,PASS,Per-mode cooldown starts after exit completion and decrements by completed mode bricks
 8,Exit parity,PASS,TP SL TIME BB_MID BB_OPPOSITE priority/lifecycle reproduced
 9,Module extraction,PASS,A10 module separated without broker execution
-10,Multi Alpha Core integration,PENDING,A10 selectable through common interface with NO_ORDERS=1
-11,Regression parity,PENDING,Integrated A10 matches standalone NoOrders baseline
+10,Multi Alpha Core integration,PASS,A10 selectable through common interface with NO_ORDERS=1
+11,Regression parity,PASS,Integrated A10 matches standalone NoOrders baseline

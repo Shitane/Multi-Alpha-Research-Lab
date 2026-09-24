@@ -9,6 +9,7 @@
 #include "..\\..\\Include\\A12_Entry_Module.mqh"
 #include "..\\..\\Include\\A15_Entry_Module_v1_00.mqh"
 #include "..\\..\\Include\\A15_Exit_Decision_Module_v1_00.mqh"
+#include "..\\..\\Include\\Alpha_Template_v1_00.mqh"
 
 input ENUM_MULTI_ALPHA_ID InpAlpha=ALPHA_A15;
 
@@ -48,6 +49,9 @@ double g_a12_tick_size=0.0,g_a12_effective_brick=0.0;
 // A15 state
 CA15RenkoBuilder g_a15_renko;
 CA15EntryModule  g_a15_entry;
+
+// A16 template state (empty Alpha; emits no decisions)
+CAlphaTemplate g_a16_template;
 
 void ClearPosition()
   {
@@ -137,11 +141,14 @@ int InitA15()
 
 int OnInit()
   {
-   if(InpAlpha!=ALPHA_A12 && InpAlpha!=ALPHA_A15) return INIT_PARAMETERS_INCORRECT;
+   if(InpAlpha!=ALPHA_A12 && InpAlpha!=ALPHA_A15 && InpAlpha!=ALPHA_A16_TEMPLATE) return INIT_PARAMETERS_INCORRECT;
    if(InpCooldownBricks<0 || InpMaxSpreadFraction<0.0) return INIT_PARAMETERS_INCORRECT;
    ClearPosition(); g_cooldown=0; g_failed=false;
    g_ticks=0; g_bricks=0; g_raw=0; g_entries=0; g_exits=0; g_blocks=0; g_spread_blocks=0;
-   const int rc=(InpAlpha==ALPHA_A12 ? InitA12() : InitA15());
+   int rc=INIT_SUCCEEDED;
+   if(InpAlpha==ALPHA_A12) rc=InitA12();
+   else if(InpAlpha==ALPHA_A15) rc=InitA15();
+   else g_a16_template.Init();
    if(rc!=INIT_SUCCEEDED) return rc;
    PrintFormat("[MULTI_ALPHA_CORE_START] selected_alpha=%d cooldown=%d spread_fraction=%.4f NO_ORDERS=1",
       (int)InpAlpha,InpCooldownBricks,InpMaxSpreadFraction);
@@ -242,6 +249,14 @@ void TickA15(const SMultiAlphaMarket &m,const MqlTick &tick)
    ApplyDecision(d);
   }
 
+void TickA16Template(const SMultiAlphaMarket &m)
+  {
+   SMultiAlphaDecision d;
+   MultiAlphaDecisionClear(d,ALPHA_A16_TEMPLATE);
+   if(g_a16_template.Evaluate(m,g_position,d))
+      ApplyDecision(d);
+  }
+
 void OnTick()
   {
    if(g_failed) return;
@@ -249,7 +264,9 @@ void OnTick()
    SMultiAlphaMarket m; m.time=tick.time; m.time_msc=tick.time_msc; m.bid=tick.bid; m.ask=tick.ask;
    if(!MultiAlphaMarketValid(m)) return;
    g_ticks++;
-   if(InpAlpha==ALPHA_A12) TickA12(m); else TickA15(m,tick);
+   if(InpAlpha==ALPHA_A12) TickA12(m);
+   else if(InpAlpha==ALPHA_A15) TickA15(m,tick);
+   else TickA16Template(m);
   }
 
 void OnDeinit(const int reason)

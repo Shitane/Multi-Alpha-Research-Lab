@@ -19,50 +19,58 @@ Unless a test record says otherwise:
 - Period: 2026-08-16 through 2026-08-29
 - Tick model: real ticks
 - Initial deposit: JPY 100000
-- Core: `MultiAlpha_Core_NoOrders_v1_02.mq5`
+- Current Core: `MultiAlpha_Core_NoOrders_v1_03.mq5`
 
-## Current status — 2026-09-24
+## Current status — 2026-09-25
 
 ### A10 — VERIFIED / Core integrated
 Original Bollinger 4-mode EA reproduced. NoOrders baseline, module parity, and MultiAlpha Core integration passed.
-Core v1.02 baseline: ticks=2571204, entries=6, exits=4, open=2.
-Verified A10 code should now be treated as a frozen reference.
+Known baseline: ticks=2571204, entries=6, exits=4, open=2.
+Verified A10 code is a frozen reference.
 
-### A11 — NOORDERS REPRODUCTION VERIFIED / module extraction next
+### A11 — VERIFIED / Core integrated
 Original: `Original_EA/A11/A_11_MACross_MT5_v107.mq5`.
+
 Default logic: EMA100/EMA200 on PERIOD_CURRENT; new-bar evaluation; closed bars [1]/[2]; MTF filter OFF; TP=0; SL=0; Fast-MA exit OFF; Magic=889.
-Original common-baseline lifecycle:
+
+Original / standalone NoOrders / extracted module / MultiAlpha Core v1.03 all reproduce the same common-baseline lifecycle:
 - 2026-08-17 04:30 BUY 4407.72
 - 2026-08-18 20:45 close BUY 4358.38, then SELL 4358.38
 - 2026-08-19 18:00 close SELL 4488.41, then BUY 4488.41
 - 2026-08-26 20:30 close BUY 4597.53, then SELL 4597.53
-- Final SELL remains logically open; tester closes it only at end of test.
-NoOrders v1.00 exactly matched timestamps, directions, executable bid/ask prices, and reversal ordering.
-Summary: ticks=2571204, newbars=920, raw=4, entries=4, exits=3, open=1.
-Next step: extract A11 module, run standalone-vs-module parity, then integrate A11 into MultiAlpha Core.
+- Final SELL remains logically open.
+
+Core v1.03 summary:
+`selected_alpha=11 ticks=2571204 bricks=0 raw=4 entries=4 exits=3 blocks=0 spread_blocks=0 open=1 cooldown=0 failed=0 reason=1 NO_ORDERS=1 VIRTUAL_NOT_FILL=1`
+
+A11 module parity passed with ticks=2571204, newbars=920, raw=4, entries=4, exits=3, open=1.
+A11 verified module/Core integration should now be treated as a frozen reference.
 
 ### A12 — VERIFIED / Core integrated
 Known baseline: ticks=2571204, bricks=80, raw=9, entries=5, exits=4, blocks=4, open=1.
-Regression on Core v1.02 passed.
+Core v1.02 regression passed. Re-run on v1.03 remains desirable after A11 integration.
 
 ### A13 — ORIGINAL / reproduction pending
 Original source is preserved. Source-faithful reproduction/parity work remains.
+**Next development target.**
 
 ### A14 — ORIGINAL / reproduction pending
 Original source is preserved. Source-faithful reproduction/parity work remains.
 
 ### A15 — VERIFIED / Core integrated
 Known baseline: ticks=2571204, bricks=100, raw=23, entries=3, exits=3, blocks=0, spread_blocks=0, open=0, cooldown=5.
-Regression on Core v1.02 passed. Broker lifecycle was separately observed with the A15 Observer.
+Core v1.03 regression after A11 integration passed with the same baseline.
+Broker lifecycle was separately observed with the A15 Observer.
 
 ### A16 — EMPTY RESEARCH TEMPLATE / Core connection verified
-Core v1.02 regression: ticks=2571204, bricks=0, raw=0, entries=0, exits=0, blocks=0, open=0, cooldown=0.
+Known baseline: ticks=2571204, bricks=0, raw=0, entries=0, exits=0, blocks=0, spread_blocks=0, open=0, cooldown=0.
 A16 is intentionally empty and reserved for Research/New Alpha work.
 
-## Core v1.02 regression status
+## Core regression status
 
-A10 PASS -> A12 PASS -> A15 PASS -> A16 PASS.
-Do not claim A11 Core integration until its module/parity/integration tests are actually run.
+- Core v1.02: A10 PASS -> A12 PASS -> A15 PASS -> A16 PASS.
+- Core v1.03 after A11 integration: A11 PASS and A15 PASS confirmed.
+- A12/A16 v1.03 regression can be rerun before or alongside the next integration checkpoint; do not claim those v1.03 regressions until actually tested.
 
 ## Repository structure
 
@@ -77,9 +85,23 @@ Do not claim A11 Core integration until its module/parity/integration tests are 
 
 ## Key A11 records
 
-- `Test_Results/A11/A11_Reproduction_Plan_v1_00.md`
+- `Original_EA/A11/A_11_MACross_MT5_v107.mq5`
 - `Parity_Tests/A11/A11_Core_NoOrders_v1_00.mq5`
+- `Modules/A11/A11_MA_Cross_Module_v1_00.mqh`
+- `Parity_Tests/A11/A11_Module_Parity_NoOrders_v1_00.mq5`
+- `MultiAlpha_Core/MultiAlpha_Core_NoOrders_v1_03.mq5`
 - `Test_Results/A11/A11_NoOrders_Parity_v1_00.csv`
+
+## Next step
+
+Begin **A13 original-source reproduction**:
+1. inspect `Original_EA/A13/A_13_GDS_Renko_Dual_MA_Demo.mq5` in full;
+2. document exact inputs, Renko generation, MA calculation, signal timing, executable bid/ask, virtual TP/SL, cooldown/position lifecycle, and any edge cases;
+3. create a source-faithful **NoOrders** reproduction;
+4. establish the common baseline before module extraction;
+5. only after parity, extract the A13 module and integrate it into the Core.
+
+Do not optimize A13 before reproduction parity is established.
 
 ## Resume instructions for a new ChatGPT chat
 

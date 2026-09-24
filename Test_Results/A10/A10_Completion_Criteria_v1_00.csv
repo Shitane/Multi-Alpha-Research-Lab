@@ -2,11 +2,11 @@ stage,item,status,acceptance
 1,Original source frozen,PASS,Original_EA/A10 is preserved unchanged
 2,Original baseline backtest,PASS,Run original A10 on XAUUSD_DUKA M15 2026-08-16 to 2026-08-29 real ticks with default inputs
 3,Reference trade log,PASS,Capture entries exits mode direction executable price time and exit reason
-4,NoOrders decision reproduction,PENDING,Same tick/brick/mode signals and virtual lifecycle as reference
+4,NoOrders decision reproduction,PASS,Same tick/brick/mode signals and virtual lifecycle as reference
 5,Mode parity,PENDING,Breakout Re-entry Midline Squeeze each verified
 6,Queue/conflict parity,PENDING,Same-tick conflict filter and deterministic queue priority reproduced
-7,Cooldown parity,PENDING,Per-mode cooldown starts after exit completion and decrements by completed mode bricks
-8,Exit parity,PENDING,TP SL TIME BB_MID BB_OPPOSITE priority/lifecycle reproduced
+7,Cooldown parity,PASS,Per-mode cooldown starts after exit completion and decrements by completed mode bricks
+8,Exit parity,PASS,TP SL TIME BB_MID BB_OPPOSITE priority/lifecycle reproduced
 9,Module extraction,PENDING,A10 module separated without broker execution
 10,Multi Alpha Core integration,PENDING,A10 selectable through common interface with NO_ORDERS=1
 11,Regression parity,PENDING,Integrated A10 matches standalone NoOrders baseline

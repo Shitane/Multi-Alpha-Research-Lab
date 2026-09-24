@@ -1,9 +1,0 @@
-﻿criterion_id,criterion,class,status,evidence,interpretation
-C01,Signal decision parity,CORE_REQUIRED,PASS,v1.52: 3 entries/3 exits matched; price/opposite checks zero mismatch,Required to call A15 logic reproduction complete
-C02,Normal order/fill/position lifecycle,CORE_REQUIRED,PASS,Observer baseline: 6 orders terminal-observed; entries retain 0.01 position; exits observe absence; cooldown=6,Required to call normal execution path reproduced
-C03,Observer non-interference on baseline,CORE_REQUIRED,PASS,Observer run preserved the same 3-entry/3-exit baseline sequence,Required before accepting observer evidence
-C04,Actual partial-fill lifecycle,ROBUSTNESS_EXTENSION,UNOBSERVED,No real partial fill occurred in the baseline run; synthetic tests passed,Do not block core A15 completion solely because broker/tester did not produce this event
-C05,Actual delayed position-update lifecycle,ROBUSTNESS_EXTENSION,UNOBSERVED,No real stale-position/update case occurred; synthetic tests passed,Do not claim this abnormal path is proven
-C06,Core A15 reproduction status,CORE_RESULT,COMPLETE_FOR_BASELINE,C01-C03 PASS,Scope: documented baseline and normal lifecycle only
-C07,Abnormal broker lifecycle robustness,EXTENSION_RESULT,NOT_PROVEN,C04-C05 remain unobserved in actual execution,Keep as separate robustness research track
-C08,Full universal execution parity,GLOBAL_RESULT,NOT_CLAIMED,Cannot be established from one normal baseline without real abnormal events,Do not use 'complete under every broker condition' wording

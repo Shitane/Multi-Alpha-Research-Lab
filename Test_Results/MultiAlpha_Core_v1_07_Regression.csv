@@ -1,0 +1,7 @@
+alpha,status,ticks,bars,bricks,raw,entries,exits,blocks,spread_blocks,open,cooldown,failed,no_orders,virtual_not_fill
+A10,PASS,2571204,920,0,0,6,4,0,0,2,0,0,1,1
+A11,PASS,2571204,920,0,4,4,3,0,0,1,0,0,1,1
+A12,PASS,2571204,920,80,9,5,4,4,0,1,0,0,1,1
+A13,PASS,2571204,920,554,4,4,3,10,0,1,0,0,1,1
+A15,PASS,2571204,920,100,23,3,3,0,0,0,5,0,1,1
+A16,PASS,2571204,920,0,0,0,0,0,0,0,0,0,1,1

@@ -33,3 +33,7 @@ This baseline is the gate for subsequent O01 Core integration. Any Core adapter 
 The O01 Core Interface v1.00 regression passed against the frozen SPLIT105 baseline on XAUUSD_DUKA M15, 2026-08-16..2026-08-29, real ticks. Result: 2,571,204 ticks; entries 31; grid additions 5; closes 31; single trailing 27; basket trailing 4; virtual SL 0; final BUY/SELL open 0/0. Safety remained NO_ORDERS=1 and VIRTUAL_NOT_FILL=1.
 
 This freezes O01_GSG_RSI30_Core_Interface_v1_00.mqh as the current Core integration baseline. Future O01/Core changes must regress against this result before acceptance.
+
+## Settings panel development — v1.10
+
+Added expanded runtime settings transport and a NoOrders panel lab. The panel now exposes the main RSI, lot/grid, trailing, DD 8/12/15 and session fields with APPLY/SAVE/LOAD/REFRESH. Settings are stored separately as O01_GSG_RSI30_Settings_v1_10.csv in FILE_COMMON. This is a development surface only: it does not modify the frozen Core v1.00 parity baseline and it contains no broker order functions.

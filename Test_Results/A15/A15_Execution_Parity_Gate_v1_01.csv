@@ -6,8 +6,8 @@ G04,Position absence observed after exit,absence event for all 3 exits,PASS,all 
 G05,Cooldown starts at 6 after absence,6 for all,PASS,all 3 EXIT_COMPLETED_POSITION_ABSENT records cooldown=6,Control-flow evidence
 G06,Terminal order state observable,all 6 orders linked to terminal observation,PASS_OBSERVED,orders 2-7 observed state=4 with same order linkage,"Observer timestamp is sampling time, not proven broker transition instant"
 G07,Position volume observable at terminal sampling,entry/exit position snapshot available,PASS_OBSERVED,entries: pos_found=1 volume=0.01; exits: pos_found=0 volume=0.00,Normal lifecycle only
-G08,Partial-fill broker path observed,at least one actual partial-fill case,UNCONFIRMED,no actual partial fill occurred,Synthetic tests do not count as broker evidence
-G09,Delayed position-update broker path observed,at least one actual stale/update case,UNCONFIRMED,no actual delayed update occurred,Synthetic tests do not count as broker evidence
+G08,Partial-fill broker path observed,at least one actual partial-fill case,UNOBSERVED_V1_13,"v1.13 actual-order baseline: partial_retcode=0; PARTIAL_ACTUAL_CONFIRMED=0",Synthetic tests do not count as broker evidence
+G09,Delayed position-update broker path observed,at least one actual stale/update case,UNOBSERVED_V1_13,"v1.13 actual-order baseline: terminal_exit_position_present=0; DELAYED_UPDATE_ACTUAL_CANDIDATE=0",Synthetic tests do not count as broker evidence
 G10,Observer preserves baseline trade sequence,3 entries / 3 exits at baseline times/prices,PASS,baseline sequence preserved in observer run,No evidence observer changed normal-path behavior
-G11,Overall normal-path execution reproduction,G01-G07 and G10 satisfied,CONFIRMED_NORMAL_PATH,decision -> request -> deal -> position state -> cooldown traceable,Applies to observed normal baseline only
+G11,Overall normal-path execution reproduction,G01-G07 and G10 satisfied,CONFIRMED_NORMAL_PATH_V1_13,"v1.13: all 3 exits terminal position absent; terminal_exit_position_absent=3; test passed 2571204 ticks / 920 bars",Applies to observed normal baseline only
 G12,Overall execution parity including abnormal lifecycle,G01-G10 plus real G08/G09 evidence,NOT_ESTABLISHED,G08 and G09 remain unconfirmed,Do not claim full broker-lifecycle parity

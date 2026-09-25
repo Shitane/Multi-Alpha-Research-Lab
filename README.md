@@ -150,6 +150,70 @@ The long-term objective is to combine many strong entry logics at controlled/sma
 
 The architecture should therefore support multiple strategies and, later, multiple exit/recovery treatments for a signal without coupling every strategy into one monolithic block.
 
+### 9. Panel strategy composition, presets, backtest, and optimization
+
+The final product should allow users to compose strategies from **verified modules** through the chart panel without source-code edits.
+
+Target layers:
+
+```
+ENTRY: A10 / A11 / A12 / A13 / O01 / ...
+  -> MANAGEMENT: Single / Grid / Recovery / Multiple positions / ...
+  -> EXIT: Original / Fixed TP-SL / Trailing / Basket / Time / MA / ...
+  -> RISK & SAFETY: Lot / DD / News / Session / Emergency / ...
+```
+
+The panel should support Entry/Management/Exit selection per strategy slot. Not every combination is valid: modules should expose ID/version/type, required state/data, compatible position modes, and compatibility information. The UI/Core should hide or reject incompatible combinations. Only parity-verified/frozen modules belong in the normal product selection list; experimental modules must remain clearly separated.
+
+The panel should save/load the complete configuration as a named **Strategy Preset**, including module selections, enabled slots, detailed parameters, lot/risk, session/time, news, DD/safety, and relevant product settings. Provide SAVE, SAVE AS, LOAD, User Preset, Factory Default, and Restore Default. Presets should contain format/module version information so obsolete/incompatible settings can be detected after updates.
+
+Edits should not silently change active trading. Prefer an explicit **APPLY** step with validation. Lifecycle-sensitive changes such as Grid/Recovery/Exit settings may be queued for the next cycle instead of modifying an open cycle.
+
+### 10. Exact panel configuration must be backtestable
+
+Target workflow:
+
+```
+Panel configuration
+   -> SAVE PRESET
+   -> Backtest same configuration
+   -> Demo Forward same configuration
+   -> Live same configuration
+```
+
+Do not manually recreate settings at every stage. The tester/research host must use the **same verified Entry/Management/Exit modules** as demo/live; never maintain a separate backtest reimplementation of trading logic.
+
+### 11. PRESET mode and TESTER_INPUTS mode
+
+Backtesting and optimization need different configuration paths:
+
+- **PRESET**: reproduce an exact saved panel strategy for backtest/parity/demo/live.
+- **TESTER_INPUTS**: expose selected research parameters to MT5 Strategy Tester for parameter sweeps/optimization.
+
+```
+             Strategy Configuration
+                      |
+          +-----------+-----------+
+          |                       |
+        PRESET               TESTER_INPUTS
+          |                       |
+ exact saved strategy       optimization ranges
+          |                       |
+          +-----------+-----------+
+                      |
+               Same Modules/Core
+```
+
+Do not expose every optimization parameter in the normal customer input screen merely because research needs it. Research flexibility and customer-facing simplicity are separate concerns.
+
+Promising optimization results should be converted into a versioned preset and then validated by normal backtest/parity/forward testing before becoming a Factory/validated preset.
+
+### 12. One verified logic path and reproducibility
+
+The architecture must prevent divergence between what was backtested, optimized, demo-forward-tested, and run live. A saved/tested configuration should identify both the selected module combination and exact parameter/module versions so results can be reproduced later.
+
+Before APPLY/load/test/live execution, validate module registration/version compatibility, Entry/Exit/Management compatibility, parameter ranges, position ownership/Magic mapping, and required symbol/timeframe/data conditions where applicable. On validation failure, fail safely: show a clear reason, do not silently substitute another strategy, and keep the invalid configuration from trading.
+
 ## Current development status — 2026-09-25
 
 ### A10

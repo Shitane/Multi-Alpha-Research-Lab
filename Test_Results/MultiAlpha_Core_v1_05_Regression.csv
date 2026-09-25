@@ -1,0 +1,8 @@
+alpha,status,ticks,bars,bricks,raw,entries,exits,blocks,spread_blocks,open,cooldown,failed,notes
+A10,PASS,2571204,920,0,0,6,4,0,0,2,0,0,"A10 split Entry+Exit Core integration; exact baseline lifecycle parity"
+A11,PASS,2571204,920,0,4,4,3,0,0,1,0,0,"v1.04 baseline preserved"
+A12,PASS,2571204,920,80,9,5,4,4,0,1,0,0,"v1.04 baseline preserved"
+A13,PASS,2571204,920,554,4,4,3,10,0,1,0,0,"v1.04 baseline preserved; baseline failed=0"
+A15,PASS,2571204,920,100,23,3,3,0,0,0,5,0,"TIME / OPPOSITE DONCHIAN / TP lifecycle preserved"
+A16,PASS,2571204,920,0,0,0,0,0,0,0,0,0,"empty template baseline preserved"
+OVERALL,PASS,2571204,920,,,,,,,,,,"XAUUSD_DUKA M15; 2026-08-16 to 2026-08-29; real ticks; initial deposit JPY 100000; NO_ORDERS=1"

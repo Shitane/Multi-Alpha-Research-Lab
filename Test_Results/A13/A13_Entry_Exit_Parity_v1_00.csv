@@ -1,0 +1,26 @@
+test,status,value
+conditions,PASS,"XAUUSD_DUKA M15; 2026-08-16 to 2026-08-29; real ticks; initial JPY 100000; leverage 1:100"
+compile,PASS,"0 errors / 0 warnings (user-confirmed before test)"
+ticks,PASS,2571204
+bars,PASS,920
+bricks,PASS,554
+raw,PASS,4
+entries,PASS,4
+exits,PASS,3
+open,PASS,1
+tp,PASS,0
+sl,PASS,0
+time,PASS,3
+maflip,PASS,0
+spread_blocks,PASS,0
+cooldown_blocks,PASS,10
+failed,PASS,0
+entry_1,PASS,"BUY 4496.45 @ 2026-08-20 17:33:59"
+exit_1,PASS,"TIME BUY 4593.07 @ 2026-08-21 17:33:59"
+entry_2,PASS,"BUY 4622.60 @ 2026-08-24 02:54:48"
+exit_2,PASS,"TIME BUY 4679.96 @ 2026-08-25 02:54:49"
+entry_3,PASS,"SELL 4609.19 @ 2026-08-26 17:54:18"
+exit_3,PASS,"TIME SELL 4593.02 @ 2026-08-27 17:54:18"
+entry_4,PASS,"SELL 4573.63 @ 2026-08-28 17:04:08"
+safety,PASS,"NO_ORDERS=1; VIRTUAL_NOT_FILL=1"
+overall,PASS,"A13 split Entry/Exit parity matches established baseline"

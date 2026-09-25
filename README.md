@@ -33,7 +33,8 @@ Unless a test record says otherwise:
 - Initial deposit: JPY 100000
 - Leverage: 1:100
 - Reference tick/bar count: 2,571,204 ticks / 920 bars
-- Current integration line: `MultiAlpha_Core_NoOrders_v1_08.mq5`
+- Current integration line: `MultiAlpha_Core_NoOrders_v1_09.mq5`
+- Core v1.09 full regression (A10-A16 selectable IDs) passed on 2026-09-25 after A14 integration.
 
 ## Product architecture policy — IMPORTANT
 
@@ -232,13 +233,21 @@ Known common-baseline Core summary:
 `selected_alpha=13 ticks=2571204 bricks=554 raw=4 entries=4 exits=3 blocks=10 spread_blocks=0 open=1 cooldown=0 failed=0 reason=1 NO_ORDERS=1 VIRTUAL_NOT_FILL=1`
 
 ### A14
-Original source preserved. Full reproduction pipeline remains the next A-series development work.
+Original reproduction, Entry/Exit split, split parity, Core v1.09 integration, and post-integration regression have passed. Frozen verified reference.
+
+Known Core v1.09 summary:
+`selected_alpha=14 ticks=2571204 bricks=554 raw=32 entries=32 exits=31 blocks=8 spread_blocks=0 open=1 cooldown=0 failed=0 reason=1 NO_ORDERS=1 VIRTUAL_NOT_FILL=1`
 
 ### A15
-Existing reproduction/integration baseline is available. Continue/confirm under the agreed completion pipeline after A14 as planned.
+Reproduction baseline, Entry module, Exit decision module, split parity artifacts, and Core integration are present. Core v1.09 regression passed on 2026-09-25.
+
+Known Core v1.09 summary:
+`selected_alpha=15 ticks=2571204 bricks=100 raw=23 entries=3 exits=3 blocks=0 spread_blocks=0 open=0 cooldown=5 failed=0 reason=1 NO_ORDERS=1 VIRTUAL_NOT_FILL=1`
+
+Execution-parity edge cases involving real partial fills / delayed terminal position updates remain evidence-gated and are not claimed as observed. Keep the frozen NoOrders baseline unchanged.
 
 ### A16
-Empty Research/New Alpha template. Keep separate from the O-series proprietary/original logic.
+Empty Research/New Alpha template. Core v1.09 regression passed with zero activity as expected: `ticks=2571204 bricks=0 raw=0 entries=0 exits=0 blocks=0 spread_blocks=0 open=0 cooldown=0 failed=0`. Keep separate from the O-series proprietary/original logic.
 
 ### O01 — GSG RSI30
 A separate **Original Logic** line has been started for the logic of `Gold_Session_Guard_v4_Experimental_03_RSI30`.
@@ -263,8 +272,9 @@ Immediate:
 3. Do not optimize O01 until reproduction parity is established.
 
 After this temporary Friday demo test:
-4. Resume the planned A-series work: **A14 -> A15**.
-5. Preserve the product architecture policy in this README while modules are added.
+4. A14 Core integration and full Core v1.09 regression are complete.
+5. Preserve v1.09 as the regression baseline while continuing A15 evidence-gated execution-parity work and O01 demo parity observation.
+6. Preserve the product architecture policy in this README while modules are added.
 
 ## Repository structure direction
 

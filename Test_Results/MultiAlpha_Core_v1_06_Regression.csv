@@ -1,0 +1,7 @@
+core_version,test_date,symbol,timeframe,start,end,ticks,bars,alpha,status,bricks,raw,entries,exits,blocks,spread_blocks,open,cooldown,failed,notes
+v1.06,2026-09-25,XAUUSD_DUKA,M15,2026-08-16,2026-08-29,2571204,920,A10,PASS,0,0,6,4,0,0,2,0,0,"A10 split baseline exact"
+v1.06,2026-09-25,XAUUSD_DUKA,M15,2026-08-16,2026-08-29,2571204,920,A11,PASS,0,4,4,3,0,0,1,0,0,"A11 split Entry/Exit integrated; exact baseline"
+v1.06,2026-09-25,XAUUSD_DUKA,M15,2026-08-16,2026-08-29,2571204,920,A12,PASS,80,9,5,4,4,0,1,0,0,"baseline exact"
+v1.06,2026-09-25,XAUUSD_DUKA,M15,2026-08-16,2026-08-29,2571204,920,A13,PASS,554,4,4,3,10,0,1,0,0,"baseline exact; builder failure boundary not exercised"
+v1.06,2026-09-25,XAUUSD_DUKA,M15,2026-08-16,2026-08-29,2571204,920,A15,PASS,100,23,3,3,0,0,0,5,0,"baseline exact"
+v1.06,2026-09-25,XAUUSD_DUKA,M15,2026-08-16,2026-08-29,2571204,920,A16,PASS,0,0,0,0,0,0,0,0,0,"empty template baseline exact"

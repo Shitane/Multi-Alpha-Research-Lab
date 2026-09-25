@@ -1,0 +1,2 @@
+case_id,scope,status,period,symbol,timeframe,ticks,entries,grids,closes,single_trail,basket_trail,virtual_sl,buy_open,sell_open,no_orders,virtual_not_fill,evidence
+O01-P105,Split Entry/Exit lifecycle parity,PASS,2026-08-16..2026-08-29,XAUUSD_DUKA,M15,2571204,31,5,31,27,4,0,0,0,1,1,O01_SPLIT105_SUMMARY; tester Test passed

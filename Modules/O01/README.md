@@ -27,3 +27,9 @@ This baseline is the gate for subsequent O01 Core integration. Any Core adapter 
 ## Core adapter
 
 - O01_GSG_RSI30_Core_Interface_v1_00.mqh — stable decision-only Entry/Exit adapter for Multi Alpha Core; NO ORDERS.
+
+## Core integration parity — v1.00 PASS
+
+The O01 Core Interface v1.00 regression passed against the frozen SPLIT105 baseline on XAUUSD_DUKA M15, 2026-08-16..2026-08-29, real ticks. Result: 2,571,204 ticks; entries 31; grid additions 5; closes 31; single trailing 27; basket trailing 4; virtual SL 0; final BUY/SELL open 0/0. Safety remained NO_ORDERS=1 and VIRTUAL_NOT_FILL=1.
+
+This freezes O01_GSG_RSI30_Core_Interface_v1_00.mqh as the current Core integration baseline. Future O01/Core changes must regress against this result before acceptance.

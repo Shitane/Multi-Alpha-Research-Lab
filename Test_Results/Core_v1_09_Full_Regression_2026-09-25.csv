@@ -1,0 +1,8 @@
+alpha,status,ticks,bricks,raw,entries,exits,blocks,spread_blocks,open,cooldown,failed,no_orders,virtual_not_fill,notes
+A10,PASS,2571204,0,0,6,4,0,0,2,0,0,1,1,"Core v1.09 regression"
+A11,PASS,2571204,0,4,4,3,0,0,1,0,0,1,1,"Core v1.09 regression"
+A12,PASS,2571204,80,9,5,4,4,0,1,0,0,1,1,"Core v1.09 regression"
+A13,PASS,2571204,554,4,4,3,10,0,1,0,0,1,1,"Core v1.09 regression; exact known baseline matched"
+A14,PASS,2571204,554,32,32,31,8,0,1,0,0,1,1,"Core v1.09 integration/regression; split parity counts matched"
+A15,PASS,2571204,100,23,3,3,0,0,0,5,0,1,1,"Core v1.09 regression; exact known baseline matched"
+A16,PASS,2571204,0,0,0,0,0,0,0,0,0,1,1,"Empty template; zero activity expected"

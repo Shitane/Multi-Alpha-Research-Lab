@@ -12,7 +12,7 @@
 #property description "TP/SL are virtual: the EA and terminal must remain running."
 #property description "No external indicators, DLLs, custom symbols or offline charts are required."
 
-#include "A15_Lifecycle_Observer_NoOrders_v1_00.mqh"
+// v1.13 is self-contained; external lifecycle observer include removed.
 
 input double InpBrickSize             = 14.0;  // Renko brick size in price units
 input int    InpDonchianPeriod        = 25;    // Donchian lookback in completed Renko bricks
@@ -442,7 +442,7 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
   {
    if(!InpLifecycleAudit) return;
    if(trans.symbol!=_Symbol && trans.symbol!="") return;
-   A15ObsOnDeal(trans,_Symbol,GDS_MAGIC);
+   // v1.13 logs deal evidence directly below.
    if(trans.type==TRADE_TRANSACTION_DEAL_ADD)
      {
       if(!HistoryDealSelect(trans.deal)) return;
@@ -471,7 +471,7 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
 //+------------------------------------------------------------------+
 void MarkExitCompleted(void)
   {
-   A15ObsSnapshotPosition("EXIT_COMPLETED_ABSENT",_Symbol,GDS_MAGIC,g_a15obs.tracked_order);
+   A15AbnormalSnapshot("EXIT_COMPLETED_ABSENT",g_last_request_order,true);
    g_exit_pending=false;
    g_exit_reason="";
    g_cooldown_left=InpCooldownBricks;
@@ -484,7 +484,7 @@ void MarkExitCompleted(void)
 //+------------------------------------------------------------------+
 bool ResolveExecution(void)
   {
-   A15ObsCheckTerminal(_Symbol,GDS_MAGIC,g_wait_order,g_execution_uncertain);
+   // ResolveExecution below observes terminal order and position state directly.
    if(g_wait_order!=0)
      {
       if(OrderSelect(g_wait_order)) return false;
@@ -734,7 +734,7 @@ void TryPendingExit(void)
    if(!g_exit_pending || !ResolveExecution())
       return;
 
-   A15ObsSnapshotPosition("PENDING_EXIT_POST_RESOLVE",_Symbol,GDS_MAGIC,g_a15obs.tracked_order);
+   A15AbnormalSnapshot("PENDING_EXIT_POST_RESOLVE",g_last_request_order,true);
 
    ulong ticket=0;
    long type=-1;

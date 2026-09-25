@@ -515,3 +515,183 @@ v1.40 should establish:
 9. no change to frozen O01 trading decisions
 
 After that foundation compiles cleanly, O01 FULL demo execution can continue on the separate demo line while the modular architecture is expanded and parity-tested.
+
+
+---
+
+## 19. Four-level save/load architecture
+
+Save/load must be separated into four scopes. These scopes are intentionally independent so that loading a small preset never silently overwrites unrelated running strategies, account safety settings, or panel appearance.
+
+### Level 1 — LOGIC PRESET
+
+Purpose: save and load settings for a selected module role without changing the rest of the Strategy Instance.
+
+Supported scopes should include:
+
+- ENTRY preset
+- MANAGE preset
+- EXIT preset
+- optionally a combined logic preset when explicitly selected
+
+Examples:
+
+```text
+O01_Entry_Standard.logic
+O01_Exit_Conservative.logic
+O01_Manage_Grid200.logic
+```
+
+A LOGIC load must not change:
+
+- Symbol
+- Strategy Instance ID
+- Enabled state
+- modules in the other roles
+- other Strategy Instances
+- common/account Safety
+- panel theme/appearance
+
+The preset file must identify the module type/version/schema it belongs to. An incompatible preset must be rejected or migrated explicitly; it must never be applied silently to the wrong module.
+
+### Level 2 — STRATEGY PRESET
+
+Purpose: save and load one complete Strategy Instance.
+
+A Strategy preset may contain:
+
+- Symbol
+- FULL or MODULAR mode
+- selected FULL module, when applicable
+- selected ENTRY module
+- selected MANAGE module
+- selected EXIT module
+- ENTRY settings
+- MANAGE settings
+- EXIT settings
+- strategy-scoped Safety settings
+- strategy runtime configuration that is safe to persist
+
+Example:
+
+```text
+XAUUSD_O01_Standard.strategy
+XAUUSD_A14Entry_O01Exit_Research.strategy
+```
+
+Loading a Strategy preset affects only the selected/target Strategy Instance. It must not overwrite other instances or account-wide configuration.
+
+Runtime trade state such as currently open broker positions, transient trailing state, or live cycle state must not be blindly restored from a settings preset. Persistent runtime recovery, if needed, is a separate explicitly designed mechanism.
+
+### Level 3 — EA CONFIG
+
+Purpose: save and restore the complete Multi Alpha EA configuration.
+
+An EA CONFIG may contain:
+
+- all Strategy Instances
+- instance IDs
+- Symbols
+- Enabled states
+- FULL/MODULAR modes
+- Entry/Manage/Exit selections
+- all persistent module settings
+- common Safety settings
+- symbol/account Safety scope settings
+- Time/News/common filters where they are Core-owned
+- other EA-wide configuration
+
+Example:
+
+```text
+MultiAlpha_Demo_01.config
+MultiAlpha_Stable_01.config
+```
+
+EA CONFIG is the only normal save/load scope allowed to intentionally replace the full multi-strategy configuration.
+
+Before LOAD ALL is applied to an EA that has active cycles/positions, the Core must use a defined safe-load policy. Do not silently replace ownership/module configuration while positions are open.
+
+### Level 4 — PANEL THEME
+
+Purpose: save and load appearance only.
+
+A PANEL THEME may contain:
+
+- background opacity
+- background color
+- normal text color
+- title color
+- section-heading color
+- value/status color
+- border color
+- warning color
+- permitted font-size option
+- named theme/preset
+
+Examples:
+
+```text
+DemoDark.theme
+Dark.theme
+Light.theme
+MyPanel.theme
+```
+
+A PANEL THEME load must never change trading logic, Symbols, module settings, Safety thresholds, Enabled states, or Strategy Instances.
+
+Panel geometry/layout remains controlled by the fixed Panel Framework and is not part of arbitrary theme customization.
+
+### Panel commands
+
+The UI should expose the distinction clearly. Conceptually:
+
+```text
+APPLY
+
+LOGIC
+  SAVE LOGIC
+  LOAD LOGIC
+
+STRATEGY
+  SAVE STRATEGY
+  LOAD STRATEGY
+
+EA / SYSTEM
+  SAVE ALL
+  LOAD ALL
+
+APPEARANCE
+  SAVE THEME
+  LOAD THEME
+```
+
+The visible panel does not need to show every operation as a permanent button. A save/load dialog or page may provide the detailed scope selection so the main trading panel stays compact.
+
+### Save/load safety requirements
+
+1. Every persisted file must contain a format/schema version.
+2. Module-specific presets must contain module identity and module version/schema identity.
+3. Loading must validate compatibility before modifying live settings.
+4. Parse and validate the complete file before applying any values.
+5. A failed load must leave the current configuration unchanged.
+6. APPLY should be atomic at the selected scope where practical.
+7. Indicator-handle-dependent changes (RSI/ATR period/timeframe, etc.) must safely rebuild only the affected handles after a successful apply/load.
+8. Loading one scope must not mutate settings outside that scope.
+9. SAVE must not include transient broker/runtime state unless that state is explicitly part of a separately designed recovery mechanism.
+10. The active configuration should be copied/backed up in memory before a large LOAD ALL operation so validation/application failure can roll back safely.
+11. LOAD ALL while positions/cycles are active requires an explicit safe policy; no silent Strategy ID, Magic, Symbol, or ownership remapping is allowed.
+12. Research NoOrders and real-order Demo hosts may share configuration formats, but loading a config must never bypass the host's execution safety boundary. A NoOrders host remains NoOrders.
+
+### v1.40 implementation consequence
+
+The v1.40 settings model should therefore be designed around separate serializable containers from the beginning:
+
+```text
+LogicSettings
+StrategyInstanceConfig
+MultiAlphaEAConfig
+PanelThemeConfig
+```
+
+Do not build one monolithic settings structure and later try to infer which fields belong to which save scope. The four scopes are part of the architecture, not merely four UI buttons.

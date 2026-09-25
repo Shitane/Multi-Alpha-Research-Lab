@@ -244,7 +244,9 @@ Reproduction baseline, Entry module, Exit decision module, split parity artifact
 Known Core v1.09 summary:
 `selected_alpha=15 ticks=2571204 bricks=100 raw=23 entries=3 exits=3 blocks=0 spread_blocks=0 open=0 cooldown=5 failed=0 reason=1 NO_ORDERS=1 VIRTUAL_NOT_FILL=1`
 
-Execution-parity edge cases involving real partial fills / delayed terminal position updates remain evidence-gated and are not claimed as observed. Keep the frozen NoOrders baseline unchanged.
+Normal actual-order lifecycle evidence is confirmed with the v1.13 Observer on the common baseline: all 3 exits reached terminal position absence; `partial_retcode=0`, `terminal_exit_position_present=0`, `terminal_exit_position_absent=3`, `PARTIAL_ACTUAL_CONFIRMED=0`, and `DELAYED_UPDATE_ACTUAL_CANDIDATE=0`. The run passed with 2,571,204 ticks / 920 bars.
+
+Core A15 reproduction is therefore complete for the documented baseline and observed normal lifecycle. Real partial-fill and delayed/stale terminal-position cases remain evidence-gated robustness extensions because those abnormal events did not occur in the v1.13 run; synthetic coverage is not counted as actual broker evidence. Keep the frozen NoOrders baseline unchanged.
 
 ### A16
 Empty Research/New Alpha template. Core v1.09 regression passed with zero activity as expected: `ticks=2571204 bricks=0 raw=0 entries=0 exits=0 blocks=0 spread_blocks=0 open=0 cooldown=0 failed=0`. Keep separate from the O-series proprietary/original logic.

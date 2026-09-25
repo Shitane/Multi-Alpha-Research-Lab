@@ -17,3 +17,13 @@ The A-series-style research/parity path is NoOrders. The previously validated O0
 
 ## Development gate
 v1.00 establishes the module boundaries and settings transport. It does **not** yet claim split-module parity. Next gate: wire market/session/news/grid context into Entry and Exit modules, emit decision logs, compare against the frozen monolithic reference, then expand the panel to all strategy settings. Runtime panel values must not silently change the frozen monolithic reference during parity testing.
+
+## Split parity baseline — v1.05
+
+The 2026-08-16..2026-08-29 XAUUSD_DUKA M15 real-tick run is frozen as the O01 split regression baseline: 2,571,204 ticks; entries 31; grid additions 5; closes 31; single trailing 27; basket trailing 4; virtual SL 0; no open BUY/SELL at end. The tester completed successfully with NO_ORDERS=1 and VIRTUAL_NOT_FILL=1.
+
+This baseline is the gate for subsequent O01 Core integration. Any Core adapter change must preserve these lifecycle counts and event timing before O01 can be marked Core-complete.
+
+## Core adapter
+
+- O01_GSG_RSI30_Core_Interface_v1_00.mqh — stable decision-only Entry/Exit adapter for Multi Alpha Core; NO ORDERS.

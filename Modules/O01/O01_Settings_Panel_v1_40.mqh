@@ -16,6 +16,7 @@ class CO01SettingsPanel140
    string p;
    SMA140PanelTheme theme;
    SMA140StrategyIdentity identity;
+   string appearance_prefix;
 
    void Label(const string id,const int x,const int y,const string value,const color c,const int fs)
    {
@@ -31,6 +32,12 @@ class CO01SettingsPanel140
       ObjectSetInteger(0,n,OBJPROP_SELECTABLE,false);
       ObjectSetInteger(0,n,OBJPROP_HIDDEN,true);
       ObjectSetInteger(0,n,OBJPROP_ZORDER,5);
+   }
+
+   void DrawAppearanceStatus()
+   {
+      string opacity_text="Opacity:"+IntegerToString(theme.opacity);
+      Label("APPEARANCE",18,18,opacity_text+"  Text/Title/Section colors: THEME",theme.muted,theme.font_size);
    }
 
    void DrawIdentity()
@@ -54,10 +61,12 @@ class CO01SettingsPanel140
                const SMA140PanelTheme &appearance)
    {
       p="O01CFG140_";
+      appearance_prefix="O01APP140_";
       identity=strategy_cfg;
       theme=appearance;
       legacy.Create(s);
       DrawIdentity();
+      DrawAppearanceStatus();
       ChartRedraw();
    }
 
@@ -65,6 +74,7 @@ class CO01SettingsPanel140
    {
       legacy.Delete();
       ObjectsDeleteAll(0,p);
+      ObjectsDeleteAll(0,appearance_prefix);
    }
 
    bool Pull(SO01RuntimeSettings110 &s)
@@ -83,6 +93,7 @@ class CO01SettingsPanel140
       identity=strategy_cfg;
       theme=appearance;
       DrawIdentity();
+      DrawAppearanceStatus();
       ChartRedraw();
    }
 };

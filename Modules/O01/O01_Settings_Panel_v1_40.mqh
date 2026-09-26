@@ -18,6 +18,24 @@ class CO01SettingsPanel140
    SMA140StrategyIdentity identity;
    string appearance_prefix;
 
+   void ThemeBackground()
+   {
+      string n=p+"THEME_BG";
+      if(ObjectFind(0,n)<0) ObjectCreate(0,n,OBJ_RECTANGLE_LABEL,0,0,0);
+      ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);
+      ObjectSetInteger(0,n,OBJPROP_XDISTANCE,8);
+      ObjectSetInteger(0,n,OBJPROP_YDISTANCE,0);
+      ObjectSetInteger(0,n,OBJPROP_XSIZE,610);
+      ObjectSetInteger(0,n,OBJPROP_YSIZE,34);
+      ObjectSetInteger(0,n,OBJPROP_BGCOLOR,ColorToARGB(theme.background,(uchar)MathMax(0,MathMin(255,theme.opacity))));
+      ObjectSetInteger(0,n,OBJPROP_BORDER_TYPE,BORDER_FLAT);
+      ObjectSetInteger(0,n,OBJPROP_COLOR,theme.border);
+      ObjectSetInteger(0,n,OBJPROP_BACK,false);
+      ObjectSetInteger(0,n,OBJPROP_SELECTABLE,false);
+      ObjectSetInteger(0,n,OBJPROP_HIDDEN,true);
+      ObjectSetInteger(0,n,OBJPROP_ZORDER,1);
+   }
+
    void Label(const string id,const int x,const int y,const string value,const color c,const int fs)
    {
       string n=p+id;
@@ -65,6 +83,7 @@ class CO01SettingsPanel140
       identity=strategy_cfg;
       theme=appearance;
       legacy.Create(s);
+      ThemeBackground();
       DrawIdentity();
       DrawAppearanceStatus();
       ChartRedraw();
@@ -92,6 +111,7 @@ class CO01SettingsPanel140
    {
       identity=strategy_cfg;
       theme=appearance;
+      ThemeBackground();
       DrawIdentity();
       DrawAppearanceStatus();
       ChartRedraw();

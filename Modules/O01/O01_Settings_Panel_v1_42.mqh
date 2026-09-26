@@ -31,12 +31,12 @@ class CO01SettingsPanel141{
   ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,y);
   ObjectSetInteger(0,n,OBJPROP_FONTSIZE,fs);ObjectSetInteger(0,n,OBJPROP_COLOR,c);ObjectSetString(0,n,OBJPROP_FONT,"Arial");ObjectSetString(0,n,OBJPROP_TEXT,v);ObjectSetInteger(0,n,OBJPROP_SELECTABLE,false);
  }
- void E(string id,int x,int y,string v,int w=EW){
+ void E(string id,int x,int y,string v,int w=64){
   string n=p+id;if(ObjectFind(0,n)<0)ObjectCreate(0,n,OBJ_EDIT,0,0,0);
   ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,y);ObjectSetInteger(0,n,OBJPROP_XSIZE,w);ObjectSetInteger(0,n,OBJPROP_YSIZE,19);
   ObjectSetInteger(0,n,OBJPROP_BGCOLOR,C_EDIT_BG);ObjectSetInteger(0,n,OBJPROP_COLOR,theme.text);ObjectSetInteger(0,n,OBJPROP_BORDER_COLOR,theme.border);ObjectSetInteger(0,n,OBJPROP_FONTSIZE,theme.font_size);ObjectSetInteger(0,n,OBJPROP_ALIGN,ALIGN_CENTER);ObjectSetString(0,n,OBJPROP_TEXT,v);
  }
- void F(string id,int col,int y,string lab,string v,int lw=LW,int ew=EW){L(id,col,y+2,lab,theme.text,theme.font_size);E(id,col+lw,y,v,ew);}
+ void F(string id,int col,int y,string lab,string v,int lw=100,int ew=64){L(id,col,y+2,lab,theme.text,theme.font_size);E(id,col+lw,y,v,ew);}
  void H(string id,int x,int y,string v){L("H_"+id,x,y,v,theme.section,9);}
  void B(string id,int x,int y,int w,string v){
   string n=p+id;if(ObjectFind(0,n)<0)ObjectCreate(0,n,OBJ_BUTTON,0,0,0);

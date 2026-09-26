@@ -117,6 +117,7 @@ void OnTick(){
  if(sig==O01_ENTRY_SELL&&(!runtime_cfg.one_order_per_bar||lastSellBar!=bar)){double l=NormLot(runtime_cfg.initial_lot);Add(sell,t.bid,l);lastSellBar=bar;entries++;LO("SELL","INITIAL",t.bid,l,C(sell));}
 }
 void OnChartEvent(const int id,const long &lparam,const double &dparam,const string &sparam){
+ Print("[O01_CHART_EVENT] id=",id," name=",sparam," lparam=",lparam," dparam=",DoubleToString(dparam,2));
  SO01RuntimeSettings110 before=runtime_cfg;
  int r=panel.Event(id,sparam,runtime_cfg);
  if(r!=0)

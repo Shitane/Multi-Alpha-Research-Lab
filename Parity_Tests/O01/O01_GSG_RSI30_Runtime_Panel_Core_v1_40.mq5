@@ -103,6 +103,11 @@ void OnDeinit(const int reason){
  Print("[O01_RUNTIME140_SUMMARY] ticks=",ticks," entries=",entries," grids=",grids," closes=",closes," single_trail=",singleTrail," basket_trail=",basketTrail," virtual_sl=",vsl," buy_open=",C(buy)," sell_open=",C(sell)," time_blocks=",timeBlocks," news_blocks=",newsBlocks," spread_blocks=",spreadBlocks," filter_blocks=",filterBlocks," EXECUTION=NO_ORDERS VIRTUAL_NOT_FILL=1");
 }
 void OnTick(){
+ int pr=panel.PollButtons(runtime_cfg);
+ if(pr!=0){
+  Print("[O01_RUNTIME140_PANEL_POLL] result=",pr," EXECUTION=NO_ORDERS");
+  if(pr>0) RebuildIndicatorHandles();
+ }
  ticks++;MqlTick t;if(!SymbolInfoTick(_Symbol,t))return;Manage(true,buy,bt,t);Manage(false,sell,st,t);
  double r=B(rh),a1=B(a1h),a2=B(a2h);if(r==EMPTY_VALUE||a1==EMPTY_VALUE||a2==EMPTY_VALUE)return;
  if(!TimeOK()){if(r<runtime_cfg.rsi_lower||r>runtime_cfg.rsi_upper)timeBlocks++;return;}if(NewsNewBlocked()){newsBlocks++;return;}if(!SpreadOK()){spreadBlocks++;return;}

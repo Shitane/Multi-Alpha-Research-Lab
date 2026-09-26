@@ -13,6 +13,7 @@ class CO01SettingsPanel141{
  string p; CO01SettingsStore110 st; CCanvas cv; bool cvReady;
  string preset_name;
  string preset_list[]; int preset_index;
+ SO01RuntimeSettings110 initial_cfg; bool initial_cfg_set;
  SMA140PanelTheme theme; SMA140StrategyIdentity identity;
  color C_EDIT_BG,C_BUTTON;
  int PX,PY,PW,PH;
@@ -101,7 +102,7 @@ class CO01SettingsPanel141{
  }
 public:
  void Create(const SO01RuntimeSettings110&s,const SMA140StrategyIdentity &strategy_cfg,const SMA140PanelTheme &appearance){
-  p="O01CFG141_";cvReady=false;PX=8;PY=8;PW=620;PH=570;X1=24;X2=220;X3=416;LW=100;EW=64;RH=23;identity=strategy_cfg;theme=appearance;if(preset_name=="")preset_name="O01_Default";st.SetFile("O01_GSG_RSI30_Settings_v1_10.csv");C_EDIT_BG=C'24,31,38';C_BUTTON=C'42,52,61';Draw(s);
+  p="O01CFG141_";cvReady=false;if(!initial_cfg_set){initial_cfg=s;initial_cfg_set=true;}PX=8;PY=8;PW=620;PH=570;X1=24;X2=220;X3=416;LW=100;EW=64;RH=23;identity=strategy_cfg;theme=appearance;if(preset_name=="")preset_name="O01_Default";st.SetFile("O01_GSG_RSI30_Settings_v1_10.csv");C_EDIT_BG=C'24,31,38';C_BUTTON=C'42,52,61';Draw(s);
  }
  void Delete(){if(cvReady){cv.Destroy();cvReady=false;}ObjectsDeleteAll(0,p);}
  bool Pull(SO01RuntimeSettings110&s){
@@ -124,14 +125,12 @@ public:
   n=p+"LOAD";
   if(ObjectFind(0,n)>=0 && (bool)ObjectGetInteger(0,n,OBJPROP_STATE)){ObjectSetInteger(0,n,OBJPROP_STATE,false);ChartRedraw();Print("[O01_PANEL_POLL] LOAD");if(!LoadPreset(s))return -3;Delete();Create(s,identity,theme);return 3;}
   n=p+"RESET";
-  if(ObjectFind(0,n)>=0 && (bool)ObjectGetInteger(0,n,OBJPROP_STATE)){ObjectSetInteger(0,n,OBJPROP_STATE,false);ChartRedraw();Print("[O01_PANEL_POLL] RESET");SO01RuntimeSettings110 disk=s;if(st.Load(disk))s=disk;Delete();Create(s,identity,theme);return 4;}
+  if(ObjectFind(0,n)>=0 && (bool)ObjectGetInteger(0,n,OBJPROP_STATE)){ObjectSetInteger(0,n,OBJPROP_STATE,false);ChartRedraw();Print("[O01_PANEL_POLL] REFRESH_DEFAULT");s=initial_cfg;Delete();Create(s,identity,theme);return 4;}
   return 0;
  }
  int Event(int id,string name,SO01RuntimeSettings110&s){if(id==CHARTEVENT_OBJECT_ENDEDIT&&StringFind(name,p)==0&&ObjectGetInteger(0,name,OBJPROP_TYPE)==OBJ_EDIT){NormalizeEdit(name);ChartRedraw();return 0;}if(id!=CHARTEVENT_OBJECT_CLICK)return 0;Print("[O01_PANEL_CLICK] name=",name);if(StringFind(name,p)!=0)return 0;if(name==p+"NEXT"){ObjectSetInteger(0,name,OBJPROP_STATE,false);SelectNextPreset();return 0;}if(name==p+"APPLY"){ObjectSetInteger(0,name,OBJPROP_STATE,false);ChartRedraw();return Pull(s)?1:-1;}if(name==p+"SAVE"){ObjectSetInteger(0,name,OBJPROP_STATE,false);ChartRedraw();if(!Pull(s))return-1;return SavePreset(s)?2:-2;}if(name==p+"LOAD"){ObjectSetInteger(0,name,OBJPROP_STATE,false);ChartRedraw();if(!LoadPreset(s))return-3;Delete();Create(s,identity,theme);return 3;}
 if(name==p+"RESET"){ObjectSetInteger(0,name,OBJPROP_STATE,false);ChartRedraw();
- SO01RuntimeSettings110 disk=s;
- if(st.Load(disk)){s=disk;Delete();Create(s,identity,theme);return 4;}
- Delete();Create(s,identity,theme);return 4;
+ s=initial_cfg;Print("[O01_PRESET_REFRESH] restored_initial=1");Delete();Create(s,identity,theme);return 4;
 }return 0;}
  void RefreshIdentity(const SMA140StrategyIdentity &strategy_cfg,const SMA140PanelTheme &appearance){
   identity=strategy_cfg;theme=appearance;CanvasCreate();

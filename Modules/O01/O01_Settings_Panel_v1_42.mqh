@@ -99,6 +99,17 @@ public:
   s.start_hour=(int)StringToInteger(StringSubstr(a,0,2));s.start_minute=(int)StringToInteger(StringSubstr(a,3,2));s.end_hour=(int)StringToInteger(StringSubstr(b,0,2));s.end_minute=(int)StringToInteger(StringSubstr(b,3,2));s.use_news_filter=Bool("NEWS");s.news_manage_only=Bool("NEWSMO");
   return s.rsi_period>0&&s.rsi_lower>=0&&s.rsi_upper<=100&&s.rsi_lower<s.rsi_upper&&s.atr1_period>0&&s.atr2_period>0&&s.atr1_min_points>=0&&s.atr1_max_points>=s.atr1_min_points&&s.atr2_min_points>=0&&s.atr2_max_points>=s.atr2_min_points&&s.initial_lot>0&&s.lot_multiplier>=1&&s.max_lot>=s.initial_lot&&s.max_total_lots_per_side>=0&&s.max_orders>0&&s.fixed_distance_points>0&&s.dynamic_start_order>0&&s.dynamic_start_points>0&&s.distance_multiplier>=1&&s.virtual_sl_points>=0&&s.warning_dd>=0&&s.pause_grid_dd>=s.warning_dd&&s.emergency_close_dd>=s.pause_grid_dd&&s.start_hour>=0&&s.start_hour<24&&s.end_hour>=0&&s.end_hour<24&&s.start_minute>=0&&s.start_minute<60&&s.end_minute>=0&&s.end_minute<60;
  }
+ int PollButtons(SO01RuntimeSettings110 &s){
+  string n=p+"APPLY";
+  if(ObjectFind(0,n)>=0 && (bool)ObjectGetInteger(0,n,OBJPROP_STATE)){ObjectSetInteger(0,n,OBJPROP_STATE,false);ChartRedraw();Print("[O01_PANEL_POLL] APPLY");return Pull(s)?1:-1;}
+  n=p+"SAVE";
+  if(ObjectFind(0,n)>=0 && (bool)ObjectGetInteger(0,n,OBJPROP_STATE)){ObjectSetInteger(0,n,OBJPROP_STATE,false);ChartRedraw();Print("[O01_PANEL_POLL] SAVE");if(!Pull(s))return -1;return st.Save(s)?2:-2;}
+  n=p+"LOAD";
+  if(ObjectFind(0,n)>=0 && (bool)ObjectGetInteger(0,n,OBJPROP_STATE)){ObjectSetInteger(0,n,OBJPROP_STATE,false);ChartRedraw();Print("[O01_PANEL_POLL] LOAD");if(!st.Load(s))return -3;Delete();Create(s,identity,theme);return 3;}
+  n=p+"RESET";
+  if(ObjectFind(0,n)>=0 && (bool)ObjectGetInteger(0,n,OBJPROP_STATE)){ObjectSetInteger(0,n,OBJPROP_STATE,false);ChartRedraw();Print("[O01_PANEL_POLL] RESET");SO01RuntimeSettings110 disk=s;if(st.Load(disk))s=disk;Delete();Create(s,identity,theme);return 4;}
+  return 0;
+ }
  int Event(int id,string name,SO01RuntimeSettings110&s){if(id==CHARTEVENT_OBJECT_ENDEDIT&&StringFind(name,p)==0&&ObjectGetInteger(0,name,OBJPROP_TYPE)==OBJ_EDIT){NormalizeEdit(name);ChartRedraw();return 0;}if(id!=CHARTEVENT_OBJECT_CLICK)return 0;Print("[O01_PANEL_CLICK] name=",name);if(StringFind(name,p)!=0)return 0;if(name==p+"APPLY"){ObjectSetInteger(0,name,OBJPROP_STATE,false);ChartRedraw();return Pull(s)?1:-1;}if(name==p+"SAVE"){ObjectSetInteger(0,name,OBJPROP_STATE,false);ChartRedraw();if(!Pull(s))return-1;return st.Save(s)?2:-2;}if(name==p+"LOAD"){ObjectSetInteger(0,name,OBJPROP_STATE,false);ChartRedraw();if(!st.Load(s))return-3;Delete();Create(s,identity,theme);return 3;}
 if(name==p+"RESET"){ObjectSetInteger(0,name,OBJPROP_STATE,false);ChartRedraw();
  SO01RuntimeSettings110 disk=s;

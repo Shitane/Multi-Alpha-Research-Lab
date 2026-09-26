@@ -103,6 +103,8 @@ void OnDeinit(const int reason){
  Print("[O01_RUNTIME140_SUMMARY] ticks=",ticks," entries=",entries," grids=",grids," closes=",closes," single_trail=",singleTrail," basket_trail=",basketTrail," virtual_sl=",vsl," buy_open=",C(buy)," sell_open=",C(sell)," time_blocks=",timeBlocks," news_blocks=",newsBlocks," spread_blocks=",spreadBlocks," filter_blocks=",filterBlocks," EXECUTION=NO_ORDERS VIRTUAL_NOT_FILL=1");
 }
 void OnTick(){
+ static ulong diag_ticks=0; diag_ticks++;
+ if(diag_ticks==1 || diag_ticks%100000==0) Print("[O01_TICK_DIAG] ticks=",diag_ticks," time=",TimeToString(TimeCurrent(),TIME_DATE|TIME_SECONDS));
  int pr=panel.PollButtons(runtime_cfg);
  if(pr!=0){
   Print("[O01_RUNTIME140_PANEL_POLL] result=",pr," EXECUTION=NO_ORDERS");

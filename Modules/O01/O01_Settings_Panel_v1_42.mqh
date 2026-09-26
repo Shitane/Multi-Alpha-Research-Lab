@@ -41,7 +41,7 @@ class CO01SettingsPanel141{
  void B(string id,int x,int y,int w,string v){
   string n=p+id;if(ObjectFind(0,n)<0)ObjectCreate(0,n,OBJ_BUTTON,0,0,0);
   ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,y);ObjectSetInteger(0,n,OBJPROP_XSIZE,w);ObjectSetInteger(0,n,OBJPROP_YSIZE,25);
-  ObjectSetInteger(0,n,OBJPROP_BGCOLOR,C_BUTTON);ObjectSetInteger(0,n,OBJPROP_COLOR,theme.text);ObjectSetInteger(0,n,OBJPROP_BORDER_COLOR,theme.border);ObjectSetInteger(0,n,OBJPROP_FONTSIZE,theme.font_size);ObjectSetString(0,n,OBJPROP_TEXT,v);
+  ObjectSetInteger(0,n,OBJPROP_BGCOLOR,C_BUTTON);ObjectSetInteger(0,n,OBJPROP_COLOR,theme.text);ObjectSetInteger(0,n,OBJPROP_BORDER_COLOR,theme.border);ObjectSetInteger(0,n,OBJPROP_FONTSIZE,theme.font_size);ObjectSetInteger(0,n,OBJPROP_SELECTABLE,true);ObjectSetInteger(0,n,OBJPROP_SELECTED,false);ObjectSetInteger(0,n,OBJPROP_HIDDEN,false);ObjectSetInteger(0,n,OBJPROP_BACK,false);ObjectSetInteger(0,n,OBJPROP_ZORDER,30);ObjectSetString(0,n,OBJPROP_TEXT,v);
  }
  string G(string id){return ObjectGetString(0,p+id,OBJPROP_TEXT);} double D(string id){return StringToDouble(G(id));} int I(string id){return(int)StringToInteger(G(id));}
  void NormalizeEdit(string name){

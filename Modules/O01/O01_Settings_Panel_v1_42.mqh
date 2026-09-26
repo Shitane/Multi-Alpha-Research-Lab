@@ -98,7 +98,7 @@ class CO01SettingsPanel141{
   F("VSL",X1,305,"Virtual SL",(string)s.virtual_sl_points);F("STS",X2,305,"Single Start",(string)s.single_trail_start);F("STL",X3,305,"Single Lock",(string)s.single_trail_lock);
   F("STD",X1,328,"Single Dist",(string)s.single_trail_distance);F("BTS",X2,328,"Basket Start",(string)s.basket_trail_start);F("BTL",X3,328,"Basket Lock",(string)s.basket_trail_lock);
   H("SAFETY",X1,375,"SAFETY / DD");H("TIME",326,375,"TIME / NEWS");
-  F("WARN",X1,397,"Warning DD %",(string)s.warning_dd,96,48);F("PAUSE",178,397,"Grid Pause %",(string)s.pause_grid_dd,96,44);
+  F("WARN",X1,397,"Warning DD %",(string)s.warning_dd,84,48);F("PAUSE",178,397,"Grid Pause %",(string)s.pause_grid_dd,84,48);
   F("CLOSE",X1,420,"Emergency %",(string)s.emergency_close_dd,96,48);
   F("TMODE",326,397,"Time Mode",TF(s.time_mode),74,88);F("START",492,397,"Start",StringFormat("%02d:%02d",s.start_hour,s.start_minute),42,58);
   F("END",326,420,"End",StringFormat("%02d:%02d",s.end_hour,s.end_minute),74,88);F("NEWS",492,420,"News",OnOff(s.use_news_filter),42,58);

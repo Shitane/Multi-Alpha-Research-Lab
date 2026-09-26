@@ -44,6 +44,17 @@ class CO01SettingsPanel141{
   ObjectSetInteger(0,n,OBJPROP_BGCOLOR,C_BUTTON);ObjectSetInteger(0,n,OBJPROP_COLOR,theme.text);ObjectSetInteger(0,n,OBJPROP_BORDER_COLOR,theme.border);ObjectSetInteger(0,n,OBJPROP_FONTSIZE,theme.font_size);ObjectSetString(0,n,OBJPROP_TEXT,v);
  }
  string G(string id){return ObjectGetString(0,p+id,OBJPROP_TEXT);} double D(string id){return StringToDouble(G(id));} int I(string id){return(int)StringToInteger(G(id));}
+ void NormalizeEdit(string name){
+  string id=name;
+  if(StringFind(id,p)==0)id=StringSubstr(id,StringLen(p));
+  string v=ObjectGetString(0,name,OBJPROP_TEXT);
+  if(id=="RSIL"||id=="RSIU"||id=="A1MIN"||id=="A1MAX"||id=="A2MIN"||id=="A2MAX")
+   ObjectSetString(0,name,OBJPROP_TEXT,DoubleToString(StringToDouble(v),1));
+  else if(id=="LOT"||id=="MULT"||id=="MAXLOT"||id=="TOTLOT"||id=="DISTM")
+   ObjectSetString(0,name,OBJPROP_TEXT,DoubleToString(StringToDouble(v),2));
+  else if(id=="RSIP"||id=="ATR1P"||id=="ATR2P"||id=="ATR2TF"||id=="MAXORD"||id=="GRID"||id=="DYNORD"||id=="DYNPTS"||id=="VSL"||id=="STS"||id=="STL"||id=="STD"||id=="STSTEP"||id=="BTS"||id=="BTL"||id=="BTD"||id=="BTSTEP"||id=="WARN"||id=="PAUSE"||id=="CLOSE")
+   ObjectSetString(0,name,OBJPROP_TEXT,IntegerToString((int)StringToInteger(v)));
+ }
  string TF(int m){if(m==0)return"AUTO_GMT";if(m==1)return"SERVER_TIME";return"CUSTOM_GMT";}
  int TM(string s){StringToUpper(s);if(s=="SERVER_TIME"||s=="1")return 1;if(s=="CUSTOM_GMT"||s=="2")return 2;return 0;}
  string OnOff(bool v){return v?"1":"0";} bool Bool(string id){string s=G(id);StringToUpper(s);return(s=="1"||s=="ON"||s=="TRUE"||s=="YES");}

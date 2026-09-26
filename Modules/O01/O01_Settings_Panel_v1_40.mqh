@@ -50,11 +50,11 @@ class CO01SettingsPanel140
 
  public:
    void Create(const SO01RuntimeSettings110 &s,
-               const SMA140StrategyIdentity &strategy,
+               const SMA140StrategyIdentity &strategy_cfg,
                const SMA140PanelTheme &appearance)
    {
       p="O01CFG140_";
-      identity=strategy;
+      identity=strategy_cfg;
       theme=appearance;
       legacy.Create(s);
       DrawIdentity();
@@ -77,10 +77,10 @@ class CO01SettingsPanel140
       return legacy.Event(id,name,s);
    }
 
-   void RefreshIdentity(const SMA140StrategyIdentity &strategy,
+   void RefreshIdentity(const SMA140StrategyIdentity &strategy_cfg,
                         const SMA140PanelTheme &appearance)
    {
-      identity=strategy;
+      identity=strategy_cfg;
       theme=appearance;
       DrawIdentity();
       ChartRedraw();

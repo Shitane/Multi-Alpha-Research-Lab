@@ -17,6 +17,62 @@ enum O01_TIME_MODE { O01_AUTO_GMT=0,O01_SERVER_TIME=1,O01_CUSTOM_GMT=2 };
 
 input ENUM_MA_EXECUTION_MODE InpExecutionMode=MA_EXECUTION_NO_ORDERS;
 
+// O01 startup defaults. Expert Properties -> panel -> runtime.
+// These inputs are read only after initialization; panel APPLY/LOAD changes runtime, not these input values.
+input group "O01 Entry / Filter"
+input bool   InpNewCycles=true;
+input bool   InpTradeBuy=true;
+input bool   InpTradeSell=true;
+input int    InpRSIPeriod=8;
+input double InpRSILower=30.0;
+input double InpRSIUpper=70.0;
+input int    InpATR1Period=15;
+input int    InpATR2Period=15;
+input ENUM_TIMEFRAMES InpATR2Timeframe=PERIOD_CURRENT;
+input double InpATR1MinPoints=0.0;
+input double InpATR1MaxPoints=10000.0;
+input double InpATR2MinPoints=0.0;
+input double InpATR2MaxPoints=10000.0;
+
+input group "O01 Manage / Grid / Lot"
+input double InpInitialLot=0.01;
+input double InpLotMultiplier=1.50;
+input double InpMaxLot=5.00;
+input double InpMaxTotalLotsPerSide=1.20;
+input int    InpMaxOrders=10;
+input int    InpFixedDistancePoints=200;
+input int    InpDynamicStartOrder=3;
+input int    InpDynamicStartPoints=300;
+input double InpDistanceMultiplier=1.20;
+input bool   InpAllowGridOutsideTime=true;
+input bool   InpOneOrderPerBar=true;
+input bool   InpPauseGridWhileTrailing=true;
+
+input group "O01 Exit / Trailing"
+input int InpVirtualSLPoints=1500;
+input int InpSingleTrailStart=110;
+input int InpSingleTrailLock=60;
+input int InpSingleTrailDistance=50;
+input int InpSingleTrailStep=10;
+input int InpBasketTrailStart=100;
+input int InpBasketTrailLock=50;
+input int InpBasketTrailDistance=50;
+input int InpBasketTrailStep=10;
+
+input group "O01 Safety / DD"
+input int InpWarningDD=8;
+input int InpPauseGridDD=12;
+input int InpEmergencyCloseDD=15;
+
+input group "O01 Time / News"
+input O01_TIME_MODE InpTimeMode=O01_AUTO_GMT;
+input int InpStartHour=7;
+input int InpStartMinute=0;
+input int InpEndHour=11;
+input int InpEndMinute=0;
+input bool InpUseNewsFilter=true;
+input bool InpNewsManageOnly=true;
+
 SO01RuntimeSettings110 runtime_cfg;
 CO01SettingsPanel141 panel;
 CO01RuntimeAdapter120 adapter;
@@ -32,11 +88,11 @@ datetime lastBuyBar=0,lastSellBar=0;
 ulong ticks=0,entries=0,grids=0,closes=0,singleTrail=0,basketTrail=0,vsl=0,timeBlocks=0,newsBlocks=0,spreadBlocks=0,filterBlocks=0;
 
 void Defaults(){
- runtime_cfg.new_cycles=true;runtime_cfg.trade_buy=true;runtime_cfg.trade_sell=true;runtime_cfg.allow_grid_outside_time=true;runtime_cfg.one_order_per_bar=true;runtime_cfg.pause_grid_while_trailing=true;
- runtime_cfg.rsi_period=8;runtime_cfg.rsi_lower=30;runtime_cfg.rsi_upper=70;runtime_cfg.atr1_period=15;runtime_cfg.atr2_period=15;runtime_cfg.atr2_timeframe=PERIOD_CURRENT;runtime_cfg.atr1_min_points=0;runtime_cfg.atr1_max_points=10000;runtime_cfg.atr2_min_points=0;runtime_cfg.atr2_max_points=10000;
- runtime_cfg.initial_lot=.01;runtime_cfg.lot_multiplier=1.5;runtime_cfg.max_lot=5;runtime_cfg.max_total_lots_per_side=1.2;runtime_cfg.max_orders=10;runtime_cfg.fixed_distance_points=200;runtime_cfg.dynamic_start_order=3;runtime_cfg.dynamic_start_points=300;runtime_cfg.distance_multiplier=1.2;
- runtime_cfg.virtual_sl_points=1500;runtime_cfg.single_trail_start=110;runtime_cfg.single_trail_lock=60;runtime_cfg.single_trail_distance=50;runtime_cfg.single_trail_step=10;runtime_cfg.basket_trail_start=100;runtime_cfg.basket_trail_lock=50;runtime_cfg.basket_trail_distance=50;runtime_cfg.basket_trail_step=10;
- runtime_cfg.warning_dd=8;runtime_cfg.pause_grid_dd=12;runtime_cfg.emergency_close_dd=15;runtime_cfg.time_mode=0;runtime_cfg.start_hour=7;runtime_cfg.start_minute=0;runtime_cfg.end_hour=11;runtime_cfg.end_minute=0;runtime_cfg.use_news_filter=true;runtime_cfg.news_manage_only=true;
+ runtime_cfg.new_cycles=InpNewCycles;runtime_cfg.trade_buy=InpTradeBuy;runtime_cfg.trade_sell=InpTradeSell;runtime_cfg.allow_grid_outside_time=InpAllowGridOutsideTime;runtime_cfg.one_order_per_bar=InpOneOrderPerBar;runtime_cfg.pause_grid_while_trailing=InpPauseGridWhileTrailing;
+ runtime_cfg.rsi_period=InpRSIPeriod;runtime_cfg.rsi_lower=InpRSILower;runtime_cfg.rsi_upper=InpRSIUpper;runtime_cfg.atr1_period=InpATR1Period;runtime_cfg.atr2_period=InpATR2Period;runtime_cfg.atr2_timeframe=(int)InpATR2Timeframe;runtime_cfg.atr1_min_points=InpATR1MinPoints;runtime_cfg.atr1_max_points=InpATR1MaxPoints;runtime_cfg.atr2_min_points=InpATR2MinPoints;runtime_cfg.atr2_max_points=InpATR2MaxPoints;
+ runtime_cfg.initial_lot=InpInitialLot;runtime_cfg.lot_multiplier=InpLotMultiplier;runtime_cfg.max_lot=InpMaxLot;runtime_cfg.max_total_lots_per_side=InpMaxTotalLotsPerSide;runtime_cfg.max_orders=InpMaxOrders;runtime_cfg.fixed_distance_points=InpFixedDistancePoints;runtime_cfg.dynamic_start_order=InpDynamicStartOrder;runtime_cfg.dynamic_start_points=InpDynamicStartPoints;runtime_cfg.distance_multiplier=InpDistanceMultiplier;
+ runtime_cfg.virtual_sl_points=InpVirtualSLPoints;runtime_cfg.single_trail_start=InpSingleTrailStart;runtime_cfg.single_trail_lock=InpSingleTrailLock;runtime_cfg.single_trail_distance=InpSingleTrailDistance;runtime_cfg.single_trail_step=InpSingleTrailStep;runtime_cfg.basket_trail_start=InpBasketTrailStart;runtime_cfg.basket_trail_lock=InpBasketTrailLock;runtime_cfg.basket_trail_distance=InpBasketTrailDistance;runtime_cfg.basket_trail_step=InpBasketTrailStep;
+ runtime_cfg.warning_dd=InpWarningDD;runtime_cfg.pause_grid_dd=InpPauseGridDD;runtime_cfg.emergency_close_dd=InpEmergencyCloseDD;runtime_cfg.time_mode=(int)InpTimeMode;runtime_cfg.start_hour=InpStartHour;runtime_cfg.start_minute=InpStartMinute;runtime_cfg.end_hour=InpEndHour;runtime_cfg.end_minute=InpEndMinute;runtime_cfg.use_news_filter=InpUseNewsFilter;runtime_cfg.news_manage_only=InpNewsManageOnly;
 }
 double B(int h){double x[1];return CopyBuffer(h,0,0,1,x)==1?x[0]:EMPTY_VALUE;}
 int C(VPos &p[]){return ArraySize(p);}

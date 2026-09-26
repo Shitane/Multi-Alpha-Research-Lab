@@ -14,21 +14,31 @@ class CO01SettingsPanel141{
  string preset_name;
  string preset_list[]; int preset_index;
  SO01RuntimeSettings110 initial_cfg; bool initial_cfg_set;
+ bool delete_armed; string delete_target;
  SMA140PanelTheme theme; SMA140StrategyIdentity identity;
  color C_EDIT_BG,C_BUTTON;
  int PX,PY,PW,PH;
  int X1,X2,X3,LW,EW,RH;
  string CleanPreset(string s){StringTrimLeft(s);StringTrimRight(s);string o="";for(int i=0;i<StringLen(s);i++){ushort ch=StringGetCharacter(s,i);bool ok=(ch>='0'&&ch<='9')||(ch>='A'&&ch<='Z')||(ch>='a'&&ch<='z')||ch=='_'||ch=='-';if(ok)o+=ShortToString(ch);}return o;}
  string PresetFile(){string n=CleanPreset(G("PRESET"));if(n=="")return "";return "MultiAlpha\\O01\\Presets\\"+n+".csv";}
- bool SavePreset(const SO01RuntimeSettings110 &s){string fn=PresetFile();if(fn=="")return false;CO01SettingsStore110 ps;ps.SetFile(fn);bool ok=ps.Save(s);if(ok){preset_name=CleanPreset(G("PRESET"));Print("[O01_PRESET_SAVE] name=",preset_name," file=",fn);}return ok;}
- bool LoadPreset(SO01RuntimeSettings110 &s){string fn=PresetFile();if(fn=="")return false;CO01SettingsStore110 ps;ps.SetFile(fn);bool ok=ps.Load(s);if(ok){preset_name=CleanPreset(G("PRESET"));Print("[O01_PRESET_LOAD] name=",preset_name," file=",fn);}return ok;}
+ bool SavePreset(const SO01RuntimeSettings110 &s){string fn=PresetFile();if(fn=="")return false;CO01SettingsStore110 ps;ps.SetFile(fn);bool ok=ps.Save(s);if(ok){preset_name=CleanPreset(G("PRESET"));delete_armed=false;delete_target="";Print("[O01_PRESET_SAVE] name=",preset_name," file=",fn);}return ok;}
+ bool LoadPreset(SO01RuntimeSettings110 &s){string fn=PresetFile();if(fn=="")return false;CO01SettingsStore110 ps;ps.SetFile(fn);bool ok=ps.Load(s);if(ok){preset_name=CleanPreset(G("PRESET"));delete_armed=false;delete_target="";Print("[O01_PRESET_LOAD] name=",preset_name," file=",fn);}return ok;}
  void RefreshPresetList(){
   ArrayResize(preset_list,0);string fn;long h=FileFindFirst("MultiAlpha\\O01\\Presets\\*.csv",fn,FILE_COMMON);
   if(h!=INVALID_HANDLE){do{string n=fn;if(StringLen(n)>4&&StringSubstr(n,StringLen(n)-4)==".csv")n=StringSubstr(n,0,StringLen(n)-4);int z=ArraySize(preset_list);ArrayResize(preset_list,z+1);preset_list[z]=n;}while(FileFindNext(h,fn));FileFindClose(h);}
   if(ArraySize(preset_list)==0){preset_index=-1;return;}preset_index=0;for(int i=0;i<ArraySize(preset_list);i++)if(preset_list[i]==preset_name){preset_index=i;break;}
  }
  string SelectedPreset(){if(preset_index>=0&&preset_index<ArraySize(preset_list))return preset_list[preset_index];return "(none)";}
- void SelectNextPreset(){RefreshPresetList();int n=ArraySize(preset_list);if(n<=0)return;preset_index=(preset_index+1)%n;preset_name=preset_list[preset_index];ObjectSetString(0,p+"PRESET",OBJPROP_TEXT,preset_name);ObjectSetString(0,p+"L_SAVEDVAL",OBJPROP_TEXT,SelectedPreset());ChartRedraw();}
+ void SelectNextPreset(){RefreshPresetList();int n=ArraySize(preset_list);if(n<=0)return;preset_index=(preset_index+1)%n;preset_name=preset_list[preset_index];ObjectSetString(0,p+"PRESET",OBJPROP_TEXT,preset_name);ObjectSetString(0,p+"L_SAVEDVAL",OBJPROP_TEXT,SelectedPreset());delete_armed=false;delete_target="";if(ObjectFind(0,p+"DELETE")>=0)ObjectSetString(0,p+"DELETE",OBJPROP_TEXT,"DELETE");ChartRedraw();}
+ void ClearButtonSelection(string n){ObjectSetInteger(0,n,OBJPROP_STATE,false);ObjectSetInteger(0,n,OBJPROP_SELECTED,false);ChartRedraw();}
+ int DeleteSelectedPreset(){
+  RefreshPresetList();string target=SelectedPreset();if(target=="(none)")return -5;
+  if(!delete_armed||delete_target!=target){delete_armed=true;delete_target=target;ObjectSetString(0,p+"DELETE",OBJPROP_TEXT,"DELETE?");Print("[O01_PRESET_DELETE_ARM] name=",target);ChartRedraw();return 5;}
+  string fn="MultiAlpha\\O01\\Presets\\"+target+".csv";ResetLastError();bool ok=FileDelete(fn,FILE_COMMON);int err=GetLastError();
+  delete_armed=false;delete_target="";if(!ok){ObjectSetString(0,p+"DELETE",OBJPROP_TEXT,"DELETE");Print("[O01_PRESET_DELETE_FAIL] name=",target," file=",fn," err=",err);ChartRedraw();return -6;}
+  Print("[O01_PRESET_DELETE] name=",target," file=",fn);preset_name="";RefreshPresetList();if(ArraySize(preset_list)>0){preset_index=0;preset_name=preset_list[0];}
+  ObjectSetString(0,p+"PRESET",OBJPROP_TEXT,preset_name);ObjectSetString(0,p+"L_SAVEDVAL",OBJPROP_TEXT,SelectedPreset());ObjectSetString(0,p+"DELETE",OBJPROP_TEXT,"DELETE");ChartRedraw();return 6;
+ }
  void CanvasCreate(){
   string n=p+"BG";if(cvReady){cv.Destroy();cvReady=false;}
   cvReady=cv.CreateBitmapLabel(0,0,n,PX,PY,PW,PH,COLOR_FORMAT_ARGB_NORMALIZE);
@@ -98,7 +108,7 @@ class CO01SettingsPanel141{
   E("ONEBAR",-300,108,OnOff(s.one_order_per_bar));E("GRIDOUT",-300,130,OnOff(s.allow_grid_outside_time));E("PGTR",-300,152,OnOff(s.pause_grid_while_trailing));E("STSTEP",-300,174,(string)s.single_trail_step);E("BTD",-300,196,(string)s.basket_trail_distance);E("BTSTEP",-300,218,(string)s.basket_trail_step);E("NEWSMO",-300,240,OnOff(s.news_manage_only));
   H("PRESETSEC",X1,459,"USER PRESET");L("PRESETLAB",24,482,"Preset Name",theme.text,theme.font_size);E("PRESET",106,478,preset_name,220);
   RefreshPresetList();L("SAVEDLAB",342,482,"Saved",theme.text,theme.font_size);L("SAVEDVAL",386,482,SelectedPreset(),theme.section,theme.font_size);B("NEXT",535,476,67,"NEXT");
-  B("APPLY",24,520,137,"APPLY");B("SAVE",171,520,137,"SAVE");B("LOAD",318,520,137,"LOAD");B("RESET",465,520,137,"REFRESH");ChartRedraw();
+  B("APPLY",24,520,108,"APPLY");B("SAVE",142,520,108,"SAVE");B("LOAD",260,520,108,"LOAD");B("DELETE",378,520,108,"DELETE");B("RESET",496,520,108,"REFRESH");ChartRedraw();
  }
 public:
  void Create(const SO01RuntimeSettings110&s,const SMA140StrategyIdentity &strategy_cfg,const SMA140PanelTheme &appearance){
@@ -117,19 +127,21 @@ public:
  }
  int PollButtons(SO01RuntimeSettings110 &s){
   string n=p+"NEXT";
-  if(ObjectFind(0,n)>=0 && (bool)ObjectGetInteger(0,n,OBJPROP_STATE)){ObjectSetInteger(0,n,OBJPROP_STATE,false);SelectNextPreset();Print("[O01_PANEL_POLL] NEXT preset=",preset_name);return 0;}
+  if(ObjectFind(0,n)>=0 && (bool)ObjectGetInteger(0,n,OBJPROP_STATE)){ClearButtonSelection(n);SelectNextPreset();Print("[O01_PANEL_POLL] NEXT preset=",preset_name);return 0;}
   n=p+"APPLY";
   if(ObjectFind(0,n)>=0 && (bool)ObjectGetInteger(0,n,OBJPROP_STATE)){ObjectSetInteger(0,n,OBJPROP_STATE,false);ChartRedraw();Print("[O01_PANEL_POLL] APPLY");return Pull(s)?1:-1;}
   n=p+"SAVE";
   if(ObjectFind(0,n)>=0 && (bool)ObjectGetInteger(0,n,OBJPROP_STATE)){ObjectSetInteger(0,n,OBJPROP_STATE,false);ChartRedraw();Print("[O01_PANEL_POLL] SAVE");if(!Pull(s))return -1;return SavePreset(s)?2:-2;}
   n=p+"LOAD";
   if(ObjectFind(0,n)>=0 && (bool)ObjectGetInteger(0,n,OBJPROP_STATE)){ObjectSetInteger(0,n,OBJPROP_STATE,false);ChartRedraw();Print("[O01_PANEL_POLL] LOAD");if(!LoadPreset(s))return -3;Delete();Create(s,identity,theme);return 3;}
+  n=p+"DELETE";
+  if(ObjectFind(0,n)>=0 && (bool)ObjectGetInteger(0,n,OBJPROP_STATE)){ClearButtonSelection(n);Print("[O01_PANEL_POLL] DELETE preset=",SelectedPreset());return DeleteSelectedPreset();}
   n=p+"RESET";
   if(ObjectFind(0,n)>=0 && (bool)ObjectGetInteger(0,n,OBJPROP_STATE)){ObjectSetInteger(0,n,OBJPROP_STATE,false);ChartRedraw();Print("[O01_PANEL_POLL] REFRESH_DEFAULT");s=initial_cfg;Delete();Create(s,identity,theme);return 4;}
   return 0;
  }
- int Event(int id,string name,SO01RuntimeSettings110&s){if(id==CHARTEVENT_OBJECT_ENDEDIT&&StringFind(name,p)==0&&ObjectGetInteger(0,name,OBJPROP_TYPE)==OBJ_EDIT){NormalizeEdit(name);ChartRedraw();return 0;}if(id!=CHARTEVENT_OBJECT_CLICK)return 0;Print("[O01_PANEL_CLICK] name=",name);if(StringFind(name,p)!=0)return 0;if(name==p+"NEXT"){ObjectSetInteger(0,name,OBJPROP_STATE,false);SelectNextPreset();return 0;}if(name==p+"APPLY"){ObjectSetInteger(0,name,OBJPROP_STATE,false);ChartRedraw();return Pull(s)?1:-1;}if(name==p+"SAVE"){ObjectSetInteger(0,name,OBJPROP_STATE,false);ChartRedraw();if(!Pull(s))return-1;return SavePreset(s)?2:-2;}if(name==p+"LOAD"){ObjectSetInteger(0,name,OBJPROP_STATE,false);ChartRedraw();if(!LoadPreset(s))return-3;Delete();Create(s,identity,theme);return 3;}
-if(name==p+"RESET"){ObjectSetInteger(0,name,OBJPROP_STATE,false);ChartRedraw();
+ int Event(int id,string name,SO01RuntimeSettings110&s){if(id==CHARTEVENT_OBJECT_ENDEDIT&&StringFind(name,p)==0&&ObjectGetInteger(0,name,OBJPROP_TYPE)==OBJ_EDIT){NormalizeEdit(name);ChartRedraw();return 0;}if(id!=CHARTEVENT_OBJECT_CLICK)return 0;Print("[O01_PANEL_CLICK] name=",name);if(StringFind(name,p)!=0)return 0;if(name==p+"NEXT"){ClearButtonSelection(name);SelectNextPreset();return 0;}if(name==p+"APPLY"){ClearButtonSelection(name);return Pull(s)?1:-1;}if(name==p+"SAVE"){ClearButtonSelection(name);if(!Pull(s))return-1;return SavePreset(s)?2:-2;}if(name==p+"LOAD"){ClearButtonSelection(name);if(!LoadPreset(s))return-3;Delete();Create(s,identity,theme);return 3;}if(name==p+"DELETE"){ClearButtonSelection(name);return DeleteSelectedPreset();}
+if(name==p+"RESET"){ClearButtonSelection(name);
  s=initial_cfg;Print("[O01_PRESET_REFRESH] restored_initial=1");Delete();Create(s,identity,theme);return 4;
 }return 0;}
  void RefreshIdentity(const SMA140StrategyIdentity &strategy_cfg,const SMA140PanelTheme &appearance){

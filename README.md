@@ -170,6 +170,62 @@ The panel should save/load the complete configuration as a named **Strategy Pres
 
 Edits should not silently change active trading. Prefer an explicit **APPLY** step with validation. Lifecycle-sensitive changes such as Grid/Recovery/Exit settings may be queued for the next cycle instead of modifying an open cycle.
 
+### 9A. Named preset file SAVE / LOAD contract — FIXED POLICY
+
+This section is the durable specification for panel SAVE/LOAD behavior. It corrects the earlier misunderstanding between a fixed internal settings file and the user-facing named-preset workflow. Future panel work must follow this contract unless this README is explicitly revised first.
+
+**User requirement:** save the complete current panel configuration under a user-chosen preset name, then reproduce that configuration on another chart and, by transferring the preset file, on another MT5 installation.
+
+#### APPLY
+- Reads and validates the values currently shown in the panel and applies them to the current runtime configuration.
+- APPLY does **not** save a file.
+- Invalid values fail safely and must not silently alter active settings.
+- Lifecycle-sensitive changes may be deferred to the next safe cycle when required.
+
+#### SAVE
+- SAVE is **not** "overwrite one fixed hidden settings file".
+- The panel must provide a **Preset Name** field.
+- SAVE reads and validates the complete current panel configuration and writes it to a **named preset file** derived from Preset Name.
+- Multiple named presets must coexist.
+- The preset must contain the complete reproducible configuration, including strategy/module identity, detailed parameters, lot/grid/trailing, risk/DD, session/time, news, and other runtime settings required for reproduction.
+- The preset must include format/version and logic/module identity information so incompatible or obsolete presets can be rejected clearly.
+- Preferred implementation is a normal text-based preset in an MT5/MQL5 permitted file area using `FILE_COMMON` (or a later explicitly documented equivalent).
+- SAVE does **not** require a Windows "Save As" dialog. The user chooses the filename through the panel's Preset Name control.
+
+#### LOAD
+- LOAD loads a **user-selected named preset**, validates it, restores the complete configuration to the panel/runtime, and rebuilds dependent resources such as indicator handles when necessary.
+- LOAD is **not** "always read one fixed hidden settings file".
+- The panel must provide a practical preset selector/list so the user can choose among saved presets.
+- Incompatible format/logic/module versions must fail safely with a clear reason; do not silently substitute defaults or another strategy.
+
+#### Portability / reproduction
+```
+Chart / MT5 A
+  -> edit panel
+  -> Preset Name = O01_RSI25_Test
+  -> SAVE
+  -> named preset file
+
+Same MT5, another chart
+  -> select O01_RSI25_Test
+  -> LOAD
+  -> same configuration
+
+Another MT5 / another PC
+  -> copy the named preset file to the supported preset file area
+  -> select it
+  -> LOAD
+  -> same configuration
+```
+
+The preset format should remain human-inspectable where practical. File transfer is separate from panel SAVE: MQL5 file-sandbox restrictions mean the EA must not depend on unrestricted Windows filesystem access or a native Windows Save/Open dialog.
+
+#### Legacy fixed-file behavior
+The current O01 development implementation using `O01_GSG_RSI30_Settings_v1_10.csv` as one fixed `FILE_COMMON` file is **legacy/development behavior**, not the finished SAVE/LOAD contract. Keep compatibility only as needed during migration. Do not describe fixed-file behavior as the intended finished user experience.
+
+#### Scope and safety
+Preset work is configuration/UI infrastructure only. It must not change frozen strategy decision logic, parity timing, or the NoOrders safety status of research/Core/parity hosts.
+
 ### 10. Exact panel configuration must be backtestable
 
 Target workflow:

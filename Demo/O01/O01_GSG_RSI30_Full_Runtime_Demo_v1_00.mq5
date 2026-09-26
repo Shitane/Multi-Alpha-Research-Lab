@@ -13,7 +13,7 @@
 #property description "O01 FULL runtime demo host - DEMO ACCOUNT ONLY"
 #property description "Frozen O01 trading logic; separate from NoOrders research hosts."
 
-#include "..\\..\\O01_GSG_RSI30_Monolithic_Module_v1_00.mqh"
+#include <Original_Logic/O01_GSG_RSI30_Monolithic_Module_v1_00.mqh>
 
 int OnInit()
 {

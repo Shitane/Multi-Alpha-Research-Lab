@@ -10,7 +10,7 @@
 #property version "1.40"
 
 #include "..\\..\\Include\\O01\\O01_GSG_RSI30_Runtime_Adapter_v1_20.mqh"
-#include "..\\..\\Include\\O01\\O01_Settings_Panel_v1_33.mqh"
+#include "..\\..\\Include\\O01\\O01_Settings_Panel_v1_40.mqh"
 #include "..\\..\\Include\\O01\\MultiAlpha_Foundation_v1_40.mqh"
 
 enum O01_TIME_MODE { O01_AUTO_GMT=0,O01_SERVER_TIME=1,O01_CUSTOM_GMT=2 };
@@ -18,7 +18,7 @@ enum O01_TIME_MODE { O01_AUTO_GMT=0,O01_SERVER_TIME=1,O01_CUSTOM_GMT=2 };
 input ENUM_MA_EXECUTION_MODE InpExecutionMode=MA_EXECUTION_NO_ORDERS;
 
 SO01RuntimeSettings110 runtime_cfg;
-CO01SettingsPanel133 panel;
+CO01SettingsPanel140 panel;
 CO01RuntimeAdapter120 adapter;
 CO01CoreInterface core;
 SMA140StrategyIdentity strategy;
@@ -94,8 +94,8 @@ int OnInit(){
  }
  if(!adapter.Validate(runtime_cfg))return INIT_PARAMETERS_INCORRECT;
  if(!RebuildIndicatorHandles())return INIT_FAILED;
- panel.Create(runtime_cfg);
- Print("[O01_RUNTIME140_START] CORE=1.00 ADAPTER=1.20 PANEL=1.33 FOUNDATION=1.40 instance=",strategy.instance_id," symbol=",strategy.symbol," entry=",strategy.entry_module," manage=",strategy.manage_module," exit=",strategy.exit_module," EXECUTION=NO_ORDERS VIRTUAL_NOT_FILL=1");
+ panel.Create(runtime_cfg,strategy,panel_theme);
+ Print("[O01_RUNTIME140_START] CORE=1.00 ADAPTER=1.20 PANEL=1.40 FOUNDATION=1.40 instance=",strategy.instance_id," symbol=",strategy.symbol," entry=",strategy.entry_module," manage=",strategy.manage_module," exit=",strategy.exit_module," EXECUTION=NO_ORDERS VIRTUAL_NOT_FILL=1");
  return INIT_SUCCEEDED;
 }
 void OnDeinit(const int reason){

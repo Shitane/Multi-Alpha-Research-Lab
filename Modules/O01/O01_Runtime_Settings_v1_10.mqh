@@ -23,6 +23,7 @@ class CO01SettingsStore110
  void W(int h,string k,string v){FileWrite(h,k,v);}
 public:
  void SetFile(string x){f=x;}
+ string GetFile(){return f;}
  bool Save(const SO01RuntimeSettings110 &s){
   int h=FileOpen(f,FILE_WRITE|FILE_CSV|FILE_COMMON,'='); if(h==INVALID_HANDLE)return false;
   W(h,"version","1.10");

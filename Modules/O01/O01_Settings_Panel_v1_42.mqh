@@ -13,8 +13,8 @@ class CO01SettingsPanel141{
  string p; CO01SettingsStore110 st; CCanvas cv; bool cvReady;
  SMA140PanelTheme theme; SMA140StrategyIdentity identity;
  color C_EDIT_BG,C_BUTTON;
- const int PX=8,PY=8,PW=620,PH=522;
- const int X1=24,X2=220,X3=416,LW=100,EW=64,RH=23;
+ int PX,PY,PW,PH;
+ int X1,X2,X3,LW,EW,RH;
  void CanvasCreate(){
   string n=p+"BG";if(cvReady){cv.Destroy();cvReady=false;}
   cvReady=cv.CreateBitmapLabel(0,0,n,PX,PY,PW,PH,COLOR_FORMAT_ARGB_NORMALIZE);
@@ -75,7 +75,7 @@ class CO01SettingsPanel141{
  }
 public:
  void Create(const SO01RuntimeSettings110&s,const SMA140StrategyIdentity &strategy_cfg,const SMA140PanelTheme &appearance){
-  p="O01CFG141_";cvReady=false;identity=strategy_cfg;theme=appearance;st.SetFile("O01_GSG_RSI30_Settings_v1_10.csv");C_EDIT_BG=C'24,31,38';C_BUTTON=C'42,52,61';Draw(s);
+  p="O01CFG141_";cvReady=false;PX=8;PY=8;PW=620;PH=522;X1=24;X2=220;X3=416;LW=100;EW=64;RH=23;identity=strategy_cfg;theme=appearance;st.SetFile("O01_GSG_RSI30_Settings_v1_10.csv");C_EDIT_BG=C'24,31,38';C_BUTTON=C'42,52,61';Draw(s);
  }
  void Delete(){if(cvReady){cv.Destroy();cvReady=false;}ObjectsDeleteAll(0,p);}
  bool Pull(SO01RuntimeSettings110&s){

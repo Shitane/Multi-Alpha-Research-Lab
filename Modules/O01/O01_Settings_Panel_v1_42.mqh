@@ -33,11 +33,10 @@ class CO01SettingsPanel141{
  void ClearButtonSelection(string n){ObjectSetInteger(0,n,OBJPROP_STATE,false);ObjectSetInteger(0,n,OBJPROP_SELECTED,false);ChartRedraw();}
  int DeleteSelectedPreset(){
   RefreshPresetList();string target=SelectedPreset();if(target=="(none)")return -5;
-  if(!delete_armed||delete_target!=target){delete_armed=true;delete_target=target;ObjectSetString(0,p+"DELETE",OBJPROP_TEXT,"DELETE?");Print("[O01_PRESET_DELETE_ARM] name=",target);ChartRedraw();return 5;}
   string fn="MultiAlpha\\O01\\Presets\\"+target+".csv";ResetLastError();bool ok=FileDelete(fn,FILE_COMMON);int err=GetLastError();
-  delete_armed=false;delete_target="";if(!ok){ObjectSetString(0,p+"DELETE",OBJPROP_TEXT,"DELETE");Print("[O01_PRESET_DELETE_FAIL] name=",target," file=",fn," err=",err);ChartRedraw();return -6;}
+  delete_armed=false;delete_target="";if(!ok){Print("[O01_PRESET_DELETE_FAIL] name=",target," file=",fn," err=",err);ChartRedraw();return -6;}
   Print("[O01_PRESET_DELETE] name=",target," file=",fn);preset_name="";RefreshPresetList();if(ArraySize(preset_list)>0){preset_index=0;preset_name=preset_list[0];}
-  ObjectSetString(0,p+"PRESET",OBJPROP_TEXT,preset_name);ObjectSetString(0,p+"L_SAVEDVAL",OBJPROP_TEXT,SelectedPreset());ObjectSetString(0,p+"DELETE",OBJPROP_TEXT,"DELETE");ChartRedraw();return 6;
+  ObjectSetString(0,p+"PRESET",OBJPROP_TEXT,preset_name);ObjectSetString(0,p+"L_SAVEDVAL",OBJPROP_TEXT,SelectedPreset());ChartRedraw();return 6;
  }
  void CanvasCreate(){
   string n=p+"BG";if(cvReady){cv.Destroy();cvReady=false;}

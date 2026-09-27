@@ -101,3 +101,60 @@ Required direction:
 - Backtest, demo and future live execution must call the same verified modules.
 
 The next code phase is interface/router scaffolding only. It must not introduce broker orders.
+
+
+## Common selector interface v1.50 — implementation started
+
+The first common-selection layer has now been added without changing the verified v1.42 decision logic.
+
+New files:
+
+- `Modules/Common/MultiAlpha_Module_Contract_v1_50.mqh`
+- `Modules/O01/O01_GSG_RSI30_Logic_Router_v1_50.mqh`
+- `Parity_Tests/O01/O01_GSG_RSI30_Unified_Selector_NoOrders_v1_50.mq5`
+
+v1.50 exposes explicit Expert Inputs for:
+
+- Structure: FULL / SPLIT
+- Full module
+- Entry module
+- Manage module
+- Exit module
+
+At the current gate only O01 is registered. Selecting an unsupported A10-A15 combination is expected to fail initialization with an explicit reason; it must not silently substitute O01.
+
+The v1.50 O01 router is an adapter over the already verified v1.40 O01 router. SPLIT decisions therefore continue to pass through the frozen Entry / Manage / Exit implementation rather than a new reimplementation. FULL continues to dispatch to `O01_GSG_RSI30_Full_NoOrders_Adapter_v1_00.mqh`.
+
+Safety remains:
+
+```
+NO_ORDERS=1
+VIRTUAL_NOT_FILL=1
+```
+
+### Required verification before the next architecture gate
+
+Compile `O01_GSG_RSI30_Unified_Selector_NoOrders_v1_50.mq5` first.
+
+Then run the common baseline twice:
+
+1. Structure = SPLIT; Entry/Manage/Exit = O01.
+2. Structure = FULL; Full = O01.
+
+Expected aggregate baseline for both valid O01 routes remains:
+
+```
+ticks=2571204
+entries=31
+grids=5
+closes=31
+single_trail=27
+basket_trail=4
+virtual_sl=0
+buy_open=0
+sell_open=0
+```
+
+Also perform one fail-safe check by selecting an unsupported module ID such as A14 in one SPLIT slot. Initialization should stop with an `[O01_ROUTER150_START] invalid route reason=...` message. This negative test verifies that the common selector does not silently fall back to O01.
+
+Do not mark v1.50 parity PASS until compile and tester evidence are supplied.

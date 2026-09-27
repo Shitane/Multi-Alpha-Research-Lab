@@ -322,6 +322,14 @@ On 2026-09-25, original EA and O01 were prepared for simultaneous demo operation
 
 All other compared settings are intended to remain equal. Same-account comparison has one known limitation: account-level Balance/Equity DD measurements can be influenced by both EAs, even when position ownership is separated by Magic. Therefore DD 8%/12%/15% behavior needs special care when interpreting same-account parity.
 
+## O01 architecture gate update — 2026-09-27
+
+O01 unified selector v1.42 now has two genuine independent NoOrders routes: FULL uses the frozen REF105-derived whole-path adapter, while SPLIT uses the O01 Entry / Manage / Exit modules through the router. On the common XAUUSD_DUKA M15 2026-08-16..2026-08-29 real-tick baseline, both routes reached the same aggregate result: 2,571,204 ticks, 31 entries, 5 grids, 31 closes, 27 single-trailing exits, 4 basket-trailing exits, 0 virtual-SL exits, and no open virtual positions at the end. The SPLIT run generated 920 bars and passed.
+
+This v1.42 FULL/SPLIT decision behavior is now a frozen NoOrders architecture baseline. The next phase is a common module-selection interface/router layer that preserves FULL as an independent whole-strategy route and makes Entry / Manage / Exit independently selectable without introducing broker orders. Unsupported combinations must fail safely rather than silently falling back.
+
+Detailed record: `Test_Results/O01/O01_Development_Progress_2026-09-27.md`.
+
 ## Planned sequence
 
 Immediate:

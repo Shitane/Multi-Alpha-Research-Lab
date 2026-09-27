@@ -1,0 +1,139 @@
+# O01 / Multi Alpha Development Progress — 2026-09-28
+
+## Purpose
+
+This record reconciles the current GitHub implementation with the compile/runtime evidence observed on the development and remote MT5 environments after the v1.50 selector gate.
+
+It does **not** declare live/demo trading parity complete. Market-order lifecycle evidence is still pending because the latest remote validation was performed on Sunday and the O01 session is limited to the configured trading window.
+
+## Architecture direction confirmed
+
+The durable target remains the single-EA architecture in `Docs/MultiAlpha_Single_EA_Target_v1_00.md`:
+
+- one Multi Alpha EA binary,
+- `FULL` and `SPLIT` are routes of that same EA,
+- each attached instance has its own Instance ID and Magic,
+- FULL preserves the independent frozen whole-strategy reference path,
+- SPLIT selects Entry / Manage / Exit independently,
+- broker execution is owned by a common execution adapter rather than by decision modules,
+- unregistered module combinations must fail safely and must never fall back silently to O01.
+
+## Verified development state carried forward
+
+### v1.50 selector gate
+
+The established O01 baseline remains frozen:
+
+- 2,571,204 ticks
+- 920 bars
+- entries 31
+- grids 5
+- closes 31
+- single trailing 27
+- basket trailing 4
+- virtual SL 0
+- buy open 0
+- sell open 0
+
+Both genuine FULL and SPLIT O01/O01/O01 routes matched this aggregate baseline in the documented NoOrders tester work. The unregistered SPLIT Entry=A14 negative test rejected initialization instead of falling back to O01.
+
+### Route-change safety
+
+The runtime route-change safety gate was verified for the required conditions:
+
+- flat + no active cycle + no execution transition: route change accepted,
+- managed position open: rejected,
+- active cycle: rejected,
+- execution transition pending: rejected.
+
+The active route remains unchanged on rejection.
+
+### v1.61 single-EA panel/registry line
+
+The single-EA host contains:
+
+- capability-specific module registry,
+- O01 registration for the verified roles,
+- A10 as a registered ENTRY capability,
+- right-side route/composition selector,
+- left-side module settings context,
+- explicit Instance ID and Magic inputs.
+
+The development compile evidence for the updated v1.61 host showed 0 errors / 0 warnings.
+
+Remote NoOrders startup evidence was observed for two same-EA instances:
+
+- FULL / O01: Instance 2, Magic 46102031
+- SPLIT / O01 + O01 + O01: Instance 3, Magic 46102032
+
+This establishes configuration/identity separation at startup. It does **not** by itself prove broker-position isolation under real demo fills.
+
+## v1.62-v1.63 DEMO execution boundary
+
+GitHub current files:
+
+- `Modules/Common/MultiAlpha_Demo_Execution_Adapter_v1_62.mqh`
+- `Modules/Common/MultiAlpha_Demo_Execution_Adapter_v1_63.mqh`
+- `Parity_Tests/MultiAlpha/MultiAlpha_Runtime_Panel_DemoGate_v1_63.mq5`
+
+Relevant commits:
+
+- `b8dbbb0696a701273aa723dfa998b7bb0977ac9d` — Add v1.62 demo execution safety boundary
+- `cb78516f03c597cc275d6be9dda446f252ff3229` — Integrate v1.62 demo execution safety gate into Multi Alpha host
+- `81a5e21c27bc99ea3c196585ed86d0464c9a4ee9` — Add checked DEMO broker operations for v1.63 execution adapter
+- `30fafd8427bc23c57471342d75fef64466e2629f` — Connect v1.63 Multi Alpha host to checked DEMO execution adapter
+
+The v1.63 execution adapter implements:
+
+- DEMO-account requirement,
+- HEDGING-account requirement,
+- positive Instance ID / Magic validation,
+- Symbol + Magic ownership filtering,
+- synchronous CTrade execution,
+- checked trade retcodes,
+- explicit transition-pending state around broker calls,
+- owned-position count/lot/weighted-average/newest-position queries,
+- owned-side close and owned-all close helpers.
+
+The v1.63 host compile shown in MetaEditor on 2026-09-28 was **0 errors / 0 warnings**.
+
+Remote MT5 startup evidence on 2026-09-28 showed the DEMO/HEDGING gate accepting Instance 2 / Magic 46102031 and logging `BROKER_ACTIONS_ARMED=1`.
+
+## Important limitation of the 2026-09-28 remote run
+
+2026-09-28 is Sunday in the user's local environment and the O01 logic does not permit new-cycle trading on weekends. In addition, the configured O01 session is restricted to its trading window (the current AUTO_GMT inputs correspond to the intended server-time session).
+
+Therefore no broker entry/grid/exit event from this run is counted as demo execution parity evidence.
+
+The following are still **pending** and must not be marked PASS yet:
+
+1. actual DEMO initial entry with correct Instance/Symbol/Magic ownership,
+2. simultaneous FULL and SPLIT same-symbol/different-Magic non-interference under broker positions,
+3. grid-add ownership and lot progression,
+4. single-position trailing close,
+5. basket trailing close,
+6. virtual-SL/emergency behavior where applicable,
+7. route-change rejection while a real owned position/cycle exists,
+8. restart/state behavior with owned broker positions,
+9. event-level comparison against the Original O01 reference during an open market/session.
+
+## Known DD interpretation constraint
+
+O01's frozen DD behavior includes account-level Balance/Equity measurements. Two strategies on the same demo account can therefore influence account-level DD observations even when their positions are separated correctly by Symbol + Magic.
+
+Do not rewrite the frozen O01 DD logic merely to simplify the comparison. Record DD parity separately and use a separately specified risk-scope contract if per-strategy DD is introduced later.
+
+## Next implementation / validation gate
+
+Before calling simultaneous DEMO operation ready:
+
+1. preserve the frozen O01 decision path,
+2. keep the NoOrders regression host intact,
+3. strengthen execution diagnostics so every broker open/close can be tied to Instance ID, Symbol, Magic, side, ticket/order/deal and result,
+4. run the two same-EA instances during an open market and valid O01 session,
+5. verify that each instance sees/manages only its own Symbol + Magic positions,
+6. verify grid and exit lifecycle behavior,
+7. compare FULL and SPLIT event timing and results with the Original O01 reference,
+8. document discrepancies before any optimization.
+
+No optimization of O01 is authorized by this record.

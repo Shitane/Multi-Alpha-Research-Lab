@@ -277,3 +277,69 @@ Required first compile/test sequence:
 5. Pending-transition test: positions=0, cycle_none=true, transition_pending=true. Expected: REJECT / execution transition is pending.
 
 Do not connect panel route controls until this gate is verified by tester evidence.
+
+
+## Gate-3A COMPLETE — runtime route-change safety v1.51
+
+Gate-3A is now formally PASS based on user-supplied MetaTrader 5 compile/tester evidence.
+
+Compile status previously verified:
+
+```
+0 errors
+0 warnings
+```
+
+The four required route-change conditions were verified:
+
+| Test | State | Expected / observed |
+|---|---|---|
+| 1. Flat | positions=0, cycle_none=true, transition_pending=false | ACCEPT / route changed |
+| 2. Position Open | positions=1, cycle_none=true, transition_pending=false | REJECT / managed positions are open |
+| 3. Cycle Active | positions=0, cycle_none=false, transition_pending=false | REJECT / cycle is active |
+| 4. Transition Pending | positions=0, cycle_none=true, transition_pending=true | REJECT / execution transition is pending |
+
+For all rejection tests, the active route remained the original SPLIT O01 route. No automatic fallback occurred.
+
+Final Gate-3A test 4 was run on the common baseline:
+
+- XAUUSD_DUKA M15
+- 2026-08-16 through 2026-08-29
+- real ticks
+- initial deposit 100,000
+- leverage 1:100
+- 2,571,204 ticks / 920 bars
+- Tester: Test passed
+
+Observed transition-pending evidence:
+
+```
+[MA_ROUTE151_REQUEST] requested={structure=FULL full=O01 entry=O01 manage=O01 exit=O01} state_positions=0 cycle_none=1 transition_pending=1 result=REJECT reason=execution transition is pending active={structure=SPLIT full=O01 entry=O01 manage=O01 exit=O01} NO_ORDERS=1
+```
+
+### Gate-3A status
+
+**PASS / COMPLETE**
+
+The verified policy is now:
+
+1. Route change is accepted only when managed positions = 0, Cycle = NONE, and execution transition pending = false.
+2. Any unsafe lifecycle state rejects the requested route and preserves the active route.
+3. Unsupported modules reject explicitly; there is no silent fallback to O01.
+4. This gate remains architecture-only / NoOrders. It does not add broker execution.
+5. Existing parity-passed O01 FULL and SPLIT trading-decision logic remains frozen and unchanged.
+
+### Next gate — Gate-3B
+
+Connect Structure / Full / Entry / Manage / Exit selection to the existing O01 runtime panel and Expert Properties through Runtime Settings.
+
+Gate-3B must preserve:
+
+- Expert Properties -> OnInit -> Runtime Settings -> Panel
+- APPLY: Panel -> validated Runtime route
+- SAVE / LOAD / RESET behavior
+- route changes only under the Gate-3A safe-state policy
+- rejection preserves the current active route
+- unsupported modules reject; never fall back to O01
+- existing parity-passed FULL/SPLIT trading logic unchanged
+- NO_ORDERS=1 / VIRTUAL_NOT_FILL=1 in the research/parity host

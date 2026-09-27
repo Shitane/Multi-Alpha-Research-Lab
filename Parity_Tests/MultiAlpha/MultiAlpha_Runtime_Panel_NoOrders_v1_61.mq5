@@ -20,6 +20,10 @@ enum O01_TIME_MODE { O01_AUTO_GMT=0,O01_SERVER_TIME=1,O01_CUSTOM_GMT=2 };
 
 input ENUM_MA_EXECUTION_MODE InpExecutionMode=MA_EXECUTION_NO_ORDERS;
 
+input group "Multi Alpha Instance Identity"
+input int  InpInstanceId=1;
+input long InpMagic=46102031;
+
 input group "Multi Alpha Route"
 input ENUM_MA_STRUCTURE_MODE_V150 InpStructure=MA_STRUCTURE_SPLIT_V150;
 input ENUM_MA_LOGIC_ID_V150 InpFullModule=MA_LOGIC_O01_V150;
@@ -163,6 +167,8 @@ SMA_RouteState150 LiveRouteState(){
 
 int OnInit(){
  Defaults();MA140_DefaultIdentity(strategy,_Symbol);MA140_DefaultTheme(panel_theme);
+ if(InpInstanceId<=0 || InpMagic<=0){Print("[MA_RUNTIME161_IDENTITY] invalid instance_id=",InpInstanceId," magic=",InpMagic);return INIT_PARAMETERS_INCORRECT;}
+ strategy.instance_id=InpInstanceId;strategy.magic=InpMagic;
  SMA_ModuleSelection150 initial_route=StartupRoute();string route_reason="";
  if(!MA161ValidateRoute(initial_route,route_reason)){Print("[O01_RUNTIME153_ROUTE_INIT_REJECT] reason=",route_reason," NO_ORDERS=1 VIRTUAL_NOT_FILL=1");return INIT_PARAMETERS_INCORRECT;}
  route_controller.SetInitial(initial_route);
@@ -184,7 +190,7 @@ int OnInit(){
  panel.SetRouteDraftContext(MA150StructureName(initial_route.structure),MA150LogicName(initial_route.full_module),MA150LogicName(initial_route.entry_module),MA150LogicName(initial_route.manage_module),MA150LogicName(initial_route.exit_module),initial_registered);
  route_panel.Create(&route_controller,initial_route,640,36,panel_theme.opacity);
  if(initial_route.structure==MA_STRUCTURE_SPLIT_V150 && initial_route.entry_module==MA_LOGIC_A10_V150)a10_panel.Display(a10_entry_cfg);
- Print("[MA_RUNTIME161_START] CORE=1.00 ADAPTER=1.20 PANEL=1.60 FOUNDATION=1.40 REGISTRY=1.61 ENTRY_DISPATCHER=1.61 instance=",strategy.instance_id," symbol=",strategy.symbol," entry=",strategy.entry_module," manage=",strategy.manage_module," exit=",strategy.exit_module," EXECUTION=NO_ORDERS VIRTUAL_NOT_FILL=1");
+ Print("[MA_RUNTIME161_START] CORE=1.00 ADAPTER=1.20 PANEL=1.60 FOUNDATION=1.40 REGISTRY=1.61 ENTRY_DISPATCHER=1.61 instance=",strategy.instance_id," magic=",strategy.magic," symbol=",strategy.symbol," entry=",strategy.entry_module," manage=",strategy.manage_module," exit=",strategy.exit_module," EXECUTION=NO_ORDERS VIRTUAL_NOT_FILL=1");
  return INIT_SUCCEEDED;
 }
 void OnDeinit(const int reason){

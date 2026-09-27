@@ -246,3 +246,34 @@ O01 v1.50 common selector Gate is PASS for:
 - NoOrders / Virtual-not-fill safety preservation
 
 The verified decision paths remain frozen. The next architecture phase is runtime-panel selection for Structure / Full / Entry / Manage / Exit plus safe route-change rules. Route changes must be rejected while a managed cycle/position is active; no broker execution is introduced in this phase.
+
+
+## Gate-3A started — runtime route-change safety v1.51
+
+Before adding route selectors to the runtime panel, a reusable route-change controller has been added:
+
+- `Modules/Common/MultiAlpha_Route_Controller_v1_51.mqh`
+- `Parity_Tests/O01/O01_Route_Change_Safety_NoOrders_v1_51.mq5`
+
+Policy:
+
+- unsupported requested routes are rejected;
+- route changes are rejected while managed positions are open;
+- route changes are rejected while a cycle is active;
+- route changes are rejected while an execution transition is pending;
+- accepted changes update the active route only when the state is safe;
+- rejection preserves the previous active route;
+- no silent fallback;
+- NO ORDERS.
+
+The dedicated Gate-3A host intentionally contains no trading logic and no `OnTick` decisions. It exists only to verify the route-change policy before that policy is connected to the runtime panel.
+
+Required first compile/test sequence:
+
+1. Compile `O01_Route_Change_Safety_NoOrders_v1_51.mq5`.
+2. Safe-flat test: positions=0, cycle_none=true, transition_pending=false, request SPLIT -> FULL O01. Expected: ACCEPT / route changed.
+3. Open-position test: positions=1 with the same request. Expected: REJECT / managed positions are open; active route remains SPLIT.
+4. Active-cycle test: positions=0, cycle_none=false. Expected: REJECT / cycle is active.
+5. Pending-transition test: positions=0, cycle_none=true, transition_pending=true. Expected: REJECT / execution transition is pending.
+
+Do not connect panel route controls until this gate is verified by tester evidence.

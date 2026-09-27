@@ -36,6 +36,30 @@ Unless a test record says otherwise:
 - Current integration line: `MultiAlpha_Core_NoOrders_v1_09.mq5`
 - Core v1.09 full regression (A10-A16 selectable IDs) passed on 2026-09-25 after A14 integration.
 
+### Multi Alpha O01 execution-gate regression record — 2026-09-28
+
+`MultiAlpha_Runtime_Panel_DemoGate_v1_64.mq5` passed the frozen O01 **NO_ORDERS regression** on the common baseline:
+
+- XAUUSD_DUKA / M15
+- 2026-08-16 through 2026-08-29
+- real ticks
+- JPY 100000 / leverage 1:100
+- 2,571,204 ticks / 920 bars
+- entries=31
+- grids=5
+- closes=31
+- single_trail=27
+- basket_trail=4
+- virtual_sl=0
+- buy_open=0 / sell_open=0
+- `EXECUTION=NO_ORDERS`
+- `BROKER_ACTIONS_ARMED=0`
+- `VIRTUAL_NOT_FILL=1`
+
+MetaEditor compile was separately verified at **0 errors / 0 warnings**.
+
+This record verifies that the v1.64 execution-gate work did not change the frozen O01 NO_ORDERS decision-path baseline. It does **not** by itself certify live/demo broker-fill parity. Broker execution remains a separate gate and must be validated independently.
+
 ## Product architecture policy — IMPORTANT
 
 The long-term target is an MQL5 Market product containing many entry/exit strategies without making the user's setup screen unmanageably complex.

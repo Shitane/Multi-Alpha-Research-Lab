@@ -89,7 +89,16 @@ public:
      }
    void Delete(){ObjectsDeleteAll(0,m_prefix);}
    SMA_ModuleSelection150 Draft(){return m_draft;}
-   bool DraftChangedFromActive(){if(m_controller==NULL)return false;SMA_ModuleSelection150 a=m_controller.Active();return !MA150SameSelection(m_draft,a);}
+   bool DraftChangedFromActive()
+     {
+      if(m_controller==NULL) return false;
+      SMA_ModuleSelection150 a=m_controller.Active();
+      return (m_draft.structure!=a.structure ||
+              m_draft.full_module!=a.full_module ||
+              m_draft.entry_module!=a.entry_module ||
+              m_draft.manage_module!=a.manage_module ||
+              m_draft.exit_module!=a.exit_module);
+     }
    bool DraftEntryRegistered(){return (m_draft.entry_module==MA_LOGIC_O01_V150);}
    bool DraftManageRegistered(){return (m_draft.manage_module==MA_LOGIC_O01_V150);}
    bool DraftExitRegistered(){return (m_draft.exit_module==MA_LOGIC_O01_V150);}

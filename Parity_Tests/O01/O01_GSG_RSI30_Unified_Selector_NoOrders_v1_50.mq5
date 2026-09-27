@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #property strict
 #property version "1.50"
-#include "..\..\Include\O01\O01_GSG_RSI30_Logic_Router_v1_40.mqh"
+#include "..\..\Include\O01\O01_GSG_RSI30_Logic_Router_v1_50.mqh"
 #include "..\..\Include\O01\O01_GSG_RSI30_Full_NoOrders_Adapter_v1_00.mqh"
 
 enum O01_TIME_MODE { O01_AUTO_GMT=0,O01_SERVER_TIME=1,O01_CUSTOM_GMT=2 };

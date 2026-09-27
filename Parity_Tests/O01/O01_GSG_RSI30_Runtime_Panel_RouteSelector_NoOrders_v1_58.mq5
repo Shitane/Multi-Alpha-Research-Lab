@@ -172,6 +172,7 @@ int OnInit(){
  if(!RebuildIndicatorHandles())return INIT_FAILED;
  panel.SetInitialConfig(runtime_cfg); // exact Expert Properties startup snapshot for REFRESH
  panel.Create(runtime_cfg,strategy,panel_theme);
+ panel.SetRouteDraftContext(MA150StructureName(initial_route.structure),MA150LogicName(initial_route.full_module),MA150LogicName(initial_route.entry_module),MA150LogicName(initial_route.manage_module),MA150LogicName(initial_route.exit_module));
  route_panel.Create(&route_controller,initial_route,656,36);
  Print("[O01_RUNTIME140_START] CORE=1.00 ADAPTER=1.20 PANEL=1.42 FOUNDATION=1.40 instance=",strategy.instance_id," symbol=",strategy.symbol," entry=",strategy.entry_module," manage=",strategy.manage_module," exit=",strategy.exit_module," EXECUTION=NO_ORDERS VIRTUAL_NOT_FILL=1");
  return INIT_SUCCEEDED;

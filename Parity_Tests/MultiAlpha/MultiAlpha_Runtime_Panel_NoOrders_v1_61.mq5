@@ -9,11 +9,11 @@
 #property strict
 #property version "1.61"
 
-#include "..\\..\\Include\\O01\\O01_GSG_RSI30_Runtime_Adapter_v1_20.mqh"
-#include "..\\..\\Include\\O01\\O01_Settings_Panel_v1_60.mqh"
-#include "..\\..\\Include\\O01\\MultiAlpha_Foundation_v1_40.mqh"
-#include "..\\..\\Include\\Common\\MultiAlpha_Route_Selector_Panel_v1_61.mqh"
-#include "..\\..\\Include\\Common\\MultiAlpha_Entry_Dispatcher_v1_61.mqh"
+#include "..\\..\\..\\Include\\O01\\O01_GSG_RSI30_Runtime_Adapter_v1_20.mqh"
+#include "..\\..\\..\\Include\\O01\\O01_Settings_Panel_v1_60.mqh"
+#include "..\\..\\..\\Include\\O01\\MultiAlpha_Foundation_v1_40.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Route_Selector_Panel_v1_61.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Entry_Dispatcher_v1_61.mqh"
 
 enum O01_TIME_MODE { O01_AUTO_GMT=0,O01_SERVER_TIME=1,O01_CUSTOM_GMT=2 };
 

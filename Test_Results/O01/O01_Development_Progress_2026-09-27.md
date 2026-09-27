@@ -158,3 +158,55 @@ sell_open=0
 Also perform one fail-safe check by selecting an unsupported module ID such as A14 in one SPLIT slot. Initialization should stop with an `[O01_ROUTER150_START] invalid route reason=...` message. This negative test verifies that the common selector does not silently fall back to O01.
 
 Do not mark v1.50 parity PASS until compile and tester evidence are supplied.
+
+
+## v1.50 FULL route verification — 2026-09-27
+
+User tester evidence has now verified the genuine FULL route of `O01_GSG_RSI30_Unified_Selector_NoOrders_v1_50.mq5` on the common baseline:
+
+- Symbol / timeframe: XAUUSD_DUKA M15
+- Period: 2026-08-16 through 2026-08-29
+- Model: real ticks
+- Initial deposit: JPY 100,000
+- Leverage: 1:100
+- `InpStructureMode=FULL`
+- `InpFullModule=O01`
+
+The startup log explicitly reported:
+
+```
+[O01_SELECTOR150_ROUTE] structure=FULL full=O01 entry=O01 manage=O01 exit=O01 NO_ORDERS=1 VIRTUAL_NOT_FILL=1
+[O01_FULL100_START] SOURCE=REF105_FROZEN_WHOLE_PATH ... NO_ORDERS=1 VIRTUAL_NOT_FILL=1
+[O01_SELECTOR150_START] STRUCTURE=FULL SOURCE=REF105_FROZEN_WHOLE_PATH NO_ORDERS=1 VIRTUAL_NOT_FILL=1
+```
+
+Final FULL summary:
+
+```
+ticks=2571204
+entries=31
+grids=5
+closes=31
+single_trail=27
+basket_trail=4
+virtual_sl=0
+buy_open=0
+sell_open=0
+time_blocks=516374
+news_blocks=0
+spread_blocks=0
+filter_blocks=0
+STRUCTURE=FULL
+NO_ORDERS=1
+VIRTUAL_NOT_FILL=1
+```
+
+Tester completed with 2,571,204 ticks / 920 bars / Test passed.
+
+Representative FULL lifecycle evidence also preserved the expected grid/basket sequences, including the 2026-08-27 three-position BUY cycle ending in BASKET_TRAILING.
+
+### Gate interpretation
+
+This confirms that v1.50 FULL is not a disguised SPLIT route: it starts from the frozen REF105 whole-path source and reaches the established O01 aggregate baseline while preserving NoOrders safety.
+
+The next required verification remains the negative fail-safe selector test. Select an unsupported module ID (for example A14) in one SPLIT slot and confirm that initialization stops with an explicit invalid-route reason and does not silently fall back to O01. Only after this safety test is confirmed should the selector advance to the next architecture gate (runtime-panel module selection / route-change safety).

@@ -334,7 +334,7 @@ Detailed record: `Test_Results/O01/O01_Development_Progress_2026-09-27.md`.
 
 The genuine v1.50 FULL route has now been tester-verified on the common XAUUSD_DUKA M15 real-tick baseline. The log explicitly identifies `STRUCTURE=FULL` and `SOURCE=REF105_FROZEN_WHOLE_PATH`; final result is 2,571,204 ticks, 31 entries, 5 grids, 31 closes, 27 single-trailing exits, 4 basket-trailing exits, 0 virtual-SL exits, and 0 open virtual positions. Tester generated 920 bars and passed. `NO_ORDERS=1 / VIRTUAL_NOT_FILL=1` remained intact.
 
-Before advancing the selector gate, perform the planned negative fail-safe test with an unsupported module ID in a SPLIT slot. The expected behavior is initialization failure with an explicit invalid-route reason and no silent O01 fallback. After that check passes, proceed to runtime-panel module selection and flat-only route-change safety without changing the frozen O01 decision logic.
+The planned negative fail-safe test has now passed: with SPLIT selected and Entry=A14 while Manage/Exit remained O01, initialization stopped with an explicit `SPLIT entry module is not registered for this gate` reason, processed zero ticks, and did not silently fall back to O01. O01 v1.50 common selector Gate is therefore PASS. The next phase is runtime-panel module selection and flat-only route-change safety without changing the frozen O01 decision logic.
 
 
 ## Planned sequence

@@ -28,12 +28,13 @@ string MA161CapabilityName(const ENUM_MA_MODULE_CAPABILITY_V161 cap)
 // Registry reflects only adapters/contracts that are actually connected
 // to the current Multi Alpha host.
 // O01: verified for all four responsibilities.
-// A10: source exists, but its isolated Entry adapter is not connected yet.
-// Therefore A10 remains NOT REGISTERED until the next gate.
+// A10: isolated Entry module is connected; ENTRY only is registered.
+// A10 FULL/MANAGE/EXIT remain NOT REGISTERED.
 bool MA161IsRegistered(const ENUM_MA_LOGIC_ID_V150 id,
                        const ENUM_MA_MODULE_CAPABILITY_V161 cap)
   {
    if(id==MA_LOGIC_O01_V150) return true;
+   if(id==MA_LOGIC_A10_V150 && cap==MA_CAP_ENTRY_V161) return true;
    return false;
   }
 

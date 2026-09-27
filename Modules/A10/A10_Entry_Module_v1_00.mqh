@@ -5,6 +5,7 @@
 //+------------------------------------------------------------------+
 #ifndef A10_ENTRY_MODULE_V1_00_MQH
 #define A10_ENTRY_MODULE_V1_00_MQH
+#include "A10_Entry_Settings_v1_00.mqh"
 
 enum ENUM_A10_ENTRY_MODE { A10_ENTRY_BREAKOUT=0,A10_ENTRY_REENTRY=1,A10_ENTRY_MIDLINE=2,A10_ENTRY_SQUEEZE=3 };
 
@@ -103,4 +104,53 @@ public:
  double Brick()const{return m_brick;} double Spread()const{return m_spread;}
  int Cooldown()const{return m_cd;} void StartCooldown(){m_cd=m_cdset;}
 };
+
+// Entry-only coordinator for the four A10 signal engines.
+// It deliberately owns no broker orders, positions, TP/SL or exit logic.
+struct SA10EntryDecision100 { int signal; int mode; bool conflict; };
+
+class CA10EntryCoordinator100
+{
+ CA10EntryModule m[4];
+ SA10EntrySettings100 m_cfg;
+ bool m_ready;
+ bool Setup(const int i,const SA10EntryModeSettings100 &s,const ENUM_A10_ENTRY_MODE mode,const double tick)
+ {
+  // Cooldown and spread belong to original A10 execution policy, not to the
+  // pure signal contract. Use neutral values here; they do not gate signals.
+  return m[i].Configure(s.enabled,mode,tick,s.brick_size,s.bb_period,s.deviation,s.squeeze_max_width,s.entry_run,0,1.0);
+ }
+public:
+ CA10EntryCoordinator100(){m_ready=false;}
+ bool Init(const SA10EntrySettings100 &s,const double tick)
+ {
+  m_ready=false;m_cfg=s;
+  if(!A10ValidateEntrySettings100(s)||!MathIsValidNumber(tick)||tick<=0.0)return false;
+  if(!Setup(0,s.breakout,A10_ENTRY_BREAKOUT,tick)||
+     !Setup(1,s.reentry,A10_ENTRY_REENTRY,tick)||
+     !Setup(2,s.midline,A10_ENTRY_MIDLINE,tick)||
+     !Setup(3,s.squeeze,A10_ENTRY_SQUEEZE,tick))return false;
+  m_ready=true;
+  Print("[A10_ENTRY100_START] entry_only=1 NO_ORDERS=1 VIRTUAL_NOT_FILL=1");
+  return true;
+ }
+ SA10EntryDecision100 OnPrice(const double bid)
+ {
+  SA10EntryDecision100 d;d.signal=0;d.mode=-1;d.conflict=false;
+  if(!m_ready)return d;
+  SA10EntryResult r[4];int buys=0,sells=0,last_buy=-1,last_sell=-1;
+  for(int i=0;i<4;i++)
+  {
+   m[i].PushPrice(bid,r[i]);
+   if(r[i].signal>0){buys++;last_buy=i;}
+   else if(r[i].signal<0){sells++;last_sell=i;}
+  }
+  if(m_cfg.skip_opposite_signals&&buys>0&&sells>0){d.conflict=true;return d;}
+  if(buys>0&&sells==0){d.signal=1;d.mode=last_buy;}
+  else if(sells>0&&buys==0){d.signal=-1;d.mode=last_sell;}
+  return d;
+ }
+ bool Ready()const{return m_ready;}
+};
+
 #endif

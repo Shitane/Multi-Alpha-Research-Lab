@@ -12,19 +12,32 @@ Run a three-chart comparison on ONE MT5 DEMO HEDGING account without creating se
 
 FULL and SPLIT are selectable routes inside one Multi Alpha EA. A FULL-only host may remain as a diagnostic scaffold, but it is not the target architecture.
 
+## Verified v1.64 regression checkpoint — 2026-09-28
+
+The current execution-gate development host `MultiAlpha_Runtime_Panel_DemoGate_v1_64.mq5` has completed the frozen O01 NO_ORDERS regression checkpoint.
+
+Verified common-baseline result:
+
+- 2,571,204 ticks / 920 bars
+- entries=31 / grids=5 / closes=31
+- single_trail=27 / basket_trail=4 / virtual_sl=0
+- buy_open=0 / sell_open=0
+- `EXECUTION=NO_ORDERS`
+- `BROKER_ACTIONS_ARMED=0`
+- `VIRTUAL_NOT_FILL=1`
+- MetaEditor compile: 0 errors / 0 warnings
+
+This checkpoint proves regression preservation of the O01 virtual/no-order path. It does not prove broker-fill parity. The next validation remains the DEMO execution gate with identity/ownership/result logging and the route-safety rules below.
+
 ## Current safety boundary
 
-The current Multi Alpha v1.61 main-line host is still:
+The frozen parity/research path remains NO_ORDERS / VIRTUAL_NOT_FILL. The v1.64 execution-gate development host also retains that regression path, and its 2026-09-28 regression run confirmed `BROKER_ACTIONS_ARMED=0`.
 
-- NO_ORDERS=1
-- VIRTUAL_NOT_FILL=1
-- DEMO execution request rejected during initialization
-
-Do not enable broker execution from the parity/research host yet.
+Broker DEMO execution is a separate validation mode. Do not treat a successful NO_ORDERS regression as proof of broker execution parity, and do not add broker order functions to the frozen parity/research modules.
 
 ## Instance identity
 
-The v1.61 no-order host now exposes:
+The Multi Alpha host exposes:
 
 - InpInstanceId
 - InpMagic
@@ -93,7 +106,13 @@ The adapter gate must include:
 
 ## Remote deployment sequence
 
-First compile and verify the no-order v1.61 host. Then attach the same compiled Multi Alpha EA to two charts with different InstanceId/Magic and FULL/SPLIT routes. Confirm the logs show independent identity and the expected active route.
+Compile and verify the current host first. The v1.64 NO_ORDERS baseline has passed. Then attach the same compiled Multi Alpha EA to two charts with different InstanceId/Magic and FULL/SPLIT routes and confirm independent identity and the expected active route.
+
+For broker-DEMO validation, keep the planned identities:
+- FULL / O01: InstanceId=2, Magic=46102031
+- SPLIT / O01+O01+O01: InstanceId=3, Magic=46102032
+
+Validate broker actions separately from the NO_ORDERS regression, and preserve the frozen NO_ORDERS path for every later execution-adapter change.
 
 Only after compile, no-order regression, route-safety regression, and Magic-isolation checks pass should DEMO broker execution be armed.
 

@@ -10,7 +10,7 @@
 #property version "1.61"
 
 #include "..\\..\\..\\Include\\O01\\O01_GSG_RSI30_Runtime_Adapter_v1_20.mqh"
-#include "..\\..\\..\\Include\\O01\\O01_Settings_Panel_v1_60.mqh"
+#include "..\\..\\..\\Include\\O01\\O01_Settings_Panel_v1_61.mqh"
 #include "..\\..\\..\\Include\\O01\\MultiAlpha_Foundation_v1_40.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Route_Selector_Panel_v1_61.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Entry_Dispatcher_v1_61.mqh"
@@ -83,7 +83,7 @@ input bool InpUseNewsFilter=true;
 input bool InpNewsManageOnly=true;
 
 SO01RuntimeSettings110 runtime_cfg;
-CO01SettingsPanel160 panel;
+CO01SettingsPanel161 panel;
 CO01RuntimeAdapter120 adapter;
 CO01CoreInterface core;
 SMA140StrategyIdentity strategy;
@@ -178,7 +178,8 @@ int OnInit(){
  if(!RebuildIndicatorHandles())return INIT_FAILED;
  panel.SetInitialConfig(runtime_cfg); // exact Expert Properties startup snapshot for REFRESH
  panel.Create(runtime_cfg,strategy,panel_theme);
- panel.SetRouteDraftContext(MA150StructureName(initial_route.structure),MA150LogicName(initial_route.full_module),MA150LogicName(initial_route.entry_module),MA150LogicName(initial_route.manage_module),MA150LogicName(initial_route.exit_module));
+ bool initial_registered=(initial_route.structure==MA_STRUCTURE_FULL_V150?MA161IsRegistered(initial_route.full_module,MA_CAP_FULL_V161):(MA161IsRegistered(initial_route.entry_module,MA_CAP_ENTRY_V161)&&MA161IsRegistered(initial_route.manage_module,MA_CAP_MANAGE_V161)&&MA161IsRegistered(initial_route.exit_module,MA_CAP_EXIT_V161)));
+ panel.SetRouteDraftContext(MA150StructureName(initial_route.structure),MA150LogicName(initial_route.full_module),MA150LogicName(initial_route.entry_module),MA150LogicName(initial_route.manage_module),MA150LogicName(initial_route.exit_module),initial_registered);
  route_panel.Create(&route_controller,initial_route,640,36,panel_theme.opacity);
  Print("[MA_RUNTIME161_START] CORE=1.00 ADAPTER=1.20 PANEL=1.60 FOUNDATION=1.40 REGISTRY=1.61 ENTRY_DISPATCHER=1.61 instance=",strategy.instance_id," symbol=",strategy.symbol," entry=",strategy.entry_module," manage=",strategy.manage_module," exit=",strategy.exit_module," EXECUTION=NO_ORDERS VIRTUAL_NOT_FILL=1");
  return INIT_SUCCEEDED;
@@ -208,12 +209,12 @@ void OnChartEvent(const int id,const long &lparam,const double &dparam,const str
  int rr=route_panel.Event(id,sparam,route_state,route_reason);
  if(rr==1 || rr==2){
    SMA_ModuleSelection150 d=route_panel.Draft();
-   panel.SetRouteDraftContext(MA150StructureName(d.structure),MA150LogicName(d.full_module),MA150LogicName(d.entry_module),MA150LogicName(d.manage_module),MA150LogicName(d.exit_module));
+   bool draft_registered=(d.structure==MA_STRUCTURE_FULL_V150?route_panel.DraftFullRegistered():(route_panel.DraftEntryRegistered()&&route_panel.DraftManageRegistered()&&route_panel.DraftExitRegistered()));panel.SetRouteDraftContext(MA150StructureName(d.structure),MA150LogicName(d.full_module),MA150LogicName(d.entry_module),MA150LogicName(d.manage_module),MA150LogicName(d.exit_module),draft_registered);
    bool route_registered=(d.structure==MA_STRUCTURE_FULL_V150?route_panel.DraftFullRegistered():(route_panel.DraftEntryRegistered()&&route_panel.DraftManageRegistered()&&route_panel.DraftExitRegistered()));
    string sync=(route_registered?"REGISTERED ROUTE - DETAIL PANEL CONTEXT":"NOT REGISTERED - O01 SETTINGS PRESERVED");
    Print("[O01_RUNTIME156_DRAFT_SYNC] draft=",route_panel.DraftSummary()," left_panel=",sync," NO_ORDERS=1 VIRTUAL_NOT_FILL=1");
  }
- if(rr==-3){SMA_ModuleSelection150 d=route_panel.Draft();panel.SetRouteDraftContext(MA150StructureName(d.structure),MA150LogicName(d.full_module),MA150LogicName(d.entry_module),MA150LogicName(d.manage_module),MA150LogicName(d.exit_module));}
+ if(rr==-3){SMA_ModuleSelection150 d=route_panel.Draft();bool draft_registered=(d.structure==MA_STRUCTURE_FULL_V150?route_panel.DraftFullRegistered():(route_panel.DraftEntryRegistered()&&route_panel.DraftManageRegistered()&&route_panel.DraftExitRegistered()));panel.SetRouteDraftContext(MA150StructureName(d.structure),MA150LogicName(d.full_module),MA150LogicName(d.entry_module),MA150LogicName(d.manage_module),MA150LogicName(d.exit_module),draft_registered);}
  if(rr!=0){SMA_ModuleSelection150 ar=route_controller.Active();Print("[O01_RUNTIME153_ROUTE_PANEL] event=",rr," reason=",route_reason," active_structure=",MA150StructureName(ar.structure)," full=",MA150LogicName(ar.full_module)," entry=",MA150LogicName(ar.entry_module)," manage=",MA150LogicName(ar.manage_module)," exit=",MA150LogicName(ar.exit_module)," positions=",route_state.managed_positions," cycle_none=",(int)route_state.cycle_none," transition_pending=",(int)route_state.execution_transition_pending," NO_ORDERS=1 VIRTUAL_NOT_FILL=1");return;}
  Print("[O01_CHART_EVENT] id=",id," name=",sparam," lparam=",lparam," dparam=",DoubleToString(dparam,2));
  SO01RuntimeSettings110 before=runtime_cfg;

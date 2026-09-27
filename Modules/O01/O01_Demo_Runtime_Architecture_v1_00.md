@@ -166,3 +166,15 @@ The current Entry and Exit modules are decision-only and NoOrders. The current C
 The Full Reproduction module is already a thin compatibility layer over the frozen monolithic implementation and is the correct independent FULL reference path.
 
 No demo-order code is authorized by this design document alone.
+
+
+## Gate 1 implementation note — 2026-09-27
+
+Gate 1 has started with decision-only, NO ORDERS infrastructure:
+
+- O01_GSG_RSI30_Manage_Module_v1_40.mqh — first dedicated grid/manage decision module.
+- O01_GSG_RSI30_Logic_Router_v1_40.mqh — stable FULL/SPLIT selector contract, O01=101 module identity, and flat/idle route-change gate.
+
+Important: these files are scaffolding until compile and parity regression are completed. They are not yet approved as a replacement for the frozen split baseline. In particular, broker lot normalization remains host/execution responsibility, matching the current runtime host's separation of decision logic from symbol-specific execution constraints.
+
+FULL dispatch is deliberately not reimplemented inside the router. The host must dispatch FULL to the frozen whole-strategy reproduction path, keeping FULL independent from SPLIT.

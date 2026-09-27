@@ -110,6 +110,7 @@ class CO01SettingsPanel141{
   B("APPLY",24,520,108,"APPLY");B("SAVE",142,520,108,"SAVE");B("LOAD",260,520,108,"LOAD");B("DELETE",378,520,108,"DELETE");B("RESET",496,520,108,"REFRESH");ChartRedraw();
  }
 public:
+ void SetInitialConfig(const SO01RuntimeSettings110 &s){initial_cfg=s;initial_cfg_set=true;Print("[O01_PANEL_INITIAL] captured RSI_Lower=",DoubleToString(initial_cfg.rsi_lower,1));}
  void Create(const SO01RuntimeSettings110&s,const SMA140StrategyIdentity &strategy_cfg,const SMA140PanelTheme &appearance){
   p="O01CFG141_";cvReady=false;if(!initial_cfg_set){initial_cfg=s;initial_cfg_set=true;}PX=8;PY=8;PW=620;PH=570;X1=24;X2=220;X3=416;LW=100;EW=64;RH=23;identity=strategy_cfg;theme=appearance;if(preset_name=="")preset_name="O01_Default";st.SetFile("O01_GSG_RSI30_Settings_v1_10.csv");C_EDIT_BG=C'24,31,38';C_BUTTON=C'42,52,61';Draw(s);
  }

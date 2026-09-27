@@ -1,0 +1,214 @@
+//+------------------------------------------------------------------+
+//| O01_GSG_RSI30_Runtime_Panel_RouteSelector_NoOrders_v1_54.mq5                      |
+//| MAIN LINE: v1.33 parity logic + v1.40 architecture foundation.   |
+//|                                                                  |
+//| Phase 1 intentionally remains NO ORDERS / VIRTUAL NOT FILL.      |
+//| DEMO execution is declared but locked until execution adapter     |
+//| and demo-account safety gates are implemented and verified.       |
+//+------------------------------------------------------------------+
+#property strict
+#property version "1.54"
+
+#include "..\\..\\Include\\O01\\O01_GSG_RSI30_Runtime_Adapter_v1_20.mqh"
+#include "..\\..\\Include\\O01\\O01_Settings_Panel_v1_42.mqh"
+#include "..\\..\\Include\\O01\\MultiAlpha_Foundation_v1_40.mqh"
+#include "..\\..\\Include\\Common\\MultiAlpha_Route_Selector_Panel_v1_52.mqh"
+
+enum O01_TIME_MODE { O01_AUTO_GMT=0,O01_SERVER_TIME=1,O01_CUSTOM_GMT=2 };
+
+input ENUM_MA_EXECUTION_MODE InpExecutionMode=MA_EXECUTION_NO_ORDERS;
+
+input group "Multi Alpha Route"
+input ENUM_MA_STRUCTURE_MODE_V150 InpStructure=MA_STRUCTURE_SPLIT_V150;
+input ENUM_MA_LOGIC_ID_V150 InpFullModule=MA_LOGIC_O01_V150;
+input ENUM_MA_LOGIC_ID_V150 InpEntryModule=MA_LOGIC_O01_V150;
+input ENUM_MA_LOGIC_ID_V150 InpManageModule=MA_LOGIC_O01_V150;
+input ENUM_MA_LOGIC_ID_V150 InpExitModule=MA_LOGIC_O01_V150;
+
+// O01 startup defaults. Expert Properties -> panel -> runtime.
+// These inputs are read only after initialization; panel APPLY/LOAD changes runtime, not these input values.
+input group "O01 Entry / Filter"
+input bool   InpNewCycles=true;
+input bool   InpTradeBuy=true;
+input bool   InpTradeSell=true;
+input int    InpRSIPeriod=8;
+input double InpRSILower=30.0;
+input double InpRSIUpper=70.0;
+input int    InpATR1Period=15;
+input int    InpATR2Period=15;
+input ENUM_TIMEFRAMES InpATR2Timeframe=PERIOD_CURRENT;
+input double InpATR1MinPoints=0.0;
+input double InpATR1MaxPoints=10000.0;
+input double InpATR2MinPoints=0.0;
+input double InpATR2MaxPoints=10000.0;
+
+input group "O01 Manage / Grid / Lot"
+input double InpInitialLot=0.01;
+input double InpLotMultiplier=1.50;
+input double InpMaxLot=5.00;
+input double InpMaxTotalLotsPerSide=1.20;
+input int    InpMaxOrders=10;
+input int    InpFixedDistancePoints=200;
+input int    InpDynamicStartOrder=3;
+input int    InpDynamicStartPoints=300;
+input double InpDistanceMultiplier=1.20;
+input bool   InpAllowGridOutsideTime=true;
+input bool   InpOneOrderPerBar=true;
+input bool   InpPauseGridWhileTrailing=true;
+
+input group "O01 Exit / Trailing"
+input int InpVirtualSLPoints=1500;
+input int InpSingleTrailStart=110;
+input int InpSingleTrailLock=60;
+input int InpSingleTrailDistance=50;
+input int InpSingleTrailStep=10;
+input int InpBasketTrailStart=100;
+input int InpBasketTrailLock=50;
+input int InpBasketTrailDistance=50;
+input int InpBasketTrailStep=10;
+
+input group "O01 Safety / DD"
+input int InpWarningDD=8;
+input int InpPauseGridDD=12;
+input int InpEmergencyCloseDD=15;
+
+input group "O01 Time / News"
+input O01_TIME_MODE InpTimeMode=O01_AUTO_GMT;
+input int InpStartHour=7;
+input int InpStartMinute=0;
+input int InpEndHour=11;
+input int InpEndMinute=0;
+input bool InpUseNewsFilter=true;
+input bool InpNewsManageOnly=true;
+
+SO01RuntimeSettings110 runtime_cfg;
+CO01SettingsPanel141 panel;
+CO01RuntimeAdapter120 adapter;
+CO01CoreInterface core;
+SMA140StrategyIdentity strategy;
+SMA140PanelTheme panel_theme;
+CMultiAlphaRouteController151 route_controller;
+CMultiAlphaRouteSelectorPanel152 route_panel;
+
+struct VPos{double price,lot;datetime time,bar;};
+VPos buy[],sell[];
+SO01TrailState bt,st;
+int rh=INVALID_HANDLE,a1h=INVALID_HANDLE,a2h=INVALID_HANDLE;
+datetime lastBuyBar=0,lastSellBar=0;
+ulong ticks=0,entries=0,grids=0,closes=0,singleTrail=0,basketTrail=0,vsl=0,timeBlocks=0,newsBlocks=0,spreadBlocks=0,filterBlocks=0;
+
+void Defaults(){
+ runtime_cfg.new_cycles=InpNewCycles;runtime_cfg.trade_buy=InpTradeBuy;runtime_cfg.trade_sell=InpTradeSell;runtime_cfg.allow_grid_outside_time=InpAllowGridOutsideTime;runtime_cfg.one_order_per_bar=InpOneOrderPerBar;runtime_cfg.pause_grid_while_trailing=InpPauseGridWhileTrailing;
+ runtime_cfg.rsi_period=InpRSIPeriod;runtime_cfg.rsi_lower=InpRSILower;runtime_cfg.rsi_upper=InpRSIUpper;runtime_cfg.atr1_period=InpATR1Period;runtime_cfg.atr2_period=InpATR2Period;runtime_cfg.atr2_timeframe=(int)InpATR2Timeframe;runtime_cfg.atr1_min_points=InpATR1MinPoints;runtime_cfg.atr1_max_points=InpATR1MaxPoints;runtime_cfg.atr2_min_points=InpATR2MinPoints;runtime_cfg.atr2_max_points=InpATR2MaxPoints;
+ runtime_cfg.initial_lot=InpInitialLot;runtime_cfg.lot_multiplier=InpLotMultiplier;runtime_cfg.max_lot=InpMaxLot;runtime_cfg.max_total_lots_per_side=InpMaxTotalLotsPerSide;runtime_cfg.max_orders=InpMaxOrders;runtime_cfg.fixed_distance_points=InpFixedDistancePoints;runtime_cfg.dynamic_start_order=InpDynamicStartOrder;runtime_cfg.dynamic_start_points=InpDynamicStartPoints;runtime_cfg.distance_multiplier=InpDistanceMultiplier;
+ runtime_cfg.virtual_sl_points=InpVirtualSLPoints;runtime_cfg.single_trail_start=InpSingleTrailStart;runtime_cfg.single_trail_lock=InpSingleTrailLock;runtime_cfg.single_trail_distance=InpSingleTrailDistance;runtime_cfg.single_trail_step=InpSingleTrailStep;runtime_cfg.basket_trail_start=InpBasketTrailStart;runtime_cfg.basket_trail_lock=InpBasketTrailLock;runtime_cfg.basket_trail_distance=InpBasketTrailDistance;runtime_cfg.basket_trail_step=InpBasketTrailStep;
+ runtime_cfg.warning_dd=InpWarningDD;runtime_cfg.pause_grid_dd=InpPauseGridDD;runtime_cfg.emergency_close_dd=InpEmergencyCloseDD;runtime_cfg.time_mode=(int)InpTimeMode;runtime_cfg.start_hour=InpStartHour;runtime_cfg.start_minute=InpStartMinute;runtime_cfg.end_hour=InpEndHour;runtime_cfg.end_minute=InpEndMinute;runtime_cfg.use_news_filter=InpUseNewsFilter;runtime_cfg.news_manage_only=InpNewsManageOnly;
+}
+double B(int h){double x[1];return CopyBuffer(h,0,0,1,x)==1?x[0]:EMPTY_VALUE;}
+int C(VPos &p[]){return ArraySize(p);}
+double Lots(VPos &p[]){double s=0;for(int i=0;i<C(p);i++)s+=p[i].lot;return s;}
+double Avg(VPos &p[]){double pv=0,v=0;for(int i=0;i<C(p);i++){pv+=p[i].price*p[i].lot;v+=p[i].lot;}return v>0?pv/v:0;}
+double LastPrice(VPos &p[]){return C(p)?p[C(p)-1].price:0;}
+double LastLot(VPos &p[]){return C(p)?p[C(p)-1].lot:runtime_cfg.initial_lot;}
+double NormLot(double x){double mn=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN),mx=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MAX),step=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_STEP);if(step<=0)step=.01;x=MathMax(mn,MathMin(mx,MathMin(runtime_cfg.max_lot,x)));return NormalizeDouble(MathRound(x/step)*step,2);}
+double Dist(int n){if(n<runtime_cfg.dynamic_start_order)return runtime_cfg.fixed_distance_points;return runtime_cfg.dynamic_start_points*MathPow(runtime_cfg.distance_multiplier,n-runtime_cfg.dynamic_start_order);}
+int NM(int m){while(m<0)m+=1440;while(m>=1440)m-=1440;return m;}
+bool Win(int m,int s,int e){return s==e||(s<e?(m>=s&&m<e):(m>=s||m<e));}
+bool TimeOK(){MqlDateTime d;TimeToStruct(TimeTradeServer(),d);if(d.day_of_week<1||d.day_of_week>5)return false;int m=d.hour*60+d.min,s=runtime_cfg.start_hour*60+runtime_cfg.start_minute,e=runtime_cfg.end_hour*60+runtime_cfg.end_minute;if(runtime_cfg.time_mode==O01_AUTO_GMT||runtime_cfg.time_mode==O01_CUSTOM_GMT){s=NM(s+180);e=NM(e+180);}return Win(m,s,e);}
+bool SpreadOK(){return true;}
+bool NewsNewBlocked(){return false;}
+bool NewsGridBlocked(){return false;}
+void Add(VPos &p[],double px,double lot){int n=C(p);ArrayResize(p,n+1);p[n].price=px;p[n].lot=lot;p[n].time=TimeCurrent();p[n].bar=iTime(_Symbol,_Period,0);}
+void Clear(VPos &p[]){ArrayResize(p,0);}
+string EN(ENUM_O01_EXIT_DECISION d){if(d==O01_EXIT_VIRTUAL_SL)return "VIRTUAL_SL";if(d==O01_EXIT_SINGLE_TRAILING)return "SINGLE_TRAILING";if(d==O01_EXIT_BASKET_TRAILING)return "BASKET_TRAILING";if(d==O01_EXIT_FIXED_TP)return "FIXED_TP";return "NONE";}
+void LO(string side,string tag,double px,double lot,int n){Print("[O01_RUNTIME140_OPEN] t=",TimeToString(TimeCurrent(),TIME_DATE|TIME_SECONDS)," instance=",strategy.instance_id," side=",side," tag=",tag," count=",n," lot=",DoubleToString(lot,2)," px=",DoubleToString(px,_Digits)," EXECUTION=",MA140_ExecutionText(InpExecutionMode)," NO_ORDERS=1 VIRTUAL_NOT_FILL=1");}
+void LX(string side,ENUM_O01_EXIT_DECISION d,int n,double avg,double px,double mv){Print("[O01_RUNTIME140_EXIT] t=",TimeToString(TimeCurrent(),TIME_DATE|TIME_SECONDS)," instance=",strategy.instance_id," side=",side," reason=",EN(d)," count=",n," avg=",DoubleToString(avg,_Digits)," px=",DoubleToString(px,_Digits)," move_pts=",DoubleToString(mv,1)," EXECUTION=",MA140_ExecutionText(InpExecutionMode)," NO_ORDERS=1 VIRTUAL_NOT_FILL=1");}
+
+bool RebuildIndicatorHandles()
+{
+ int nr=iRSI(_Symbol,_Period,runtime_cfg.rsi_period,PRICE_CLOSE);
+ int na1=iATR(_Symbol,_Period,runtime_cfg.atr1_period);
+ int na2=iATR(_Symbol,(ENUM_TIMEFRAMES)runtime_cfg.atr2_timeframe,runtime_cfg.atr2_period);
+ if(nr==INVALID_HANDLE||na1==INVALID_HANDLE||na2==INVALID_HANDLE)
+ {
+  if(nr!=INVALID_HANDLE)IndicatorRelease(nr);if(na1!=INVALID_HANDLE)IndicatorRelease(na1);if(na2!=INVALID_HANDLE)IndicatorRelease(na2);
+  Print("[O01_RUNTIME140_HANDLES] rebuild failed");
+  return false;
+ }
+ if(rh!=INVALID_HANDLE)IndicatorRelease(rh);if(a1h!=INVALID_HANDLE)IndicatorRelease(a1h);if(a2h!=INVALID_HANDLE)IndicatorRelease(a2h);
+ rh=nr;a1h=na1;a2h=na2;
+ Print("[O01_RUNTIME140_HANDLES] rebuilt RSI=",runtime_cfg.rsi_period," ATR1=",runtime_cfg.atr1_period," ATR2=",runtime_cfg.atr2_period," TF2=",runtime_cfg.atr2_timeframe);
+ return true;
+}
+
+void Manage(bool isBuy,VPos &p[],SO01TrailState &ts,MqlTick &t){
+ int n=C(p);if(n<=0){core.ResetTrail(ts);return;}double avg=Avg(p),px=isBuy?t.bid:t.ask,mv=isBuy?(px-avg)/_Point:(avg-px)/_Point;
+ SO01ExitConfig xc;adapter.ExitConfig(runtime_cfg,n,xc);ENUM_O01_EXIT_DECISION d=core.EvaluateExit(isBuy,n,mv,xc,ts);
+ if(d!=O01_EXIT_NONE){LX(isBuy?"BUY":"SELL",d,n,avg,px,mv);closes++;if(d==O01_EXIT_SINGLE_TRAILING)singleTrail++;if(d==O01_EXIT_BASKET_TRAILING)basketTrail++;if(d==O01_EXIT_VIRTUAL_SL)vsl++;Clear(p);core.ResetTrail(ts);return;}
+ if(n>=runtime_cfg.max_orders||(runtime_cfg.pause_grid_while_trailing&&ts.active))return;if(!runtime_cfg.allow_grid_outside_time&&!TimeOK())return;if(NewsGridBlocked()||!SpreadOK())return;datetime bar=iTime(_Symbol,_Period,0);if(runtime_cfg.one_order_per_bar&&(isBuy?lastBuyBar:lastSellBar)==bar)return;
+ double lp=LastPrice(p),ds=Dist(n+1);bool met=isBuy?t.ask<=lp-ds*_Point:t.bid>=lp+ds*_Point;if(!met)return;double lot=NormLot(LastLot(p)*runtime_cfg.lot_multiplier);if(runtime_cfg.max_total_lots_per_side>0&&Lots(p)+lot>runtime_cfg.max_total_lots_per_side+1e-9)return;double op=isBuy?t.ask:t.bid;Add(p,op,lot);if(isBuy)lastBuyBar=bar;else lastSellBar=bar;grids++;LO(isBuy?"BUY":"SELL","GRID #"+IntegerToString(n+1),op,lot,C(p));
+}
+
+SMA_ModuleSelection150 StartupRoute(){
+ SMA_ModuleSelection150 s;s.structure=InpStructure;s.full_module=InpFullModule;s.entry_module=InpEntryModule;s.manage_module=InpManageModule;s.exit_module=InpExitModule;return s;
+}
+SMA_RouteState150 LiveRouteState(){
+ SMA_RouteState150 s;s.managed_positions=C(buy)+C(sell);s.cycle_none=(s.managed_positions==0);s.execution_transition_pending=false;return s;
+}
+
+int OnInit(){
+ Defaults();MA140_DefaultIdentity(strategy,_Symbol);MA140_DefaultTheme(panel_theme);
+ SMA_ModuleSelection150 initial_route=StartupRoute();string route_reason="";
+ if(!MA150ValidateO01Gate(initial_route,route_reason)){Print("[O01_RUNTIME153_ROUTE_INIT_REJECT] reason=",route_reason," NO_ORDERS=1 VIRTUAL_NOT_FILL=1");return INIT_PARAMETERS_INCORRECT;}
+ route_controller.SetInitial(initial_route);
+ // Phase-1 safety gate: the main line knows the requested execution mode,
+ // but broker execution is not connected until the execution adapter is verified.
+ if(InpExecutionMode==MA_EXECUTION_DEMO)
+ {
+  Print("[O01_RUNTIME140_SAFETY] DEMO requested but execution adapter is not armed in phase 1. Initialization stopped.");
+  return INIT_PARAMETERS_INCORRECT;
+ }
+ if(!adapter.Validate(runtime_cfg))return INIT_PARAMETERS_INCORRECT;
+ if(!RebuildIndicatorHandles())return INIT_FAILED;
+ panel.SetInitialConfig(runtime_cfg); // exact Expert Properties startup snapshot for REFRESH
+ panel.Create(runtime_cfg,strategy,panel_theme);
+ route_panel.Create(&route_controller,initial_route,24,585);
+ Print("[O01_RUNTIME140_START] CORE=1.00 ADAPTER=1.20 PANEL=1.42 FOUNDATION=1.40 instance=",strategy.instance_id," symbol=",strategy.symbol," entry=",strategy.entry_module," manage=",strategy.manage_module," exit=",strategy.exit_module," EXECUTION=NO_ORDERS VIRTUAL_NOT_FILL=1");
+ return INIT_SUCCEEDED;
+}
+void OnDeinit(const int reason){
+ route_panel.Delete();panel.Delete();if(rh!=INVALID_HANDLE)IndicatorRelease(rh);if(a1h!=INVALID_HANDLE)IndicatorRelease(a1h);if(a2h!=INVALID_HANDLE)IndicatorRelease(a2h);
+ Print("[O01_RUNTIME140_SUMMARY] ticks=",ticks," entries=",entries," grids=",grids," closes=",closes," single_trail=",singleTrail," basket_trail=",basketTrail," virtual_sl=",vsl," buy_open=",C(buy)," sell_open=",C(sell)," time_blocks=",timeBlocks," news_blocks=",newsBlocks," spread_blocks=",spreadBlocks," filter_blocks=",filterBlocks," EXECUTION=NO_ORDERS VIRTUAL_NOT_FILL=1");
+}
+void OnTick(){
+ static ulong diag_ticks=0; diag_ticks++;
+ if(diag_ticks==1 || diag_ticks%100000==0) Print("[O01_TICK_DIAG] ticks=",diag_ticks," time=",TimeToString(TimeCurrent(),TIME_DATE|TIME_SECONDS));
+ int pr=panel.PollButtons(runtime_cfg);
+ if(pr!=0){
+  Print("[O01_RUNTIME140_PANEL_POLL] result=",pr," EXECUTION=NO_ORDERS");
+  if(pr>0) RebuildIndicatorHandles();
+ }
+ ticks++;MqlTick t;if(!SymbolInfoTick(_Symbol,t))return;Manage(true,buy,bt,t);Manage(false,sell,st,t);
+ double r=B(rh),a1=B(a1h),a2=B(a2h);if(r==EMPTY_VALUE||a1==EMPTY_VALUE||a2==EMPTY_VALUE)return;
+ if(!TimeOK()){if(r<runtime_cfg.rsi_lower||r>runtime_cfg.rsi_upper)timeBlocks++;return;}if(NewsNewBlocked()){newsBlocks++;return;}if(!SpreadOK()){spreadBlocks++;return;}
+ double p1=a1/_Point,p2=a2/_Point;if(!(p1>=runtime_cfg.atr1_min_points&&p1<=runtime_cfg.atr1_max_points&&p2>=runtime_cfg.atr2_min_points&&p2<=runtime_cfg.atr2_max_points)){filterBlocks++;return;}
+ SO01EntryConfig ec;adapter.EntryConfig(runtime_cfg,ec);SO01EntryContext x;x.emergency_lock=false;x.time_allowed=true;x.news_blocked=false;x.spread_ok=true;x.filters_ok=true;x.buy_count=C(buy);x.sell_count=C(sell);x.rsi=r;ENUM_O01_ENTRY_SIGNAL sig=core.EvaluateEntry(ec,x);datetime bar=iTime(_Symbol,_Period,0);
+ if(sig==O01_ENTRY_BUY&&(!runtime_cfg.one_order_per_bar||lastBuyBar!=bar)){double l=NormLot(runtime_cfg.initial_lot);Add(buy,t.ask,l);lastBuyBar=bar;entries++;LO("BUY","INITIAL",t.ask,l,C(buy));}
+ if(sig==O01_ENTRY_SELL&&(!runtime_cfg.one_order_per_bar||lastSellBar!=bar)){double l=NormLot(runtime_cfg.initial_lot);Add(sell,t.bid,l);lastSellBar=bar;entries++;LO("SELL","INITIAL",t.bid,l,C(sell));}
+}
+void OnChartEvent(const int id,const long &lparam,const double &dparam,const string &sparam){
+ string route_reason="";SMA_RouteState150 route_state=LiveRouteState();
+ int rr=route_panel.Event(id,sparam,route_state,route_reason);
+ if(rr!=0){SMA_ModuleSelection150 ar=route_controller.Active();Print("[O01_RUNTIME153_ROUTE_PANEL] event=",rr," reason=",route_reason," active_structure=",MA150StructureName(ar.structure)," full=",MA150LogicName(ar.full_module)," entry=",MA150LogicName(ar.entry_module)," manage=",MA150LogicName(ar.manage_module)," exit=",MA150LogicName(ar.exit_module)," positions=",route_state.managed_positions," cycle_none=",(int)route_state.cycle_none," transition_pending=",(int)route_state.execution_transition_pending," NO_ORDERS=1 VIRTUAL_NOT_FILL=1");return;}
+ Print("[O01_CHART_EVENT] id=",id," name=",sparam," lparam=",lparam," dparam=",DoubleToString(dparam,2));
+ SO01RuntimeSettings110 before=runtime_cfg;
+ int r=panel.Event(id,sparam,runtime_cfg);
+ if(r!=0)
+ {
+  bool ok=adapter.Validate(runtime_cfg);
+  if(!ok){runtime_cfg=before;Print("[O01_RUNTIME140_PANEL] result=",r," valid=0 rolled_back=1");return;}
+  bool handleChanged=(before.rsi_period!=runtime_cfg.rsi_period||before.atr1_period!=runtime_cfg.atr1_period||before.atr2_period!=runtime_cfg.atr2_period||before.atr2_timeframe!=runtime_cfg.atr2_timeframe);
+  if(handleChanged&&!RebuildIndicatorHandles()){runtime_cfg=before;RebuildIndicatorHandles();Print("[O01_RUNTIME140_PANEL] result=",r," valid=1 handles=FAIL rolled_back=1");return;}
+  Print("[O01_RUNTIME140_PANEL] result=",r," valid=1 handles_rebuilt=",(int)handleChanged," EXECUTION=NO_ORDERS");
+ }
+}

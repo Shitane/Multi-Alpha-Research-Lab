@@ -210,3 +210,39 @@ Representative FULL lifecycle evidence also preserved the expected grid/basket s
 This confirms that v1.50 FULL is not a disguised SPLIT route: it starts from the frozen REF105 whole-path source and reaches the established O01 aggregate baseline while preserving NoOrders safety.
 
 The next required verification remains the negative fail-safe selector test. Select an unsupported module ID (for example A14) in one SPLIT slot and confirm that initialization stops with an explicit invalid-route reason and does not silently fall back to O01. Only after this safety test is confirmed should the selector advance to the next architecture gate (runtime-panel module selection / route-change safety).
+
+
+## v1.50 negative fail-safe selector test — PASS
+
+The planned unsupported-combination test has now passed.
+
+Test selection:
+
+```
+Structure = SPLIT
+Full     = O01
+Entry    = A14   // intentionally unsupported at this gate
+Manage   = O01
+Exit     = O01
+```
+
+Observed startup result:
+
+```
+[O01_ROUTER150_START] invalid route reason=SPLIT entry module is not registered for this gate
+[O01_SELECTOR150_SUMMARY] ticks=0 entries=0 grids=0 closes=0 ... STRUCTURE=SPLIT NO_ORDERS=1 VIRTUAL_NOT_FILL=1
+tester stopped because OnInit reports incorrect input parameters
+```
+
+This proves the common selector does not silently substitute O01 when an unsupported module is selected. No ticks were processed and no virtual lifecycle was started.
+
+### Gate status
+
+O01 v1.50 common selector Gate is PASS for:
+
+- valid SPLIT O01/O01/O01 baseline
+- valid genuine FULL O01 baseline
+- invalid SPLIT module fail-safe rejection
+- NoOrders / Virtual-not-fill safety preservation
+
+The verified decision paths remain frozen. The next architecture phase is runtime-panel selection for Structure / Full / Entry / Manage / Exit plus safe route-change rules. Route changes must be rejected while a managed cycle/position is active; no broker execution is introduced in this phase.

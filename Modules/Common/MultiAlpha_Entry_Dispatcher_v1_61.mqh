@@ -24,13 +24,13 @@ public:
    bool A10Ready()const{return m_a10_ready;}
 
    ENUM_O01_ENTRY_SIGNAL EvaluateO01(const SMA_ModuleSelection150 &route,
-                                     CO01CoreInterface &core,
+                                     CO01CoreInterface &o01_core,
                                      const SO01EntryConfig &cfg,
                                      const SO01EntryContext &ctx)
      {
       if(route.structure!=MA_STRUCTURE_SPLIT_V150 || route.entry_module!=MA_LOGIC_O01_V150)
          return O01_ENTRY_NONE;
-      return core.EvaluateEntry(cfg,ctx);
+      return o01_core.EvaluateEntry(cfg,ctx);
      }
 
    ENUM_O01_ENTRY_SIGNAL EvaluateA10(const SMA_ModuleSelection150 &route,const double bid)

@@ -1,96 +1,109 @@
-# O01 Three-Instance Demo Deployment v1.00
+# O01 Three-Instance Demo Deployment v1.01
 
 ## Goal
 
-Run three independent O01 comparison instances on ONE MT5 demo hedging account:
+Run a three-chart comparison on ONE MT5 DEMO HEDGING account without creating separate FULL and SPLIT EA products.
 
-| Chart | Role | Structure | Required Magic |
+| Chart | Codebase | Route | Planned Magic |
 |---|---|---|---:|
-| 1 | Original O01 benchmark | Original | 46102030 |
-| 2 | Frozen whole-path reproduction | FULL | 46102031 |
-| 3 | Modular composition | SPLIT (Entry/Manage/Exit) | 46102032 |
+| 1 | Original O01 benchmark | Original O01 | 46102030 |
+| 2 | SAME Multi Alpha EA binary | FULL / O01 | 46102031 |
+| 3 | SAME Multi Alpha EA binary | SPLIT / O01 + O01 + O01 | 46102032 |
 
-All three must use the same symbol/timeframe and equivalent strategy settings for parity comparison.
+FULL and SPLIT are selectable routes inside one Multi Alpha EA. A FULL-only host may remain as a diagnostic scaffold, but it is not the target architecture.
 
-## Safety boundary
+## Current safety boundary
 
-- Original O01 and FULL may submit broker orders only on a DEMO account.
-- SPLIT broker execution is NOT enabled yet. Existing SPLIT/parity files remain NO_ORDERS / VIRTUAL_NOT_FILL.
-- Do not convert any Parity_Tests host into a trading EA.
-- No unsupported module may silently fall back to O01.
-- Each trading instance manages positions by Symbol + its own Magic.
-- Use a HEDGING demo account. The frozen O01 module rejects non-hedging accounts.
+The current Multi Alpha v1.61 main-line host is still:
 
-## Stage A — copy to Remote Desktop now
-
-On the development PC, keep GitHub as the source of truth. On the remote MT5, copy the following source files into the corresponding MQL5 locations.
-
-### Original benchmark
-
-Copy the frozen original O01 source/module used by the current benchmark. Keep:
-- Magic = 46102030
-
-### FULL demo host
-
-EA:
-- Demo/O01/O01_GSG_RSI30_Full_Runtime_Demo_v1_01.mq5
-
-Required include:
-- O01_GSG_RSI30_Monolithic_Module_v1_00.mqh
-
-The repository module is the frozen whole-path source. On the remote terminal, place it at:
-- MQL5/Include/Original_Logic/O01_GSG_RSI30_Monolithic_Module_v1_00.mqh
-
-Place the host at:
-- MQL5/Experts/MultiAlpha_Demo/O01_GSG_RSI30_Full_Runtime_Demo_v1_01.mq5
-
-Compile on the REMOTE MetaEditor. Do not copy an old EX5 over a newer source and assume it is current.
-
-FULL host v1.01 intentionally refuses initialization unless:
-- InpMagic = 46102031
-
-### SPLIT research host — observation only for now
-
-Keep the current verified selector/runtime research EA available for visual/decision observation, but it remains:
 - NO_ORDERS=1
 - VIRTUAL_NOT_FILL=1
+- DEMO execution request rejected during initialization
 
-Do NOT count it as broker-execution parity yet.
+Do not enable broker execution from the parity/research host yet.
 
-## Stage B — first remote validation
+## Instance identity
 
-Before AutoTrading is enabled:
+The v1.61 no-order host now exposes:
 
-1. Open three XAUUSD charts with the same timeframe.
-2. Attach Original to Chart 1.
-3. Attach FULL v1.01 to Chart 2 and set InpMagic=46102031.
-4. Attach current SPLIT research host to Chart 3.
-5. Confirm Expert log identifies each role correctly.
-6. Confirm Original Magic=46102030 and FULL Magic=46102031.
-7. Confirm SPLIT still reports NO_ORDERS / VIRTUAL_NOT_FILL.
-8. Confirm the account is DEMO and HEDGING.
+- InpInstanceId
+- InpMagic
 
-Only after these checks should Original/FULL AutoTrading be enabled.
+These values identify each attached instance in logs and prepare the single-EA execution boundary. They do not enable broker orders.
 
-## Stage C — SPLIT real-demo development
+Suggested research instances:
 
-Next code gate will add a SEPARATE demo execution layer for SPLIT. Required properties:
+- Chart 2: InpInstanceId=2, InpMagic=46102031, Structure=FULL, Full=O01
+- Chart 3: InpInstanceId=3, InpMagic=46102032, Structure=SPLIT, Entry=O01, Manage=O01, Exit=O01
+
+Unsupported routes must reject. There is no O01 fallback for an unregistered capability.
+
+## O01 ownership audit
+
+The frozen Original O01 source filters managed open positions by both:
+
+- POSITION_SYMBOL == _Symbol
+- POSITION_MAGIC == InpMagic
+
+Closed-profit history also filters DEAL_SYMBOL and DEAL_MAGIC.
+
+Persistent terminal Global Variables use a base key containing:
+
+- account login
+- InpMagic
+- symbol
+
+This means position/history/persistent-state ownership is separated by Magic in the inspected Original O01 implementation.
+
+## Important DD coupling
+
+Magic separation does NOT make drawdown independent.
+
+The Original O01 drawdown calculation uses account Balance/Equity (and, in PEAK_EQUITY mode, an account-equity peak). Therefore profit/loss from another EA instance on the same demo account can affect an O01 instance's:
+
+- Warning DD threshold
+- Grid Pause threshold
+- Emergency Close threshold
+
+The 8% / 12% / 15% safety behavior must not be treated as per-instance parity when several trading instances share one account.
+
+For forward comparison, distinguish:
+
+1. decision/route parity — Entry, Manage, Exit decisions
+2. broker execution parity — request/fill/result behavior
+3. account-level safety behavior — DD thresholds affected by total account equity
+
+Do not rewrite the frozen O01 DD formula merely to make the comparison convenient. If isolated DD parity is required, use separate demo accounts or add a separately specified future per-instance risk contract after the frozen baseline is preserved.
+
+## Next execution gate
+
+Before the SAME Multi Alpha EA binary may place demo orders, add one broker execution adapter owned by the host. Decision modules remain order-free.
+
+The adapter gate must include:
 
 - hard DEMO-account lock
 - hard HEDGING-account lock
-- required Magic = 46102032
+- positive InstanceId and Magic
 - Symbol + Magic filtering for every position read/modify/close
-- synchronous execution result checking and logging
-- explicit pending-execution-transition state
-- no order function inside Entry/Manage/Exit decision modules
-- route change rejected while positions are open, cycle is active, or execution transition is pending
-- Entry/Manage/Exit module decisions remain independently testable under NO_ORDERS
+- checked and logged broker result codes
+- explicit execution_transition_pending state
+- route changes rejected while managed positions are open, a cycle is active, or execution transition is pending
+- no order functions inside FULL/SPLIT decision modules unless the FULL adapter is explicitly treated as a separately frozen whole-path compatibility boundary
+- NO_ORDERS regression path retained
 
-SPLIT real-demo execution is not PASS until compile, no-order regression, isolation test, and user-observed demo behavior are all confirmed.
+## Remote deployment sequence
+
+First compile and verify the no-order v1.61 host. Then attach the same compiled Multi Alpha EA to two charts with different InstanceId/Magic and FULL/SPLIT routes. Confirm the logs show independent identity and the expected active route.
+
+Only after compile, no-order regression, route-safety regression, and Magic-isolation checks pass should DEMO broker execution be armed.
 
 ## Forward comparison fields
 
-Record independently for Original / FULL / SPLIT:
+Record independently for Original / Multi Alpha FULL / Multi Alpha SPLIT:
+
+- instance id
+- Magic
+- active route
 - signal timestamp
 - BUY/SELL
 - requested lot
@@ -100,10 +113,6 @@ Record independently for Original / FULL / SPLIT:
 - close reason
 - trailing state
 - managed position count
-- broker fill/result code
+- broker request/result code when execution is later enabled
 
-Actual fill prices can differ slightly because three requests are sequential. Decision parity and fill parity are separate measurements.
-
-## Important DD note
-
-The O01 safety logic can depend on account Balance/Equity. Running three trading instances on one account can therefore couple DD measurements. Normal entry/manage/exit parity should be checked first. Warning 8%, Grid Pause 12%, Emergency Close 15% behavior must be evaluated separately with this account-level coupling documented.
+Actual broker fill prices can differ because requests are sequential. Decision parity and fill parity are separate measurements.

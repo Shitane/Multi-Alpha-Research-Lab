@@ -4,13 +4,12 @@
 //| SPLIT is armed/parity-proven. FULL stays locked until frozen whole-path adapter is verified.      |
 //+------------------------------------------------------------------+
 #property strict
-#property version "1.42"
+#property version "1.41"
 #include "..\..\Include\O01\O01_GSG_RSI30_Logic_Router_v1_40.mqh"
-#include "..\..\Include\O01\O01_GSG_RSI30_Full_NoOrders_Adapter_v1_00.mqh"
 
 enum O01_TIME_MODE { O01_AUTO_GMT=0,O01_SERVER_TIME=1,O01_CUSTOM_GMT=2 };
 input group "O01 Architecture"
-input ENUM_O01_STRUCTURE_MODE InpStructureMode=O01_STRUCTURE_SPLIT; // FULL and SPLIT are both NoOrders test routes in v1.42
+input ENUM_O01_STRUCTURE_MODE InpStructureMode=O01_STRUCTURE_SPLIT; // FULL is intentionally gate-locked in v1.41
 input int InpRSIPeriod=8; input double InpRSILower=30.0,InpRSIUpper=70.0;
 input int InpATR1Period=15,InpATR2Period=15; input ENUM_TIMEFRAMES InpATR2Timeframe=PERIOD_CURRENT;
 input double InpATR1MinPoints=0,InpATR1MaxPoints=10000,InpATR2MinPoints=0,InpATR2MaxPoints=10000;
@@ -31,7 +30,7 @@ input int InpVirtualSLPoints=1500,InpSingleTrailStart=110,InpSingleTrailLock=60,
 input int InpBasketTrailStart=100,InpBasketTrailLock=50,InpBasketTrailDistance=50,InpBasketTrailStep=10;
 
 struct VPos{double price,lot;datetime time,bar;}; VPos buy[],sell[];
-SO01TrailState bt,st; CO01LogicRouter140 router; SO01RouteSelection140 route; CO01FullNoOrdersAdapter100 full;
+SO01TrailState bt,st; CO01LogicRouter140 router; SO01RouteSelection140 route;
 int rh=INVALID_HANDLE,a1h=INVALID_HANDLE,a2h=INVALID_HANDLE; datetime lastBuyBar=0,lastSellBar=0;
 ulong ticks=0,entries=0,grids=0,closes=0,singleTrail=0,basketTrail=0,vsl=0,timeBlocks=0,newsBlocks=0,spreadBlocks=0,filterBlocks=0;
 
@@ -68,36 +67,15 @@ void Manage(bool isBuy,VPos &p[],SO01TrailState &ts,MqlTick &t){
  if(InpMaxTotalLotsPerSide>0&&Lots(p)+lot>InpMaxTotalLotsPerSide+1e-9)return;
  double op=isBuy?t.ask:t.bid;Add(p,op,lot);if(isBuy)lastBuyBar=bar;else lastSellBar=bar;grids++;LO(isBuy?"BUY":"SELL","GRID #"+IntegerToString(md.next_grid_number),op,lot,C(p));
 }
-void BuildFullConfig(SO01FullNoOrdersConfig100 &q){
- q.rsi_period=InpRSIPeriod;q.rsi_lower=InpRSILower;q.rsi_upper=InpRSIUpper;
- q.atr1_period=InpATR1Period;q.atr2_period=InpATR2Period;q.atr2_timeframe=InpATR2Timeframe;
- q.atr1_min_points=InpATR1MinPoints;q.atr1_max_points=InpATR1MaxPoints;q.atr2_min_points=InpATR2MinPoints;q.atr2_max_points=InpATR2MaxPoints;
- q.time_mode=(int)InpTimeMode;
- q.auto_start_h=InpAutoGMTStartHour;q.auto_start_m=InpAutoGMTStartMinute;q.auto_end_h=InpAutoGMTEndHour;q.auto_end_m=InpAutoGMTEndMinute;
- q.server_start_h=InpServerStartHour;q.server_start_m=InpServerStartMinute;q.server_end_h=InpServerEndHour;q.server_end_m=InpServerEndMinute;
- q.custom_start_h=InpCustomGMTStartHour;q.custom_start_m=InpCustomGMTStartMinute;q.custom_end_h=InpCustomGMTEndHour;q.custom_end_m=InpCustomGMTEndMinute;
- q.fixed_tester_offset=InpUseFixedTesterGMTOffset;q.fixed_tester_offset_hours=InpFixedTesterGMTOffsetHours;
- q.mon=InpTradeMonday;q.tue=InpTradeTuesday;q.wed=InpTradeWednesday;q.thu=InpTradeThursday;q.fri=InpTradeFriday;
- q.block_mon=InpBlockMondayWindow;q.mon_bs_h=InpMondayBlockStartHour;q.mon_bs_m=InpMondayBlockStartMinute;q.mon_be_h=InpMondayBlockEndHour;q.mon_be_m=InpMondayBlockEndMinute;
- q.block_fri=InpBlockFridayWindow;q.fri_bs_h=InpFridayBlockStartHour;q.fri_bs_m=InpFridayBlockStartMinute;q.fri_be_h=InpFridayBlockEndHour;q.fri_be_m=InpFridayBlockEndMinute;
- q.max_spread_points=InpMaxSpreadPoints;q.use_news_gate=InpUseNewsGateAdapter;q.news_blocked=InpNewsBlocked;q.news_manage_only=InpNewsManageOnly;
- q.initial_lot=InpInitialLot;q.lot_multiplier=InpLotMultiplier;q.max_lot=InpMaxLot;q.max_total_lots_per_side=InpMaxTotalLotsPerSide;
- q.max_orders=InpMaxOrders;q.fixed_distance_points=InpFixedDistancePoints;q.dynamic_start_order=InpDynamicStartOrder;q.dynamic_start_points=InpDynamicStartPoints;q.distance_multiplier=InpDistanceMultiplier;
- q.one_order_per_bar=InpOneOrderPerBar;q.pause_grid_while_trailing=InpPauseGridWhileTrailing;q.allow_grid_outside_time=InpAllowGridOutsideTime;
- q.virtual_sl_points=InpVirtualSLPoints;q.single_trail_start=InpSingleTrailStart;q.single_trail_lock=InpSingleTrailLock;q.single_trail_distance=InpSingleTrailDistance;q.single_trail_step=InpSingleTrailStep;
- q.basket_trail_start=InpBasketTrailStart;q.basket_trail_lock=InpBasketTrailLock;q.basket_trail_distance=InpBasketTrailDistance;q.basket_trail_step=InpBasketTrailStep;
-}
-
 int OnInit(){
  route.structure=InpStructureMode;route.entry_module=MA_LOGIC_O01;route.manage_module=MA_LOGIC_O01;route.exit_module=MA_LOGIC_O01;
- if(InpStructureMode==O01_STRUCTURE_FULL){SO01FullNoOrdersConfig100 q;BuildFullConfig(q);int rc=full.Init(q);if(rc!=INIT_SUCCEEDED)return rc;Print("[O01_SELECTOR142_START] STRUCTURE=FULL SOURCE=REF105_FROZEN_WHOLE_PATH NO_ORDERS=1 VIRTUAL_NOT_FILL=1");return INIT_SUCCEEDED;}
+ if(InpStructureMode==O01_STRUCTURE_FULL){Print("[O01_SELECTOR141_SAFETY] FULL selected, but frozen whole-path NO-ORDERS adapter is not verified yet. Initialization stopped; SPLIT remains the only armed mode.");return INIT_PARAMETERS_INCORRECT;}
  if(!router.ValidateSelection(route)){Print("[O01_ROUTER140_START] invalid route");return INIT_PARAMETERS_INCORRECT;}
  rh=iRSI(_Symbol,_Period,InpRSIPeriod,PRICE_CLOSE);a1h=iATR(_Symbol,_Period,InpATR1Period);a2h=iATR(_Symbol,InpATR2Timeframe,InpATR2Period);if(rh==INVALID_HANDLE||a1h==INVALID_HANDLE||a2h==INVALID_HANDLE)return INIT_FAILED;
  int s,e;Window(s,e);Print("[O01_SELECTOR141_START] BASELINE=SPLIT105 STRUCTURE=SPLIT E=O01 M=O01 X=O01 effective_server=",s/60,":",s%60,"-",e/60,":",e%60," offset=",DoubleToString(Offset(),2)," NO_ORDERS=1 VIRTUAL_NOT_FILL=1");return INIT_SUCCEEDED;
 }
-void OnDeinit(const int r){if(InpStructureMode==O01_STRUCTURE_FULL){full.Deinit();return;} IndicatorRelease(rh);IndicatorRelease(a1h);IndicatorRelease(a2h);Print("[O01_SELECTOR141_SUMMARY] ticks=",ticks," entries=",entries," grids=",grids," closes=",closes," single_trail=",singleTrail," basket_trail=",basketTrail," virtual_sl=",vsl," buy_open=",C(buy)," sell_open=",C(sell)," time_blocks=",timeBlocks," news_blocks=",newsBlocks," spread_blocks=",spreadBlocks," filter_blocks=",filterBlocks," STRUCTURE=SPLIT NO_ORDERS=1 VIRTUAL_NOT_FILL=1");}
+void OnDeinit(const int r){IndicatorRelease(rh);IndicatorRelease(a1h);IndicatorRelease(a2h);Print("[O01_SELECTOR141_SUMMARY] ticks=",ticks," entries=",entries," grids=",grids," closes=",closes," single_trail=",singleTrail," basket_trail=",basketTrail," virtual_sl=",vsl," buy_open=",C(buy)," sell_open=",C(sell)," time_blocks=",timeBlocks," news_blocks=",newsBlocks," spread_blocks=",spreadBlocks," filter_blocks=",filterBlocks," STRUCTURE=SPLIT NO_ORDERS=1 VIRTUAL_NOT_FILL=1");}
 void OnTick(){
- if(InpStructureMode==O01_STRUCTURE_FULL){full.Tick();return;}
  ticks++;MqlTick t;if(!SymbolInfoTick(_Symbol,t))return;Manage(true,buy,bt,t);Manage(false,sell,st,t);
  double r=B(rh),a1=B(a1h),a2=B(a2h);if(r==EMPTY_VALUE||a1==EMPTY_VALUE||a2==EMPTY_VALUE)return;
  if(!TimeOK()){if(r<InpRSILower||r>InpRSIUpper)timeBlocks++;return;}if(NewsNewBlocked()){newsBlocks++;return;}if(!SpreadOK()){spreadBlocks++;return;}

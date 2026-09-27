@@ -4,7 +4,7 @@
 //+------------------------------------------------------------------+
 #ifndef A10_ENTRY_SETTINGS_PANEL_V1_01_MQH
 #define A10_ENTRY_SETTINGS_PANEL_V1_01_MQH
-#include "A10_Entry_Settings_v1_01.mqh"
+#include "A10_Entry_Settings_v1_00.mqh"
 
 class CA10EntrySettingsPanel100
 {
@@ -22,7 +22,7 @@ public:
  void BindToO01Panel(){p="O01CFG160_";}
  void EnsureModeButton(){
   string n=p+"A10_MODE_NEXT";if(ObjectFind(0,n)<0)ObjectCreate(0,n,OBJ_BUTTON,0,0,0);
-  ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,708);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,169);
+  ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,516);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,169);
   ObjectSetInteger(0,n,OBJPROP_XSIZE,72);ObjectSetInteger(0,n,OBJPROP_YSIZE,19);ObjectSetInteger(0,n,OBJPROP_BGCOLOR,C'42,52,61');ObjectSetInteger(0,n,OBJPROP_COLOR,clrWhite);
   ObjectSetInteger(0,n,OBJPROP_BORDER_COLOR,C'80,92,104');ObjectSetInteger(0,n,OBJPROP_FONTSIZE,8);ObjectSetInteger(0,n,OBJPROP_SELECTABLE,true);ObjectSetInteger(0,n,OBJPROP_HIDDEN,false);ObjectSetInteger(0,n,OBJPROP_ZORDER,40);ObjectSetString(0,n,OBJPROP_TEXT,"NEXT >");
  }

@@ -337,6 +337,28 @@ The genuine v1.50 FULL route has now been tester-verified on the common XAUUSD_D
 The planned negative fail-safe test has now passed: with SPLIT selected and Entry=A14 while Manage/Exit remained O01, initialization stopped with an explicit `SPLIT entry module is not registered for this gate` reason, processed zero ticks, and did not silently fall back to O01. O01 v1.50 common selector Gate is therefore PASS. The next phase is runtime-panel module selection and flat-only route-change safety without changing the frozen O01 decision logic.
 
 
+## O01 single-EA / DEMO gate update — 2026-09-28
+
+Development has advanced beyond the v1.50 selector gate while preserving the single-EA target and frozen O01 decision baseline.
+
+Current verified/observed state:
+
+- v1.61 introduced the capability-specific registry/panel line, explicit Instance ID + Magic identity, O01 registered capabilities, and A10 ENTRY registration/panel binding.
+- The updated v1.61 host was compiled with 0 errors / 0 warnings.
+- Remote NoOrders startup was observed with the **same Multi Alpha EA** configured as:
+  - FULL / O01 — Instance 2 / Magic 46102031
+  - SPLIT / O01 + O01 + O01 — Instance 3 / Magic 46102032
+- v1.62 added the DEMO/HEDGING execution safety boundary.
+- v1.63 added checked broker operations through the common execution adapter, including Symbol + Magic ownership filtering, checked trade results, and execution-transition state.
+- `MultiAlpha_Runtime_Panel_DemoGate_v1_63.mq5` was compiled in MetaEditor on 2026-09-28 with **0 errors / 0 warnings**.
+- Remote DEMO startup evidence showed the DEMO/HEDGING gate accepting Instance 2 / Magic 46102031 and arming the v1.63 broker boundary.
+
+This is **not yet a DEMO execution parity PASS**. The latest remote validation occurred on Sunday, when O01 new-cycle trading is blocked, and O01 also operates only inside its configured session. Actual entry/grid/exit ownership and FULL-vs-SPLIT broker lifecycle evidence therefore remain pending.
+
+Do not optimize O01 or declare simultaneous DEMO operation complete until open-market/session tests verify same-symbol/different-Magic isolation, actual broker entry/grid/exit behavior, route-change safety with real owned positions, and event-level comparison against the Original O01 reference.
+
+Detailed record: `Test_Results/O01/O01_MultiAlpha_DemoGate_Progress_2026-09-28.md`.
+
 ## Planned sequence
 
 Immediate:

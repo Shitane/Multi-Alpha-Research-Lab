@@ -82,7 +82,7 @@ input bool InpUseNewsFilter=true;
 input bool InpNewsManageOnly=true;
 
 SO01RuntimeSettings110 runtime_cfg;
-CO01SettingsPanel141 panel;
+CO01SettingsPanel157 panel;
 CO01RuntimeAdapter120 adapter;
 CO01CoreInterface core;
 SMA140StrategyIdentity strategy;

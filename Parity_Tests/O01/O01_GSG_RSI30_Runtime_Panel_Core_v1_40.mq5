@@ -150,6 +150,7 @@ int OnInit(){
  }
  if(!adapter.Validate(runtime_cfg))return INIT_PARAMETERS_INCORRECT;
  if(!RebuildIndicatorHandles())return INIT_FAILED;
+ panel.SetInitialConfig(runtime_cfg); // exact Expert Properties startup snapshot for REFRESH
  panel.Create(runtime_cfg,strategy,panel_theme);
  Print("[O01_RUNTIME140_START] CORE=1.00 ADAPTER=1.20 PANEL=1.42 FOUNDATION=1.40 instance=",strategy.instance_id," symbol=",strategy.symbol," entry=",strategy.entry_module," manage=",strategy.manage_module," exit=",strategy.exit_module," EXECUTION=NO_ORDERS VIRTUAL_NOT_FILL=1");
  return INIT_SUCCEEDED;

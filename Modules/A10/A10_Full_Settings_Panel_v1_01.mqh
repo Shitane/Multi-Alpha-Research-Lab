@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #ifndef A10_FULL_SETTINGS_PANEL_V1_01_MQH
 #define A10_FULL_SETTINGS_PANEL_V1_01_MQH
-#include "A10_Full_Module_v1_01.mqh"
+#include "A10_Full_Module_v1_00.mqh"
 
 class CA10FullSettingsPanel101
 {

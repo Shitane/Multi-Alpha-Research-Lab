@@ -265,7 +265,7 @@ int OnInit(){
  route_panel.Create(&route_controller,initial_route,640,36,panel_theme.opacity);
  if(initial_route.structure==MA_STRUCTURE_FULL_V150 && initial_route.full_module==MA_LOGIC_A10_V150){left_context.A10Full();a10_full_panel.Display(a10_full_cfg);}
  else if(initial_route.structure==MA_STRUCTURE_SPLIT_V150 && initial_route.entry_module==MA_LOGIC_A10_V150)a10_panel.Display(a10_entry_cfg);
- Print("[MA_RUNTIME179_START] CORE=1.00 ADAPTER=1.20 PANEL_ROUTE=1.79 FOUNDATION=1.40 REGISTRY=1.75 FULL_DISPATCHER=1.74 A10_FULL_PANEL=1.01 LEFT_CONTEXT=1.78 ENTRY_DISPATCHER=1.72 EXEC_ADAPTER=1.73 LOG_POLICY=1.71 GATE_DEFAULT=FULL_A10 instance=",strategy.instance_id," magic=",strategy.magic," symbol=",strategy.symbol," entry=",strategy.entry_module," manage=",strategy.manage_module," exit=",strategy.exit_module," EXECUTION=",MA140_ExecutionText(InpExecutionMode)," BROKER_ACTIONS_ARMED=",(DemoExecution()?1:0)," VIRTUAL_NOT_FILL=",(DemoExecution()?0:1));
+ Print("[MA_RUNTIME179_START] CORE=1.00 ADAPTER=1.20 PANEL_ROUTE=1.79 FOUNDATION=1.40 REGISTRY=1.75 FULL_DISPATCHER=1.74 A10_FULL_PANEL=1.01 LEFT_CONTEXT=1.79 ENTRY_DISPATCHER=1.72 EXEC_ADAPTER=1.73 LOG_POLICY=1.71 GATE_DEFAULT=FULL_A10 instance=",strategy.instance_id," magic=",strategy.magic," symbol=",strategy.symbol," entry=",strategy.entry_module," manage=",strategy.manage_module," exit=",strategy.exit_module," EXECUTION=",MA140_ExecutionText(InpExecutionMode)," BROKER_ACTIONS_ARMED=",(DemoExecution()?1:0)," VIRTUAL_NOT_FILL=",(DemoExecution()?0:1));
  return INIT_SUCCEEDED;
 }
 void OnDeinit(const int reason){

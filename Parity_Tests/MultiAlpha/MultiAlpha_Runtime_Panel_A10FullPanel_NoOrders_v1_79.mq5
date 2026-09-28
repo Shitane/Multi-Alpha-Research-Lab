@@ -104,7 +104,7 @@ SA10EntrySettings100 a10_entry_cfg;
 CA10EntrySettingsPanel100 a10_panel;
 SA10FullConfig100 a10_full_cfg;
 CA10FullSettingsPanel101 a10_full_panel;
-CMultiAlphaLeftContext178 left_context;
+CMultiAlphaLeftContext179 left_context;
 
 struct VPos{double price,lot;datetime time,bar;};
 VPos buy[],sell[];

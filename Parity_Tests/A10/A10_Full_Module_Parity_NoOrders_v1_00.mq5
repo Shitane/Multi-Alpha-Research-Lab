@@ -8,20 +8,20 @@
 
 CA10FullModule100 g_full;
 
-void SetMode(SA10FullModeConfig100 &cfg_mode,bool en,double brick,int period,double dev,
+void SetMode(SA10FullConfig100 &cfg,const int idx,bool en,double brick,int period,double dev,
              double squeeze,int run,double tp,double sl,int hold,int cd,double spread)
-  {cfg_mode.enabled=en;cfg_mode.brick=brick;cfg_mode.bb_period=period;cfg_mode.deviation=dev;cfg_mode.squeeze_width=squeeze;
-   cfg_mode.entry_run=run;cfg_mode.tp=tp;cfg_mode.sl=sl;cfg_mode.max_hold=hold;cfg_mode.cooldown=cd;cfg_mode.max_spread=spread;}
+  {cfg.mode[idx].enabled=en;cfg.mode[idx].brick=brick;cfg.mode[idx].bb_period=period;cfg.mode[idx].deviation=dev;cfg.mode[idx].squeeze_width=squeeze;
+   cfg.mode[idx].entry_run=run;cfg.mode[idx].tp=tp;cfg.mode[idx].sl=sl;cfg.mode[idx].max_hold=hold;cfg.mode[idx].cooldown=cd;cfg.mode[idx].max_spread=spread;}
 
 string ModeName(int m){if(m==0)return"Breakout";if(m==1)return"Re-entry";if(m==2)return"Midline";return"Squeeze";}
 
 int OnInit()
   {
    SA10FullConfig100 c={};c.max_positions=4;c.skip_opposite=true;c.entry_ttl_seconds=120;
-   SetMode(c.mode[0],true,17,20,1.0,1.0,2,24,42,1230,5,.35);
-   SetMode(c.mode[1],true,30,31,1.2,1.0,1,28,48.5,2580,3,.35);
-   SetMode(c.mode[2],true,30,5,3.0,1.0,1,10,34.5,2220,3,.35);
-   SetMode(c.mode[3],true,14,18,2.4,34.5,1,26,31,2050,1,.35);
+   SetMode(c,0,true,17,20,1.0,1.0,2,24,42,1230,5,.35);
+   SetMode(c,1,true,30,31,1.2,1.0,1,28,48.5,2580,3,.35);
+   SetMode(c,2,true,30,5,3.0,1.0,1,10,34.5,2220,3,.35);
+   SetMode(c,3,true,14,18,2.4,34.5,1,26,31,2050,1,.35);
    double ts=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_SIZE);
    if(!g_full.Init(c,ts))return INIT_FAILED;
    Print("[A10_FULL100_START] FULL=A10 TTL=120 NO_ORDERS=1 VIRTUAL_NOT_FILL=1");

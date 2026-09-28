@@ -43,6 +43,33 @@ Changing the right-panel draft may change what the left panel displays, but it M
 
 An unregistered module displays NOT REGISTERED and MUST NEVER fall back to O01 settings or O01 logic as if it were registered.
 
+## Per-module operating filters
+
+Trading time and news handling are configurable characteristics of each selected logic module. They MUST NOT be permanently predetermined for A10-A15, and they MUST NOT be forced into one common schedule/news policy for all Alpha modules.
+
+Each registered ENTRY, MANAGE, or EXIT module may expose user-selectable operating-filter settings when that capability uses them. The settings contract should allow, at minimum:
+
+- Trading Time Filter: ON / OFF
+- TimeMode and Start / End window when enabled
+- News Filter: ON / OFF
+- selectable news impact levels when supported
+- configurable stop time before news
+- configurable resume time after news
+
+These values are settings, not hard-coded identities of A10, A11, A12, A13, A14, or A15. The user must be able to choose them freely for the selected module and preserve different configurations between modules.
+
+In SPLIT mode, filters belong to the selected responsibility independently. Example:
+
+- E=A10 may use its own Entry time/news settings.
+- M=A12 may use different Manage time/news settings.
+- X=A14 may use different Exit time/news settings, or leave either filter OFF.
+
+Changing E/M/X must load/display that selected module's own configurable settings rather than silently inheriting another module's filter values.
+
+A module may declare a filter unsupported when it is genuinely not applicable, but registration MUST NOT silently substitute O01 or a global default as module-specific behavior.
+
+Cross-cutting account protection such as DD warning, grid-pause safety, and emergency-close safety remains a common Safety layer unless a later verified contract explicitly changes it. Common Safety must not be disabled by a module's time/news filter.
+
 ## Execution boundary
 
 Current verified research/parity hosts remain NO_ORDERS=1 / VIRTUAL_NOT_FILL=1.

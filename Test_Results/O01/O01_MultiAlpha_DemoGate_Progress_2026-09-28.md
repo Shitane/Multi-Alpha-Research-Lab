@@ -249,3 +249,83 @@ The open-market validation procedure is now fixed in:
 The protocol defines the three-chart identity map, startup prerequisites, required v1.69 log markers, and explicit PASS criteria for initial entry ownership, same-symbol/different-Magic isolation, grid lifecycle, exit lifecycle, route-change protection with real positions, restart/state observation, and Original-vs-FULL-vs-SPLIT event comparison.
 
 This preparation does not change the v1.69 trading implementation and does not change the current DEMO gate status: **PENDING until actual open-market/session broker evidence is collected**.
+
+
+## v1.70-v1.73 open-market DEMO validation update — VERIFIED 2026-09-28
+
+Development continued through the quiet-diagnostic and broker-refresh-race fixes while preserving the frozen O01 decision path.
+
+### v1.70-v1.71 diagnostics
+
+- v1.70 reduced successful state-audit logging while retaining immediate failure/lifecycle diagnostics.
+- v1.71 suppressed unconditional background chart-event noise and moved successful periodic audit display to approximately five-minute intervals.
+- v1.71 compiled with 0 errors / 0 warnings and exactly preserved the frozen NO_ORDERS baseline.
+
+### v1.72 FULL dispatch and close-confirmation fixes
+
+v1.71 open-market evidence exposed two implementation defects outside the frozen O01 decision logic:
+
+1. O01 Entry Dispatcher accepted O01 only when Structure=SPLIT, so FULL/O01 could not produce broker entries.
+2. a successful synchronous broker close could be reported as REJECTED when the terminal position list had not refreshed immediately after TRADE_RETCODE_DONE.
+
+v1.72 corrected the FULL/O01 dispatcher path without fallback and added a bounded terminal-refresh confirmation wait for closes.
+
+Verified v1.72 checkpoints:
+
+- compile: 0 errors / 0 warnings,
+- NO_ORDERS regression: exact frozen baseline,
+- FULL Instance 2 / Magic 46102031 produced real DEMO entries,
+- SPLIT Instance 3 / Magic 46102032 produced real DEMO entries,
+- same-symbol Magic ownership remained isolated,
+- initial entry, grid addition and trailing/basket exits were observed.
+
+### v1.73 broker OPEN refresh-race fix
+
+v1.72 broker evidence then exposed an OPEN-side terminal-refresh race. A broker request could return TRADE_RETCODE_DONE while the local position list still temporarily showed before_count == after_count. The adapter therefore classified a real fill as REJECTED; because the host did not record the successful INITIAL bar, the same M1 bar could later permit an unintended GRID addition.
+
+v1.73 changes only the common DEMO execution adapter confirmation boundary:
+
+- after accepted broker OPEN retcode, confirm the owned Symbol + Magic + side position/lots transition,
+- poll for at most about 500 ms (20 x 25 ms) before classifying the OPEN as failed,
+- preserve ticket ownership checks,
+- preserve DEMO/HEDGING/positive identity gates,
+- do not change O01 Entry / Manage / Exit decisions.
+
+Current files:
+
+- Modules/Common/MultiAlpha_Demo_Execution_Adapter_v1_73.mqh
+- Parity_Tests/MultiAlpha/MultiAlpha_Runtime_Panel_DemoGate_v1_73.mq5
+- Entry Dispatcher remains MultiAlpha_Entry_Dispatcher_v1_72.mqh.
+
+Verified v1.73 checkpoints:
+
+- compile: **0 errors / 0 warnings**,
+- NO_ORDERS regression: **exact frozen baseline PASS**,
+- remote FULL: Instance 2 / Magic 46102031 / DEMO + HEDGING / broker actions armed,
+- remote SPLIT: Instance 3 / Magic 46102032 / DEMO + HEDGING / broker actions armed,
+- FULL and SPLIT OPEN lifecycle: CONFIRMED with correct Symbol + Magic ownership,
+- GRID #2 and GRID #3: both routes followed the expected lot progression and retained isolated ownership,
+- both routes reached three SELL positions / 0.06 total lots in the observed basket cycle,
+- basket-trailing decision matched between FULL and SPLIT in the observed cycle,
+- all owned positions closed with accepted broker retcodes and CONFIRMED lifecycle,
+- post-cycle state audit returned owned=0 and transition_pending=0 for both instances,
+- the v1.72 false OPEN-REJECT race was not reproduced in the observed v1.73 cycle.
+
+### DEMO gate status after v1.73
+
+Verified broker evidence now covers:
+
+- Gate A — startup / identity: **PASS**
+- Gate B — initial entry ownership: **PASS**
+- Gate C — same-symbol / different-Magic isolation: **PASS**
+- Gate D — grid lifecycle: **PASS**
+- Gate E — observed trailing/basket exit lifecycle: **PASS**
+
+Still pending and not to be inferred from the above:
+
+- Gate F — controlled route-change rejection while a real owned DEMO position/cycle exists,
+- Gate G — controlled restart/state observation while a real owned DEMO position exists,
+- virtual-SL/emergency behavior when naturally reached,
+- broader event-level Original-vs-FULL-vs-SPLIT observation across additional cycles.
+
+The next controlled validation is Gate F. Do not alter the frozen O01 logic for this test. During one naturally occurring owned DEMO cycle, attempt one route APPLY on only one Multi Alpha instance. PASS requires rejection, unchanged active route, and no modification/closure of the owned broker position. After that position closes naturally, proceed separately to Gate G restart/state observation.

@@ -6,7 +6,7 @@
 //+------------------------------------------------------------------+
 #ifndef A10_FULL_MODULE_V1_01_MQH
 #define A10_FULL_MODULE_V1_01_MQH
-#include "A10_Bollinger_Module_v1_01.mqh"
+#include "A10_Bollinger_Module_v1_00.mqh"
 
 struct SA10FullModeConfig100
   {

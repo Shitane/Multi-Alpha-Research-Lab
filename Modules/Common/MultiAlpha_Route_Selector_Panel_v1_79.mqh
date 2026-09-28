@@ -4,7 +4,7 @@
 //+------------------------------------------------------------------+
 #ifndef MULTI_ALPHA_ROUTE_SELECTOR_PANEL_V1_79_MQH
 #define MULTI_ALPHA_ROUTE_SELECTOR_PANEL_V1_79_MQH
-#include "MultiAlpha_Route_Controller_v1_79.mqh"
+#include "MultiAlpha_Route_Controller_v1_75.mqh"
 #include <Canvas\Canvas.mqh>
 
 class CMultiAlphaRouteSelectorPanel179

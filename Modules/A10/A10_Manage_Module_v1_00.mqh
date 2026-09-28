@@ -60,11 +60,11 @@ public:
       m_transition_pending=false;
       m_max_positions=4;
       m_skip_opposite=true;
-      m_entry_ttl_seconds=300;
+      m_entry_ttl_seconds=120;
      }
 
    bool Init(const int max_positions,const bool skip_opposite_signals,
-             const int entry_ttl_seconds=300)
+             const int entry_ttl_seconds=120)
      {
       if(max_positions<1 || max_positions>A10_MANAGE_MODE_COUNT ||
          entry_ttl_seconds<1)

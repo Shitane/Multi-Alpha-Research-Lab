@@ -110,6 +110,62 @@ For grid / averaging / recovery-style logic, an event-day stop must distinguish 
 
 A Special Risk filter is a module setting, just like Trading Time and the normal News Filter. Different selected E/M/X modules may therefore use different Special Risk settings, including OFF. The common Safety layer remains independent and cannot be disabled by these filters.
 
+## Multi-logic / multi-symbol target
+
+The long-term production architecture MUST support up to **50 independently configurable Logic Slots** inside the same Multi Alpha EA. This is a fixed product direction so later development must not drift back to a single-symbol or one-logic-per-EA design.
+
+A Logic Slot is an independent runtime identity, for example:
+
+- #01 = selected logic/route + XAUUSD
+- #02 = selected logic/route + EURUSD
+- #03 = selected logic/route + USDJPY
+- ...
+- #50 = selected logic/route + user-selected symbol
+
+The symbol is a setting of the slot, not a hard-coded property of A10-A15 or any future Alpha. Multiple slots may use the same logical symbol with different routes/settings, and the same logic may be used on different symbols when its module contract permits it.
+
+Each slot must keep its own runtime identity and settings, including at least:
+
+- Slot ID (#01-#50)
+- selected FULL route or SPLIT E/M/X composition
+- logical/base symbol
+- broker-resolved symbol
+- Magic / ownership identity
+- module settings
+- Trading Time settings
+- normal News Filter settings
+- Special Risk / Event-Day Filter settings
+- runtime/state data needed to prevent one slot from managing another slot's positions
+
+The host must evolve toward **multi-symbol operation**. A slot must use its assigned symbol explicitly and must not silently depend on the chart symbol (_Symbol) as its trading identity. Attaching the Multi Alpha EA to one chart must not mean all 50 slots are forced to trade that chart's symbol.
+
+### Broker Symbol Mapping
+
+Trading logic MUST use canonical/logical symbol names separately from broker-specific symbol names.
+
+Examples:
+
+- XAUUSD -> XAUUSD-m
+- XAUUSD -> GOLD
+- XAUUSD -> XAUUSD.a
+- EURUSD -> EURUSD-m
+
+Broker-specific suffixes, prefixes, or aliases MUST NOT be hard-coded throughout Alpha logic. They must be resolved through a configurable **Symbol Mapping / Broker Symbol Registry**.
+
+The registry must allow the user to pre-register mappings for a broker/account environment. A canonical symbol such as XAUUSD can therefore remain the research/logic identity while the execution layer resolves the actual broker symbol such as XAUUSD-m.
+
+A mapping must be validated before a slot is armed. If the configured broker symbol does not exist or cannot be selected/used, the slot must show an explicit configuration/error state and MUST NOT silently fall back to _Symbol or another instrument.
+
+Automatic suffix/prefix detection may be added later as an optional convenience, but explicit registered mapping remains the authoritative fail-safe mechanism.
+
+### Isolation rule for 50-slot operation
+
+Every broker position/order action must be attributable to the intended slot. Symbol alone is not sufficient because several slots may trade the same instrument. Ownership must therefore include the slot/instance identity and Magic strategy used by the execution contract.
+
+One slot MUST NOT count, add to, close, trail, or otherwise manage another slot's positions merely because both trade XAUUSD or another common symbol.
+
+The existing frozen O01 parity path may remain single-symbol while migration is in progress. This target architecture does not authorize changing frozen O01 logic merely to accelerate the 50-slot migration; migration must be staged and regression-tested.
+
 ## Execution boundary
 
 Current verified research/parity hosts remain NO_ORDERS=1 / VIRTUAL_NOT_FILL=1.

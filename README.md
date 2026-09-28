@@ -457,3 +457,32 @@ v1.72 fixed the FULL/O01 entry-dispatch path and close-side terminal-refresh con
 Current DEMO evidence status: Gates A-E are PASS for the observed broker lifecycle. Gate F (route APPLY rejection while a real owned position/cycle exists) and Gate G (restart/state recognition while a real owned DEMO position exists) remain pending and must be verified separately before the DEMO validation is called complete.
 
 Detailed record: Test_Results/O01/O01_MultiAlpha_DemoGate_Progress_2026-09-28.md.
+
+
+### A10 FULL single-EA integration gate — verified 2026-09-28
+
+The verified A10 whole-strategy module has now been connected to the same Multi Alpha runtime-panel architecture through the common FULL dispatcher without changing the frozen O01 path.
+
+Verified host:
+- `Parity_Tests/MultiAlpha/MultiAlpha_Runtime_Panel_A10Full_NoOrders_v1_76.mq5`
+- route: `STRUCTURE=FULL / FULL=A10`
+- FULL dispatcher: v1.74
+- execution: `NO_ORDERS`
+- broker actions: unarmed
+
+Common baseline result:
+- XAUUSD_DUKA / M15 / 2026-08-16 through 2026-08-29 / real ticks
+- JPY 100000 / leverage 1:100
+- 2,571,204 ticks / 920 bars
+- entries=6 / exits=4 / open=2
+- Breakout entries/exits=4/3
+- Re-entry entries/exits=0/0
+- Midline entries/exits=1/1
+- Squeeze entries/exits=1/0
+- tester: `Test passed`
+
+This exactly matches the previously verified standalone A10 FULL v1.74 result, so the common FULL-dispatch path preserves A10 behavior on the documented baseline. During this A10 FULL run the O01 runtime produced zero entries/grids/closes, confirming that the frozen O01 path did not contribute trading events to the A10 result.
+
+**Gate status: A10 FULL -> common FULL dispatcher -> single Multi Alpha runtime = PASS (NO_ORDERS).**
+
+Next UI gate: preserve this verified path while making the right-panel FULL selection (O01/A10) drive the left detail-panel context. FULL=A10 must show A10 FULL settings; FULL=O01 must restore O01 settings. Draft selection changes display context only; the active trading route changes only after validated APPLY. Unregistered FULL modules must remain NOT REGISTERED with no fallback.

@@ -18,12 +18,12 @@ public:
   string h[]={"ENTRY","GRID","EXIT","SAFETY","TIME","PRESETSEC"};for(int i=0;i<ArraySize(h);i++)V("L_H_"+h[i],true);
   string b[]={"NEXT","APPLY","SAVE","LOAD","DELETE","RESET","L_PRESETLAB","L_SAVEDLAB","L_SAVEDVAL"};for(int i=0;i<ArraySize(b);i++)V(b[i],true);
  }
- void Split(){
+ void Split(const string entry_name,const string manage_name,const string exit_name){
   Restore();
   string x[]={"WARN","PAUSE","CLOSE","TMODE","START","END","NEWS","PRESET"};for(int i=0;i<ArraySize(x);i++)Pair(x[i],false);
   string h[]={"SAFETY","TIME","PRESETSEC"};for(int i=0;i<ArraySize(h);i++)V("L_H_"+h[i],false);
   string b[]={"SAVE","LOAD","DELETE","RESET","L_PRESETLAB","L_SAVEDLAB","L_SAVEDVAL"};for(int i=0;i<ArraySize(b);i++)V(b[i],false);
-  T("L_H_ENTRY","ENTRY [E]");T("L_H_GRID","MANAGE [M]");T("L_H_EXIT","EXIT [X]");ChartRedraw();
+  T("L_H_ENTRY","ENTRY [E]  ["+entry_name+"]");T("L_H_GRID","MANAGE [M]  ["+manage_name+"]");T("L_H_EXIT","EXIT [X]  ["+exit_name+"]");ChartRedraw();
  }
  void A10Full(){
   Restore();

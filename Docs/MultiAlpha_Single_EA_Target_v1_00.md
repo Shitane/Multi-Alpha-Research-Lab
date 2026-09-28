@@ -166,6 +166,86 @@ One slot MUST NOT count, add to, close, trail, or otherwise manage another slot'
 
 The existing frozen O01 parity path may remain single-symbol while migration is in progress. This target architecture does not authorize changing frozen O01 logic merely to accelerate the 50-slot migration; migration must be staged and regression-tested.
 
+## Configuration and preset architecture
+
+To prevent Expert Properties / Inputs from becoming unmanageably large as the registry grows toward 50 Logic Slots and many Alpha modules, Multi Alpha MUST use a **minimal Expert Inputs + panel-first configuration** architecture.
+
+### Minimal Expert Inputs
+
+Expert Properties must contain only settings required to bootstrap the EA and configuration system. Module-specific strategy parameters MUST NOT be added to Expert Inputs merely because a new Alpha is registered.
+
+Bootstrap inputs may include, where required:
+
+- Instance identity / base Magic configuration
+- configuration/preset storage root
+- startup preset / startup load behavior
+- essential host/demo/safety bootstrap controls
+
+Detailed FULL, ENTRY, MANAGE, EXIT, Trading Time, News Filter, Special Risk Filter, symbol, and slot configuration belongs in the Multi Alpha panel and its configuration files.
+
+Adding A10, A11, ... or future modules should therefore not cause Expert Properties to grow by dozens of module-specific inputs.
+
+### Panel-first detailed configuration
+
+The panel is the primary editor for detailed runtime configuration.
+
+For each Logic Slot (#01-#50), the panel must be able to edit and display the settings applicable to that slot, including its route/modules, symbol mapping, module parameters, operating time, normal news filters, Special Risk filters, and other registered module settings.
+
+The existing Draft -> APPLY safety concept remains applicable: editing/viewing settings in the panel must not silently bypass route/execution safety gates.
+
+### Preset scopes
+
+The configuration system must support at least two independent save/load scopes:
+
+1. **EA / Portfolio preset**
+   - saves the complete Multi Alpha configuration as one recoverable portfolio
+   - includes enabled slots and the configuration needed to restore #01-#50
+   - includes slot routes, symbols/mappings references, module settings and filters as applicable
+
+2. **Individual Slot preset**
+   - #01, #02, ... #50 can each be saved and loaded independently
+   - loading one slot must not overwrite unrelated slots
+   - a slot preset should be reusable for copying/testing a strategy configuration independently
+
+The default common-file layout should be compatible with:
+
+`%APPDATA%\MetaQuotes\Terminal\Common\Files\MultiAlpha\O01\Presets`
+
+A logical default layout may separate whole-EA and per-slot presets, for example:
+
+```
+MultiAlpha\O01\Presets\
+  EA\
+  Slots\
+    #01\
+    #02\
+    ...
+    #50\
+```
+
+The exact file format/versioning can evolve, but the EA-wide and per-slot save/load capabilities are part of the target architecture.
+
+### User-selectable storage root
+
+The preset storage location must not be permanently hard-coded to `MultiAlpha\O01\Presets`.
+
+The user must be able to select/configure a storage root, with the standard location offered as the default. Because MQL5 file access is sandboxed, the first implementation should treat the MT5 Common Files area (`FILE_COMMON`) as the safe base and allow a user-selected subpath beneath it, for example:
+
+- `MultiAlpha\O01\Presets`
+- `MultiAlpha\MyPresets`
+- `MultiAlpha\ForwardTest`
+- `MultiAlpha\TitanFX_Micro`
+
+If a later implementation supports an additional MT5-permitted storage mechanism, it must preserve the same configurable-root contract and fail safely when a requested location is unavailable.
+
+The panel should provide clear controls for storage root, SAVE ALL / LOAD ALL, and SAVE / LOAD for the currently selected slot. Invalid/missing preset paths or incompatible preset versions must produce an explicit error and MUST NOT silently load defaults over an existing configuration.
+
+### Preset data vs program code
+
+Preset files store configuration/state required for restoration; they do not store Alpha program code. Alpha/module code remains in the registered EA/module implementation.
+
+Preset data should carry a schema/version identifier so future module or configuration changes can be validated or migrated deliberately instead of being interpreted silently with the wrong structure.
+
 ## Execution boundary
 
 Current verified research/parity hosts remain NO_ORDERS=1 / VIRTUAL_NOT_FILL=1.

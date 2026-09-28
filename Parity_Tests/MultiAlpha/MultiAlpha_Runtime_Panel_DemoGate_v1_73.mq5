@@ -7,7 +7,7 @@
 //| and demo-account safety gates are implemented and verified.       |
 //+------------------------------------------------------------------+
 #property strict
-#property version "1.72"
+#property version "1.73"
 
 #include "..\\..\\..\\Include\\O01\\O01_GSG_RSI30_Runtime_Adapter_v1_20.mqh"
 #include "..\\..\\..\\Include\\O01\\O01_Settings_Panel_v1_61.mqh"

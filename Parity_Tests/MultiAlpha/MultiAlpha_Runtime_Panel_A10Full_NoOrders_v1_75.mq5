@@ -1,10 +1,8 @@
 //+------------------------------------------------------------------+
 //| MultiAlpha_Runtime_Panel_A10Full_NoOrders_v1_75.mq5                      |
-//| MAIN LINE: v1.33 parity logic + v1.40 architecture foundation.   |
-//|                                                                  |
-//| Phase 1 intentionally remains NO ORDERS / VIRTUAL NOT FILL.      |
-//| DEMO execution is declared but locked until execution adapter     |
-//| and demo-account safety gates are implemented and verified.       |
+//| Multi Alpha integration gate: O01 plus verified FULL=A10 route.   |
+//| NO_ORDERS only. v1.73 remains the verified O01 DEMO host.         |
+//| A10 FULL uses the same verified v1.74 dispatcher/module path.     |
 //+------------------------------------------------------------------+
 #property strict
 #property version "1.75"
@@ -265,6 +263,16 @@ int OnInit(){
  return INIT_SUCCEEDED;
 }
 void OnDeinit(const int reason){
+ SMA_ModuleSelection150 final_route=route_controller.Active();
+ if(final_route.structure==MA_STRUCTURE_FULL_V150 && final_route.full_module==MA_LOGIC_A10_V150)
+  Print("[MA_RUNTIME175_A10_FULL_SUMMARY] ticks=",full_dispatcher.A10Ticks(),
+        " entries=",full_dispatcher.A10Entries()," exits=",full_dispatcher.A10Exits(),
+        " open=",full_dispatcher.A10OpenCount(),
+        " breakout_entries=",full_dispatcher.A10ModeEntries(0)," breakout_exits=",full_dispatcher.A10ModeExits(0),
+        " reentry_entries=",full_dispatcher.A10ModeEntries(1)," reentry_exits=",full_dispatcher.A10ModeExits(1),
+        " midline_entries=",full_dispatcher.A10ModeEntries(2)," midline_exits=",full_dispatcher.A10ModeExits(2),
+        " squeeze_entries=",full_dispatcher.A10ModeEntries(3)," squeeze_exits=",full_dispatcher.A10ModeExits(3),
+        " reason=",reason," NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1");
  route_panel.Delete();panel.Delete();if(rh!=INVALID_HANDLE)IndicatorRelease(rh);if(a1h!=INVALID_HANDLE)IndicatorRelease(a1h);if(a2h!=INVALID_HANDLE)IndicatorRelease(a2h);
  Print("[O01_RUNTIME140_SUMMARY] instance=",strategy.instance_id," magic=",strategy.magic," symbol=",strategy.symbol," ticks=",ticks," entries=",entries," grids=",grids," closes=",closes," single_trail=",singleTrail," basket_trail=",basketTrail," virtual_sl=",vsl," buy_open=",(DemoExecution()?LiveCount(true):C(buy))," sell_open=",(DemoExecution()?LiveCount(false):C(sell))," time_blocks=",timeBlocks," news_blocks=",newsBlocks," spread_blocks=",spreadBlocks," filter_blocks=",filterBlocks," EXECUTION=",MA140_ExecutionText(InpExecutionMode)," BROKER_ACTIONS_ARMED=",(DemoExecution()?1:0)," VIRTUAL_NOT_FILL=",(DemoExecution()?0:1));
 }

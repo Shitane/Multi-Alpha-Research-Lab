@@ -6,7 +6,7 @@
 #property strict
 #property version "1.74"
 
-#include "..\\..\\Include\\Common\\MultiAlpha_Full_Dispatcher_v1_74.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Full_Dispatcher_v1_74.mqh"
 
 CMultiAlphaFullDispatcher174 g_full_dispatcher;
 SMA_ModuleSelection150 g_route;

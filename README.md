@@ -446,3 +446,14 @@ Tell ChatGPT:
 > Continue development of GitHub repository Shitane/Multi-Alpha-Research-Lab. Read README.md first and inspect the relevant current files and Test_Results before changing code. Preserve the NoOrders safety rule, the A-series/O-series separation, the reproduction pipeline, and the Product Architecture Policy. Do not assume an untested step has passed.
 
 GitHub is the durable source of truth for development state. MT5 local files may be newer only when a compile/backtest/demo test has just been performed and has not yet been committed; reconcile that before editing.
+
+
+### v1.73 open-market DEMO lifecycle checkpoint — verified 2026-09-28
+
+The single-EA DEMO line has now reached v1.73. Compile and the frozen NO_ORDERS regression both PASS. Open-market evidence verified FULL/O01 Instance 2 / Magic 46102031 and SPLIT/O01+O01+O01 Instance 3 / Magic 46102032 through owned initial entry, multiple grid additions, Magic-isolated position management, basket-trailing exit, confirmed broker closes, and flat post-cycle state audit.
+
+v1.72 fixed the FULL/O01 entry-dispatch path and close-side terminal-refresh confirmation. v1.73 added a bounded OPEN-side terminal-refresh confirmation wait after accepted broker retcodes, addressing the observed case where a real fill could temporarily remain invisible to the terminal position list and be falsely classified as REJECTED. The frozen O01 Entry/Manage/Exit decision logic was not changed.
+
+Current DEMO evidence status: Gates A-E are PASS for the observed broker lifecycle. Gate F (route APPLY rejection while a real owned position/cycle exists) and Gate G (restart/state recognition while a real owned DEMO position exists) remain pending and must be verified separately before the DEMO validation is called complete.
+
+Detailed record: Test_Results/O01/O01_MultiAlpha_DemoGate_Progress_2026-09-28.md.

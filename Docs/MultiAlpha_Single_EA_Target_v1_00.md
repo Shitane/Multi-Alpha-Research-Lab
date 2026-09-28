@@ -246,6 +246,84 @@ Preset files store configuration/state required for restoration; they do not sto
 
 Preset data should carry a schema/version identifier so future module or configuration changes can be validated or migrated deliberately instead of being interpreted silently with the wrong structure.
 
+## Strategy Tester / backtest architecture
+
+The panel-first configuration and preset architecture MUST remain fully compatible with MT5 Strategy Tester. Detailed module settings do not need to be exposed as hundreds of Expert Inputs merely to make backtesting possible.
+
+At tester startup, the host must be able to load the same versioned configuration/preset model used by normal operation. Backtest configuration should therefore be reproducible from saved presets rather than depending on manual panel state from a previous terminal session.
+
+### Backtest modes
+
+The target architecture must support three scopes:
+
+1. **SINGLE SLOT**
+   - run one selected Logic Slot, such as #01
+   - intended for module development, parity tests, parameter studies, and fast regression
+   - the slot may load its saved Slot preset
+
+2. **SELECTED SLOTS**
+   - run an explicitly selected subset such as #01, #03, #07, #12
+   - intended for interaction tests and small portfolio comparisons without running all registered slots
+
+3. **PORTFOLIO**
+   - run the saved EA/Portfolio preset, potentially #01-#50
+   - intended for final multi-logic / multi-symbol portfolio validation
+
+The selected backtest scope must be explicit and reproducible; disabled/unselected slots must not trade or alter results.
+
+### Multi-symbol backtest contract
+
+Portfolio and Selected-Slots tests must use each slot's assigned logical symbol and resolved tester/broker symbol. The architecture must not assume that the chart/tester's primary symbol is the trading symbol for every slot.
+
+Example research mapping:
+
+- canonical XAUUSD -> tester XAUUSD_DUKA
+- canonical EURUSD -> tester EURUSD_DUKA
+- canonical USDJPY -> tester USDJPY_DUKA
+
+Example broker mapping:
+
+- canonical XAUUSD -> XAUUSD-m
+
+The same Alpha configuration should be portable between research data and broker environments by changing the Symbol Mapping / Broker Symbol Registry, not by rewriting the Alpha logic.
+
+Before a multi-symbol test is accepted, every enabled slot's required symbol/data mapping must be validated. Missing/unavailable symbol data must produce an explicit failure/status and MUST NOT silently substitute the primary tester symbol.
+
+### Presets in Strategy Tester
+
+Both EA/Portfolio presets and individual Slot presets are valid sources of Strategy Tester configuration.
+
+The tester startup contract should allow a minimal bootstrap selection such as:
+
+- Backtest Mode: SINGLE / SELECTED / PORTFOLIO
+- preset storage root
+- preset name/path or selected slot set
+- required test identity/safety controls
+
+All detailed Alpha parameters remain in the versioned preset/configuration model.
+
+A test report/log should record enough configuration identity to reproduce the run, including preset/schema version, enabled slot IDs, canonical/resolved symbols, routes/modules, and relevant configuration identity/hash when implemented.
+
+### Optimization policy
+
+MT5 optimization must not require exposing every parameter of all 50 slots simultaneously.
+
+The primary optimization scope is:
+
+- SINGLE SLOT for normal Alpha parameter optimization
+- SELECTED SLOTS only when a small combination genuinely needs joint study
+- PORTFOLIO primarily for combined validation rather than brute-force optimization of every parameter across #01-#50
+
+This prevents combinatorial parameter explosion while preserving the ability to evaluate the final portfolio.
+
+If selected preset fields later need to participate in MT5's native optimization engine, they may be exposed through a deliberately small optimization bridge/input set. This exception must not turn Expert Properties back into a complete duplicate of every module's panel settings.
+
+### Migration and regression rule
+
+Current O01/XAUUSD parity baselines remain valid regression references during migration. The move to slot-assigned symbols and multi-symbol tester operation must be staged; frozen O01 behavior must not be rewritten in one step merely to reach the portfolio target.
+
+Single-slot parity must be preserved first, followed by selected-slot/multi-symbol tests, and only then full portfolio backtest validation.
+
 ## Execution boundary
 
 Current verified research/parity hosts remain NO_ORDERS=1 / VIRTUAL_NOT_FILL=1.

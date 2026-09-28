@@ -137,3 +137,47 @@ Before calling simultaneous DEMO operation ready:
 8. document discrepancies before any optimization.
 
 No optimization of O01 is authorized by this record.
+
+
+## v1.68 NO_ORDERS regression checkpoint — VERIFIED
+
+The v1.68 execution-gate host was tester-verified after the execution-adapter changes:
+
+- host: `Parity_Tests/MultiAlpha/MultiAlpha_Runtime_Panel_DemoGate_v1_68.mq5`
+- symbol/timeframe: XAUUSD_DUKA / M15
+- period: 2026-08-16 through 2026-08-29
+- model: real ticks
+- initial deposit: 100,000
+- leverage: 1:100
+- execution: `NO_ORDERS`
+- `BROKER_ACTIONS_ARMED=0`
+- `VIRTUAL_NOT_FILL=1`
+
+Verified final result:
+
+- ticks 2,571,204
+- bars 920
+- entries 31
+- grids 5
+- closes 31
+- single trailing 27
+- basket trailing 4
+- virtual SL 0
+- buy open 0
+- sell open 0
+
+The tester reported `Test passed`. These values exactly match the frozen O01 aggregate NoOrders baseline.
+
+Interpretation: the v1.68 execution-gate development changes preserved the frozen virtual/no-order O01 behavior on the common baseline. This does **not** establish DEMO broker-fill parity. Actual DEMO entry/grid/exit ownership and FULL-vs-SPLIT lifecycle evidence remain pending for an open market and valid O01 session.
+
+### Next gate after v1.68
+
+Continue with the pre-DEMO safety/diagnostic gate without changing the frozen O01 decision logic:
+
+1. preserve `NO_ORDERS` as the regression path,
+2. retain DEMO/HEDGING/positive InstanceId+Magic locks,
+3. make broker lifecycle evidence attributable to InstanceId + Symbol + Magic + side + order/deal/position ticket + retcode,
+4. verify route changes remain rejected while real owned positions/cycle/transition exist,
+5. only then collect open-market/session DEMO evidence for Original O01 vs same-EA FULL/O01 vs same-EA SPLIT/O01+O01+O01.
+
+No O01 optimization is authorized at this checkpoint.

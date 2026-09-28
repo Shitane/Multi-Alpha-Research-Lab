@@ -74,6 +74,42 @@ A module may declare a filter unsupported when it is genuinely not applicable, b
 
 Cross-cutting account protection such as DD warning, grid-pause safety, and emergency-close safety remains a common Safety layer unless a later verified contract explicitly changes it. Common Safety must not be disabled by a module's time/news filter.
 
+
+### Special Risk / Event-Day Filter
+
+In addition to the normal News Filter (which can stop operation for a configurable number of minutes before/after an announcement), each applicable logic module may expose a separate user-configurable **Special Risk / Event-Day Filter** for high-risk days.
+
+This filter MUST be optional and configurable; it MUST NOT hard-code one permanent stop policy into A10-A15.
+
+Initial selectable controls should include:
+
+- Special Risk Filter: ON / OFF
+- FOMC Day Stop: ON / OFF
+  - stop the applicable logic for the entire FOMC trading day
+  - optional Before: 0 / 1 day
+  - optional After: 0 / 1 day
+- Month End Stop: ON / OFF
+  - selectable last 1 / 2 / 3 trading days
+- Month Start Stop: ON / OFF
+  - selectable first 1 / 2 / 3 trading days
+- Custom Stop Dates: ON / OFF
+  - user-selectable dates
+
+The design should be extensible so additional event-day categories such as CPI, employment reports, ECB, BOJ, or other strategy-relevant events can be registered later without changing the basic module contract.
+
+Month-end/month-start logic should be based on **trading days**, not merely calendar day numbers, so weekends/non-trading days do not produce an unintended schedule.
+
+For grid / averaging / recovery-style logic, an event-day stop must distinguish actions instead of blindly disabling all management. The configurable policy should support:
+
+- block new cycle / initial entry
+- block new grid or averaging additions
+- continue management of already-open positions where the selected module requires it
+- keep Exit processing available
+- keep SL / trailing processing available
+- keep Emergency / common Safety protection active
+
+A Special Risk filter is a module setting, just like Trading Time and the normal News Filter. Different selected E/M/X modules may therefore use different Special Risk settings, including OFF. The common Safety layer remains independent and cannot be disabled by these filters.
+
 ## Execution boundary
 
 Current verified research/parity hosts remain NO_ORDERS=1 / VIRTUAL_NOT_FILL=1.

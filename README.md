@@ -486,3 +486,17 @@ This exactly matches the previously verified standalone A10 FULL v1.74 result, s
 **Gate status: A10 FULL -> common FULL dispatcher -> single Multi Alpha runtime = PASS (NO_ORDERS).**
 
 Next UI gate: preserve this verified path while making the right-panel FULL selection (O01/A10) drive the left detail-panel context. FULL=A10 must show A10 FULL settings; FULL=O01 must restore O01 settings. Draft selection changes display context only; the active trading route changes only after validated APPLY. Unregistered FULL modules must remain NOT REGISTERED with no fallback.
+
+
+### v1.78 FULL-route UI gate — verified 2026-09-28
+
+Verified on the MT5 chart with `MultiAlpha_Runtime_Panel_A10FullPanel_NoOrders_v1_78` after a clean compile (0 errors / 0 warnings).
+
+Observed UI states:
+- Draft `FULL=A10`: left detail panel shows the A10 FULL strategy settings and hides O01-only Safety/DD, Time/News, and preset sections.
+- Draft unregistered `FULL=A11`: left detail panel collapses to `FULL STRATEGY [A11] NOT REGISTERED`; O01/A10 editable fields are not shown.
+- While Draft is `FULL=A11`, the right panel still reports Active `FULL=A10`. Draft selection therefore does not activate an unregistered route and does not fall back to O01.
+
+**Gate status: v1.78 FULL-route draft-context UI = PASS.**
+
+Next gate: round-trip the registered FULL choices `O01 -> A10 -> O01` and verify that the left detail panel fully restores the corresponding module-specific settings while Active changes only through validated right-panel APPLY.

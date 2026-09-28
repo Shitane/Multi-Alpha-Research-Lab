@@ -389,6 +389,34 @@ After the execution-adapter development through v1.68, the common XAUUSD_DUKA M1
 
 This is a NoOrders regression PASS only. DEMO broker-fill parity remains pending until open-market/session evidence verifies actual entry/grid/exit ownership, route-change safety with real owned positions, and Original-vs-FULL-vs-SPLIT lifecycle comparison.
 
+### v1.69 NO_ORDERS regression — verified 2026-09-28
+
+After the v1.69 broker-state audit / lifecycle-diagnostic changes, the common frozen O01 regression was rerun in `NO_ORDERS` mode.
+
+Verified conditions/results:
+
+- host: `Parity_Tests/MultiAlpha/MultiAlpha_Runtime_Panel_DemoGate_v1_69.mq5`
+- XAUUSD_DUKA / M15
+- 2026-08-16 through 2026-08-29
+- real ticks
+- JPY 100000 / leverage 1:100
+- 2,571,204 ticks / 920 bars
+- entries=31
+- grids=5
+- closes=31
+- single_trail=27
+- basket_trail=4
+- virtual_sl=0
+- buy_open=0 / sell_open=0
+- `EXECUTION=NO_ORDERS`
+- `BROKER_ACTIONS_ARMED=0`
+- `VIRTUAL_NOT_FILL=1`
+- tester: `Test passed`
+
+The aggregate result exactly matches the frozen O01 NoOrders baseline. This verifies that the v1.69 execution diagnostics/state-audit work did not alter the frozen virtual decision path.
+
+This is **not** a DEMO broker-fill parity PASS. The next evidence gate remains open-market/session validation of Original O01 vs the same Multi Alpha EA in FULL/O01 and SPLIT/O01+O01+O01 modes, including Symbol+Magic isolation, broker entry/grid/exit lifecycle, route-change rejection with real owned positions/cycles, and restart/state behavior.
+
 ## Planned sequence
 
 Immediate:

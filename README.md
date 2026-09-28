@@ -383,6 +383,12 @@ Do not optimize O01 or declare simultaneous DEMO operation complete until open-m
 
 Detailed record: `Test_Results/O01/O01_MultiAlpha_DemoGate_Progress_2026-09-28.md`.
 
+### v1.68 NO_ORDERS regression — verified 2026-09-28
+
+After the execution-adapter development through v1.68, the common XAUUSD_DUKA M15 real-tick regression was rerun in `NO_ORDERS` mode. It exactly preserved the frozen O01 aggregate baseline: 2,571,204 ticks / 920 bars, 31 entries, 5 grids, 31 closes, 27 single-trailing exits, 4 basket-trailing exits, 0 virtual-SL exits, and no open virtual positions. The run logged `BROKER_ACTIONS_ARMED=0` and `VIRTUAL_NOT_FILL=1`, and the tester reported `Test passed`.
+
+This is a NoOrders regression PASS only. DEMO broker-fill parity remains pending until open-market/session evidence verifies actual entry/grid/exit ownership, route-change safety with real owned positions, and Original-vs-FULL-vs-SPLIT lifecycle comparison.
+
 ## Planned sequence
 
 Immediate:

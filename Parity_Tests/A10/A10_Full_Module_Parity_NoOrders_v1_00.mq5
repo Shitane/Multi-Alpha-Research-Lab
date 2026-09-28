@@ -8,10 +8,10 @@
 
 CA10FullModule100 g_full;
 
-void SetMode(SA10FullModeConfig100 &m,bool en,double brick,int period,double dev,
+void SetMode(SA10FullModeConfig100 &cfg_mode,bool en,double brick,int period,double dev,
              double squeeze,int run,double tp,double sl,int hold,int cd,double spread)
-  {m.enabled=en;m.brick=brick;m.bb_period=period;m.deviation=dev;m.squeeze_width=squeeze;
-   m.entry_run=run;m.tp=tp;m.sl=sl;m.max_hold=hold;m.cooldown=cd;m.max_spread=spread;}
+  {cfg_mode.enabled=en;cfg_mode.brick=brick;cfg_mode.bb_period=period;cfg_mode.deviation=dev;cfg_mode.squeeze_width=squeeze;
+   cfg_mode.entry_run=run;cfg_mode.tp=tp;cfg_mode.sl=sl;cfg_mode.max_hold=hold;cfg_mode.cooldown=cd;cfg_mode.max_spread=spread;}
 
 string ModeName(int m){if(m==0)return"Breakout";if(m==1)return"Re-entry";if(m==2)return"Midline";return"Squeeze";}
 

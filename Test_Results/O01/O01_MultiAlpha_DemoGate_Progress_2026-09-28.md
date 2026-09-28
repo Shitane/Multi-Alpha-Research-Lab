@@ -238,3 +238,14 @@ It does not close the DEMO broker-fill parity gate. DEMO evidence is still requi
 8. relevant safety/emergency behavior.
 
 No O01 optimization is authorized by this checkpoint.
+
+
+## DEMO evidence protocol prepared
+
+The open-market validation procedure is now fixed in:
+
+- `Test_Results/O01/O01_v1_69_DEMO_Validation_Protocol.md`
+
+The protocol defines the three-chart identity map, startup prerequisites, required v1.69 log markers, and explicit PASS criteria for initial entry ownership, same-symbol/different-Magic isolation, grid lifecycle, exit lifecycle, route-change protection with real positions, restart/state observation, and Original-vs-FULL-vs-SPLIT event comparison.
+
+This preparation does not change the v1.69 trading implementation and does not change the current DEMO gate status: **PENDING until actual open-market/session broker evidence is collected**.

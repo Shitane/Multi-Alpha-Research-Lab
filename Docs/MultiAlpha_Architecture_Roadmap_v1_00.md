@@ -695,3 +695,31 @@ PanelThemeConfig
 ```
 
 Do not build one monolithic settings structure and later try to infer which fields belong to which save scope. The four scopes are part of the architecture, not merely four UI buttons.
+
+
+## 20. Current O01 execution-gate checkpoint — v1.69
+
+The architecture remains unchanged: one Multi Alpha EA, independent Strategy Instance identity, FULL and SPLIT routes, and a common broker execution adapter outside frozen decision modules.
+
+The v1.69 execution-gate host has now passed the frozen O01 **NO_ORDERS regression** on the common XAUUSD_DUKA/M15 real-tick baseline:
+
+- 2,571,204 ticks / 920 bars
+- 31 entries / 5 grids / 31 closes
+- 27 single-trailing / 4 basket-trailing / 0 virtual-SL
+- no open virtual positions at completion
+- `BROKER_ACTIONS_ARMED=0`
+- `VIRTUAL_NOT_FILL=1`
+- tester `Test passed`
+
+Therefore execution-boundary diagnostics may continue to evolve through adapters/wrappers, but the frozen O01 decision path remains protected.
+
+The next gate is not another decision-logic rewrite. It is open-market/session DEMO evidence for broker lifecycle and isolation:
+
+1. Original O01 reference, Multi Alpha FULL/O01, and Multi Alpha SPLIT/O01+O01+O01 run concurrently with distinct Magic ownership.
+2. Every broker open/close is attributable to Instance ID + Symbol + Magic + side + order/deal/position ticket + retcode.
+3. Same-symbol/different-Magic instances do not manage each other's positions.
+4. Route changes remain rejected while an owned position, active cycle, or execution transition exists.
+5. Restart/state behavior is observed with real owned DEMO positions.
+6. Any discrepancy is documented before optimization.
+
+Until those observations are complete, DEMO broker-fill parity remains pending.

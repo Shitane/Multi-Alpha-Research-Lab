@@ -8,20 +8,15 @@
 
 CA10FullModule100 g_full;
 
-void SetMode(SA10FullConfig100 &cfg,const int idx,bool en,double brick,int period,double dev,
-             double squeeze,int run,double tp,double sl,int hold,int cd,double spread)
-  {cfg.mode[idx].enabled=en;cfg.mode[idx].brick=brick;cfg.mode[idx].bb_period=period;cfg.mode[idx].deviation=dev;cfg.mode[idx].squeeze_width=squeeze;
-   cfg.mode[idx].entry_run=run;cfg.mode[idx].tp=tp;cfg.mode[idx].sl=sl;cfg.mode[idx].max_hold=hold;cfg.mode[idx].cooldown=cd;cfg.mode[idx].max_spread=spread;}
-
 string ModeName(int m){if(m==0)return"Breakout";if(m==1)return"Re-entry";if(m==2)return"Midline";return"Squeeze";}
 
 int OnInit()
   {
    SA10FullConfig100 c={};c.max_positions=4;c.skip_opposite=true;c.entry_ttl_seconds=120;
-   SetMode(c,0,true,17,20,1.0,1.0,2,24,42,1230,5,.35);
-   SetMode(c,1,true,30,31,1.2,1.0,1,28,48.5,2580,3,.35);
-   SetMode(c,2,true,30,5,3.0,1.0,1,10,34.5,2220,3,.35);
-   SetMode(c,3,true,14,18,2.4,34.5,1,26,31,2050,1,.35);
+   c.mode[0].enabled=true;c.mode[0].brick=17;c.mode[0].bb_period=20;c.mode[0].deviation=1.0;c.mode[0].squeeze_width=1.0;c.mode[0].entry_run=2;c.mode[0].tp=24;c.mode[0].sl=42;c.mode[0].max_hold=1230;c.mode[0].cooldown=5;c.mode[0].max_spread=.35;
+   c.mode[1].enabled=true;c.mode[1].brick=30;c.mode[1].bb_period=31;c.mode[1].deviation=1.2;c.mode[1].squeeze_width=1.0;c.mode[1].entry_run=1;c.mode[1].tp=28;c.mode[1].sl=48.5;c.mode[1].max_hold=2580;c.mode[1].cooldown=3;c.mode[1].max_spread=.35;
+   c.mode[2].enabled=true;c.mode[2].brick=30;c.mode[2].bb_period=5;c.mode[2].deviation=3.0;c.mode[2].squeeze_width=1.0;c.mode[2].entry_run=1;c.mode[2].tp=10;c.mode[2].sl=34.5;c.mode[2].max_hold=2220;c.mode[2].cooldown=3;c.mode[2].max_spread=.35;
+   c.mode[3].enabled=true;c.mode[3].brick=14;c.mode[3].bb_period=18;c.mode[3].deviation=2.4;c.mode[3].squeeze_width=34.5;c.mode[3].entry_run=1;c.mode[3].tp=26;c.mode[3].sl=31;c.mode[3].max_hold=2050;c.mode[3].cooldown=1;c.mode[3].max_spread=.35;
    double ts=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_SIZE);
    if(!g_full.Init(c,ts))return INIT_FAILED;
    Print("[A10_FULL100_START] FULL=A10 TTL=120 NO_ORDERS=1 VIRTUAL_NOT_FILL=1");

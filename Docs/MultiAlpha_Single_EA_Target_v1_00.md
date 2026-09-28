@@ -50,11 +50,15 @@ Trading time and news handling are configurable characteristics of each selected
 Each registered ENTRY, MANAGE, or EXIT module may expose user-selectable operating-filter settings when that capability uses them. The settings contract should allow, at minimum:
 
 - Trading Time Filter: ON / OFF
-- TimeMode and Start / End window when enabled
+- TimeMode: selectable
+- Start Time: user-selectable start time
+- End Time: user-selectable end time
 - News Filter: ON / OFF
 - selectable news impact levels when supported
 - configurable stop time before news
 - configurable resume time after news
+
+The operating time window MUST be editable by the user for each applicable module. Start Time and End Time are independent selectable settings; they MUST NOT be hard-coded into the module. For example, a user may configure one module for 10:00-14:00 and another for 15:00-18:00, or turn the Trading Time Filter OFF.
 
 These values are settings, not hard-coded identities of A10, A11, A12, A13, A14, or A15. The user must be able to choose them freely for the selected module and preserve different configurations between modules.
 

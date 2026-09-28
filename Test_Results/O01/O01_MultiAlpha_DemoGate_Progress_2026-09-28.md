@@ -181,3 +181,60 @@ Continue with the pre-DEMO safety/diagnostic gate without changing the frozen O0
 5. only then collect open-market/session DEMO evidence for Original O01 vs same-EA FULL/O01 vs same-EA SPLIT/O01+O01+O01.
 
 No O01 optimization is authorized at this checkpoint.
+
+
+## v1.69 NO_ORDERS regression checkpoint — VERIFIED
+
+The v1.69 host was rerun on the frozen common O01 baseline after adding the v1.69 broker-state audit and lifecycle diagnostics.
+
+Test conditions:
+
+- host: `Parity_Tests/MultiAlpha/MultiAlpha_Runtime_Panel_DemoGate_v1_69.mq5`
+- symbol/timeframe: XAUUSD_DUKA / M15
+- period: 2026-08-16 through 2026-08-29
+- model: real ticks
+- initial deposit: JPY 100000
+- leverage: 1:100
+- Instance ID: 1
+- Magic: 46102031
+- execution: `NO_ORDERS`
+
+Verified startup safety state:
+
+- `EXEC_ADAPTER=1.69`
+- `EXECUTION=NO_ORDERS`
+- `BROKER_ACTIONS_ARMED=0`
+- `VIRTUAL_NOT_FILL=1`
+
+Verified final result:
+
+- ticks 2,571,204
+- bars 920
+- entries 31
+- grids 5
+- closes 31
+- single trailing 27
+- basket trailing 4
+- virtual SL 0
+- buy open 0
+- sell open 0
+- tester: `Test passed`
+
+These values exactly match the frozen O01 aggregate NoOrders baseline.
+
+### Interpretation
+
+v1.69 preserves the frozen O01 virtual/no-order decision path while adding execution-boundary diagnostics. This closes the v1.69 **NoOrders regression gate only**.
+
+It does not close the DEMO broker-fill parity gate. DEMO evidence is still required during an open market and valid O01 session for:
+
+1. Original O01 vs same-EA FULL/O01 vs same-EA SPLIT/O01+O01+O01 event timing,
+2. initial broker entry ownership,
+3. same-symbol/different-Magic isolation,
+4. grid additions and lot progression,
+5. single/basket trailing exits,
+6. route-change rejection while real owned positions/cycles/transitions exist,
+7. restart/state behavior with owned broker positions,
+8. relevant safety/emergency behavior.
+
+No O01 optimization is authorized by this checkpoint.

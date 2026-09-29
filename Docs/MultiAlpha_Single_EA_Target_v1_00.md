@@ -43,6 +43,65 @@ Changing the right-panel draft may change what the left panel displays, but it M
 
 An unregistered module displays NOT REGISTERED and MUST NEVER fall back to O01 settings or O01 logic as if it were registered.
 
+## Left-panel tabbed workspace contract — fixed direction 2026-09-30
+
+The two-panel footprint should remain compact. **Do not enlarge the left panel merely to add FILTER or SAFETY settings.**
+
+The right panel remains the **Route / Module Selector**. The left panel becomes one fixed-size workspace with three view tabs:
+
+```
+[ LOGIC ] [ FILTER ] [ SAFETY ]
+```
+
+These tabs switch only what is displayed/edited in the left workspace. They **do not enable, disable, pause, or change the runtime ownership** of LOGIC, FILTER, or SAFETY. All applicable runtime layers continue operating regardless of which tab is visible.
+
+### LOGIC tab
+
+The LOGIC view preserves the current module-settings behavior:
+
+- FULL draft: show the selected FULL module settings.
+- SPLIT draft: show the selected ENTRY / MANAGE / EXIT settings areas.
+- Draft selection may change the displayed settings context immediately.
+- Active route still changes only through the right-panel APPLY safety contract.
+
+### FILTER tab
+
+The FILTER view displays the slot's **COMMON FILTER / Trade Permission Gate** settings, including the independently selectable parts defined below (Trading Time, News, FOMC, NFP, CPI, Month End, Month Start, Quarter End, and future registered filter parts).
+
+The FILTER view should also expose current permission/status clearly when implemented, including:
+
+- NEW ENTRY: ALLOW / BLOCK
+- ADD ENTRY: ALLOW / BLOCK
+- blocking reason when BLOCK is active
+
+If the filter controls do not fit comfortably in one fixed-size view, use an internal page mechanism such as NEXT/PREV rather than increasing the outer panel dimensions.
+
+### SAFETY tab
+
+The SAFETY view displays **cross-cutting common safety settings and live safety state**. Safety is not owned by E, M, X, or FILTER.
+
+Names and controls in this tab must use the common Safety contract. Strategy-specific terms such as an O01-only "Grid Pause" must not automatically become universal A10-A15 terminology unless a later verified common contract defines the equivalent action.
+
+Safety remains active even while LOGIC or FILTER is the visible tab.
+
+### UI separation rule
+
+The fixed product/UI responsibility is:
+
+- **Right panel** = Structure / FULL / ENTRY / MANAGE / EXIT route selection and route APPLY.
+- **Left LOGIC tab** = selected strategy/module settings.
+- **Left FILTER tab** = common trade-permission filter settings/status for the Logic Slot.
+- **Left SAFETY tab** = common safety settings/status for the Logic Slot / host as defined by the safety contract.
+
+Switching left tabs is a **view operation only**. It must not:
+- change the active route;
+- reset module state;
+- alter filter permissions merely because FILTER is hidden;
+- disable Safety merely because SAFETY is hidden;
+- trigger broker orders.
+
+This tabbed workspace is the preferred way to add FILTER and SAFETY without increasing the existing two-panel footprint.
+
 ## Common Trade Permission Filter contract — fixed direction 2026-09-29
 
 Operating/risk filters are **NOT owned by ENTRY, MANAGE, or EXIT**. They are a cross-cutting **COMMON FILTER / Trade Permission Gate** shared by A10, A11, A12, ... and future Alpha modules.

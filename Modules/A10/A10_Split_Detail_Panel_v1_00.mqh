@@ -9,13 +9,13 @@
 
 class CA10SplitDetailPanel100
 {
- string p;
- void T(const string id,const string v){if(ObjectFind(0,p+id)>=0)ObjectSetString(0,p+id,OBJPROP_TEXT,v);}
- void V(const string id,const bool on){if(ObjectFind(0,p+id)>=0)ObjectSetInteger(0,p+id,OBJPROP_TIMEFRAMES,on?OBJ_ALL_PERIODS:0);}
+ string m_prefix;
+ void T(const string id,const string v){string name=m_prefix+id;if(ObjectFind(0,name)>=0)ObjectSetString(0,name,OBJPROP_TEXT,v);}
+ void V(const string id,const bool on){string name=m_prefix+id;if(ObjectFind(0,name)>=0)ObjectSetInteger(0,name,OBJPROP_TIMEFRAMES,(long)(on?OBJ_ALL_PERIODS:0));}
  void Pair(const string id,const bool on){V("L_"+id,on);V(id,on);}
  int ModeIndex(const int mode){int m=mode;if(m<0)m=0;if(m>3)m=3;return m;}
 public:
- CA10SplitDetailPanel100(){p="O01CFG160_";}
+ CA10SplitDetailPanel100(){m_prefix="O01CFG160_";}
  void DisplayManage(const bool a10,const SA10FullConfig100 &c,const int mode){
   if(!a10)return;int m=ModeIndex(mode);
   T("L_H_GRID","MANAGE [M]  [A10]");

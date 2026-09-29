@@ -10,7 +10,8 @@
 #include "..\\..\\..\\Include\\O01\\O01_GSG_RSI30_Runtime_Adapter_v1_20.mqh"
 #include "..\\..\\..\\Include\\O01\\O01_Settings_Panel_v1_61.mqh"
 #include "..\\..\\..\\Include\\O01\\MultiAlpha_Foundation_v1_40.mqh"
-#include "..\\..\\..\\Include\\Common\\MultiAlpha_Route_Selector_Panel_v1_85.mqh"\n#include "..\\..\\..\\Include\\Common\\MultiAlpha_A10_Split_Runtime_v1_85.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Route_Selector_Panel_v1_85.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_A10_Split_Runtime_v1_85.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Full_Dispatcher_v1_74.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Entry_Dispatcher_v1_72.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Demo_Execution_Adapter_v1_73.mqh"
@@ -98,7 +99,8 @@ SMA140PanelTheme panel_theme;
 CMultiAlphaRouteController185 route_controller;
 CMultiAlphaRouteSelectorPanel185 route_panel;
 CMultiAlphaEntryDispatcher172 entry_dispatcher;
-CMultiAlphaFullDispatcher174 full_dispatcher;\nCMultiAlphaA10SplitRuntime185 a10_split_runtime;
+CMultiAlphaFullDispatcher174 full_dispatcher;
+CMultiAlphaA10SplitRuntime185 a10_split_runtime;
 CMultiAlphaDemoExecutionAdapter173 execution_adapter;
 SA10EntrySettings100 a10_entry_cfg;
 CA10EntrySettingsPanel100 a10_panel;

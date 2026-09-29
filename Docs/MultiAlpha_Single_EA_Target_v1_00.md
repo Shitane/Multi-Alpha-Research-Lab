@@ -43,72 +43,95 @@ Changing the right-panel draft may change what the left panel displays, but it M
 
 An unregistered module displays NOT REGISTERED and MUST NEVER fall back to O01 settings or O01 logic as if it were registered.
 
-## Per-module operating filters
+## Common Trade Permission Filter contract — fixed direction 2026-09-29
 
-Trading time and news handling are configurable characteristics of each selected logic module. They MUST NOT be permanently predetermined for A10-A15, and they MUST NOT be forced into one common schedule/news policy for all Alpha modules.
+Operating/risk filters are **NOT owned by ENTRY, MANAGE, or EXIT**. They are a cross-cutting **COMMON FILTER / Trade Permission Gate** shared by A10, A11, A12, ... and future Alpha modules.
 
-Each registered ENTRY, MANAGE, or EXIT module may expose user-selectable operating-filter settings when that capability uses them. The settings contract should allow, at minimum:
+This rule exists so module responsibilities do not drift when a future MANAGE module owns grid / averaging / recovery behavior.
 
-- Trading Time Filter: ON / OFF
-- TimeMode: selectable
-- Start Time: user-selectable start time
-- End Time: user-selectable end time
-- News Filter: ON / OFF
-- selectable news impact levels when supported
-- configurable stop time before news
-- configurable resume time after news
+### Responsibility boundary
 
-The operating time window MUST be editable by the user for each applicable module. Start Time and End Time are independent selectable settings; they MUST NOT be hard-coded into the module. For example, a user may configure one module for 10:00-14:00 and another for 15:00-18:00, or turn the Trading Time Filter OFF.
+- **ENTRY [E]** = creates the strategy's initial-entry signal/decision.
+- **MANAGE [M]** = owns post-entry lifecycle/position management required by that strategy. A MANAGE module may be non-grid (A10) or may own grid / averaging / recovery additions in a future Alpha.
+- **EXIT [X]** = owns exit decisions such as TP / SL / trailing / time / strategy-specific exits.
+- **COMMON FILTER [F]** = decides whether a risk-increasing trade action is permitted now.
+- **SAFETY** = common protection layer; independent of E/M/X/F and never disabled by an operating filter.
 
-These values are settings, not hard-coded identities of A10, A11, A12, A13, A14, or A15. The user must be able to choose them freely for the selected module and preserve different configurations between modules.
+A10 MANAGE is specifically **not** a grid/averaging module. Its verified v1.00 contract coordinates A10 lifecycle/queue, max positions, opposite-signal conflict handling, entry TTL, spread, cooldown, position state, and entry/exit transition state. Registering A10 as M does not add grid, averaging, or martingale behavior.
 
-In SPLIT mode, filters belong to the selected responsibility independently. Example:
+### Two permission channels
 
-- E=A10 may use its own Entry time/news settings.
-- M=A12 may use different Manage time/news settings.
-- X=A14 may use different Exit time/news settings, or leave either filter OFF.
+COMMON FILTER must expose two distinct permissions:
 
-Changing E/M/X must load/display that selected module's own configurable settings rather than silently inheriting another module's filter values.
+1. **NEW ENTRY permission**
+   - applies when starting a new position/cycle from the ENTRY path.
+2. **ADD ENTRY permission**
+   - applies to risk-increasing additions from MANAGE, such as grid / averaging / recovery entries when the selected M actually supports them.
 
-A module may declare a filter unsupported when it is genuinely not applicable, but registration MUST NOT silently substitute O01 or a global default as module-specific behavior.
+A filter block must not be implemented as "disable MANAGE". For a grid-capable M, ADD ENTRY may be blocked while existing-position management continues.
 
-Cross-cutting account protection such as DD warning, grid-pause safety, and emergency-close safety remains a common Safety layer unless a later verified contract explicitly changes it. Common Safety must not be disabled by a module's time/news filter.
+A10 currently has no grid/averaging addition, so its ADD ENTRY channel is unused unless a later separately registered and verified module contract explicitly adds such behavior.
 
+### Exit and Safety are never stopped by these filters
 
-### Special Risk / Event-Day Filter
+When NEW ENTRY and/or ADD ENTRY is blocked:
 
-In addition to the normal News Filter (which can stop operation for a configurable number of minutes before/after an announcement), each applicable logic module may expose a separate user-configurable **Special Risk / Event-Day Filter** for high-risk days.
+- existing-position monitoring continues;
+- EXIT remains active;
+- TP / SL / trailing / time / strategy-specific exit processing remains available as applicable;
+- Emergency / common Safety remains active.
 
-This filter MUST be optional and configurable; it MUST NOT hard-code one permanent stop policy into A10-A15.
+A filter must never silently turn off X or common Safety.
 
-Initial selectable controls should include:
+### Filter parts and defaults
 
-- Special Risk Filter: ON / OFF
-- FOMC Day Stop: ON / OFF
-  - stop the applicable logic for the entire FOMC trading day
-  - optional Before: 0 / 1 day
-  - optional After: 0 / 1 day
-- Month End Stop: ON / OFF
-  - selectable last 1 / 2 / 3 trading days
-- Month Start Stop: ON / OFF
-  - selectable first 1 / 2 / 3 trading days
-- Custom Stop Dates: ON / OFF
-  - user-selectable dates
+The filter system is a set of independently selectable parts. **Every part defaults to OFF** so an all-OFF configuration introduces no new filter intervention and can preserve the verified strategy baseline.
 
-The design should be extensible so additional event-day categories such as CPI, employment reports, ECB, BOJ, or other strategy-relevant events can be registered later without changing the basic module contract.
+Initial parts:
 
-Month-end/month-start logic should be based on **trading days**, not merely calendar day numbers, so weekends/non-trading days do not produce an unintended schedule.
+- Trading Time: OFF
+  - Start = 10:00
+  - End = 14:00
+  - time basis / TimeMode must be explicit when implemented.
+- News Filter: OFF
+- FOMC Stop: OFF
+  - Before = 12 hours
+  - After = 12 hours
+- NFP Stop: OFF
+- CPI Stop: OFF
+- Month End Stop: OFF
+  - default scope = last 1 trading day
+- Month Start Stop: OFF
+  - default scope = first 1 trading day
+- Quarter End Stop: OFF
 
-For grid / averaging / recovery-style logic, an event-day stop must distinguish actions instead of blindly disabling all management. The configurable policy should support:
+Month-end/month-start rules use **trading days**, not merely calendar day numbers.
 
-- block new cycle / initial entry
-- block new grid or averaging additions
-- continue management of already-open positions where the selected module requires it
-- keep Exit processing available
-- keep SL / trailing processing available
-- keep Emergency / common Safety protection active
+The architecture must remain extensible for additional filter parts without changing E/M/X responsibility boundaries.
 
-A Special Risk filter is a module setting, just like Trading Time and the normal News Filter. Different selected E/M/X modules may therefore use different Special Risk settings, including OFF. The common Safety layer remains independent and cannot be disabled by these filters.
+### Combination rule
+
+Enabled filter parts combine as permission gates:
+
+- if any enabled filter blocks the requested action, that action is BLOCK;
+- if no enabled filter blocks it, that action is ALLOW;
+- disabled filters have no effect.
+
+The configuration model should allow each filter part to specify whether it blocks:
+
+- NEW ENTRY;
+- ADD ENTRY;
+- or both.
+
+This allows research such as blocking only grid/averaging additions around an event while still permitting an initial entry, without changing the E or M strategy code.
+
+### Configuration ownership
+
+Filter settings belong to the **Logic Slot / route configuration**, not to the internal identity of E, M, or X. Different slots may therefore use the same E/M/X modules with different filter combinations.
+
+The panel may display the filter controls near route/module settings for usability, but this must not imply that the filter logic is owned by M, E, or X.
+
+No Alpha module may silently hard-code a common filter as mandatory unless that behavior is part of the verified original strategy and is explicitly represented by its own strategy contract.
 
 ## Multi-logic / multi-symbol target
 
@@ -356,19 +379,23 @@ No change in this architecture document authorizes a change to the frozen O01 pa
 
 ## A10 SPLIT integration priority — 2026-09-29
 
-A10 is the first A-series module to be integrated into the single Multi Alpha panel as a complete SPLIT route.
+A10 is the first A-series module integrated into the single Multi Alpha panel as a complete SPLIT route.
 
 Integration order:
 1. expose verified A10 ENTRY / MANAGE / EXIT capabilities;
 2. connect the documented A10 split virtual lifecycle to the current NO_ORDERS host;
 3. preserve the verified A10 FULL and SPLIT parity logic without optimization;
-4. add A10 ENTRY operating-stop controls before expanding to A11+.
+4. connect the COMMON FILTER / Trade Permission Gate without assigning filter ownership to E, M, or X;
+5. with every filter OFF, require no filter-caused change to the verified A10 baseline before expanding to A11+.
 
-For **A10 ENTRY [E]**, the product-direction settings must include:
-- normal News Filter;
-- the original/special stop filter (Special Risk / Event-Day Filter);
-- user-selectable operating time where applicable.
+For A10:
+- E remains A10 signal/initial-entry logic;
+- M remains the verified non-grid A10 lifecycle/queue manager;
+- X remains A10 exit logic;
+- F is the common NEW ENTRY / ADD ENTRY permission layer described above;
+- A10 does **not** gain grid, averaging, or martingale behavior merely because M exists.
 
-These filters gate **new A10 entry/cycle permission**. They must not silently disable A10 EXIT processing or common Emergency/Safety protection. MANAGE and EXIT keep their own responsibility-specific filter contracts as documented above.
+The earlier idea that A10 ENTRY or A10 MANAGE should *own* Trading Time / News / Special Event filters is superseded by the COMMON FILTER contract in this document.
 
 Until a mixed-module position/state ownership contract is connected and regression-tested, O01/O01/O01 and A10/A10/A10 are valid SPLIT ownership sets; mixed O01/A10 E/M/X combinations must fail safely rather than fallback.
+

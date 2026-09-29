@@ -37,7 +37,7 @@ public:
  bool DraftExitRegistered(){return MA175IsRegistered(m_draft.exit_module,MA_CAP_EXIT_V175);}
  string DraftSummary(){return MA150StructureName(m_draft.structure)+" F:"+LogicText(m_draft.full_module)+" E:"+LogicText(m_draft.entry_module)+" M:"+LogicText(m_draft.manage_module)+" X:"+LogicText(m_draft.exit_module);}
  void SetDraft(const SMA_ModuleSelection150 &s){m_draft=s;Refresh();}
- int Event(const int id,const string &name,const SMA_RouteState150 &state,string &reason){reason="";if(id==CHARTEVENT_MOUSE_MOVE){HoverAt((int)ChartGetInteger(0,CHART_MOUSE_X_DISTANCE),(int)ChartGetInteger(0,CHART_MOUSE_Y_DISTANCE));return 0;}if(id!=CHARTEVENT_OBJECT_CLICK||StringFind(name,m_prefix)!=0)return 0;
+ int Event(const int id,const string &name,const SMA_RouteState150 &state,string &reason,const long mouse_x=0,const double mouse_y=0){reason="";if(id==CHARTEVENT_MOUSE_MOVE){HoverAt((int)mouse_x,(int)mouse_y);return 0;}if(id!=CHARTEVENT_OBJECT_CLICK||StringFind(name,m_prefix)!=0)return 0;
  if(StringFind(name,m_prefix+"DD_")==0){string tail=StringSubstr(name,StringLen(m_prefix+"DD_"));int p=StringFind(tail,"_");string which=StringSubstr(tail,0,p),key=StringSubstr(tail,p+1);if(which=="STRUCTURE")m_draft.structure=(key=="SPLIT"?MA_STRUCTURE_SPLIT_V150:MA_STRUCTURE_FULL_V150);else if(which=="FULL")m_draft.full_module=MenuLogic(key);else if(which=="ENTRY")m_draft.entry_module=MenuLogic(key);else if(which=="MANAGE")m_draft.manage_module=MenuLogic(key);else if(which=="EXIT")m_draft.exit_module=MenuLogic(key);MenuClear();Refresh();return 1;}
  if(name==m_prefix+"STRUCTURE"){Release("STRUCTURE");OpenMenu("STRUCTURE");Refresh();return 0;}
  if(name==m_prefix+"FULL"){Release("FULL");OpenMenu("FULL");Refresh();return 0;}

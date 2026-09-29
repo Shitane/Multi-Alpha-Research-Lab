@@ -14,7 +14,7 @@ class CMultiAlphaLeftWorkspaceTabs187
  void V(const string name,const bool on){if(ObjectFind(0,name)>=0)ObjectSetInteger(0,name,OBJPROP_TIMEFRAMES,(long)(on?OBJ_ALL_PERIODS:0));}
  void MakeButton(const string id,const int x,const string text){
   string n=m_prefix+id;if(ObjectFind(0,n)<0)ObjectCreate(0,n,OBJ_BUTTON,0,0,0);
-  ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,90);
+  ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,12);
   ObjectSetInteger(0,n,OBJPROP_XSIZE,88);ObjectSetInteger(0,n,OBJPROP_YSIZE,22);ObjectSetInteger(0,n,OBJPROP_FONTSIZE,8);
   ObjectSetInteger(0,n,OBJPROP_SELECTABLE,false);ObjectSetInteger(0,n,OBJPROP_SELECTED,false);ObjectSetInteger(0,n,OBJPROP_ZORDER,60);ObjectSetString(0,n,OBJPROP_TEXT,text);
  }

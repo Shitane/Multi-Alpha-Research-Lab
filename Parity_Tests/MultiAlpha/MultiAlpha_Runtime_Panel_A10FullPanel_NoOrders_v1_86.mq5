@@ -16,7 +16,8 @@
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Entry_Dispatcher_v1_72.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Demo_Execution_Adapter_v1_73.mqh"
 #include "..\\..\\..\\Include\\A10\\A10_Entry_Settings_Panel_v1_03.mqh"
-#include "..\\..\\..\\Include\\A10\\A10_Full_Settings_Panel_v1_01.mqh"\n#include "..\\..\\..\\Include\\A10\\A10_Split_Detail_Panel_v1_00.mqh"
+#include "..\\..\\..\\Include\\A10\\A10_Full_Settings_Panel_v1_01.mqh"
+#include "..\\..\\..\\Include\\A10\\A10_Split_Detail_Panel_v1_00.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Left_Context_v1_84.mqh"
 
 enum O01_TIME_MODE { O01_AUTO_GMT=0,O01_SERVER_TIME=1,O01_CUSTOM_GMT=2 };
@@ -105,7 +106,8 @@ CMultiAlphaDemoExecutionAdapter173 execution_adapter;
 SA10EntrySettings100 a10_entry_cfg;
 CA10EntrySettingsPanel100 a10_panel;
 SA10FullConfig100 a10_full_cfg;
-CA10FullSettingsPanel101 a10_full_panel;\nCA10SplitDetailPanel100 a10_split_detail_panel;
+CA10FullSettingsPanel101 a10_full_panel;
+CA10SplitDetailPanel100 a10_split_detail_panel;
 CMultiAlphaLeftContext184 left_context;
 
 struct VPos{double price,lot;datetime time,bar;};

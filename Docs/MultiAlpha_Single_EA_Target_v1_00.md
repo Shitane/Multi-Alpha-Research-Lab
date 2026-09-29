@@ -192,6 +192,144 @@ The panel may display the filter controls near route/module settings for usabili
 
 No Alpha module may silently hard-code a common filter as mandatory unless that behavior is part of the verified original strategy and is explicitly represented by its own strategy contract.
 
+## Multi-Slot Runtime / Panel contract — fixed direction 2026-09-30
+
+The production Multi Alpha EA must run **multiple independent Logic Slots concurrently inside one EA binary**. The target capacity remains up to 50 slots, displayed as **#01 ... #50**.
+
+A Logic Slot is the primary runtime/configuration unit. Each enabled slot behaves like an independently configured strategy instance while sharing the same host EA.
+
+### Slot identity and state
+
+Each slot owns at least:
+
+- Slot ID (#01-#50)
+- ENABLE / DISABLE state
+- logical/base symbol
+- broker/tester-resolved symbol
+- FULL or SPLIT route
+- selected FULL module, or selected E / M / X modules
+- COMMON FILTER configuration and runtime permission state
+- SAFETY configuration/state as defined by the common safety contract
+- Magic / execution ownership identity
+- module settings
+- independent runtime/lifecycle state
+- preset/configuration identity
+
+One slot must never count, add to, close, trail, reset, or otherwise manage another slot's positions/state merely because the slots use the same symbol or same Alpha modules.
+
+### Concurrent runtime rule
+
+All enabled slots run concurrently.
+
+Changing which slot is **displayed in the panel is a view/edit operation only**. For example, switching the panel from #01 to #02 must not pause, reset, reinitialize, disable, or otherwise alter #01. Hidden enabled slots continue running normally.
+
+Likewise, switching the left LOGIC / FILTER / SAFETY tab affects display only and does not stop any runtime layer.
+
+### Compact panel target
+
+Do **not** create one large panel per slot and do not enlarge the existing two-panel footprint merely because multiple slots exist.
+
+Add a compact slot selector/status header above the existing two-panel workspace, conceptually:
+
+```
+MULTI ALPHA RESEARCH LAB
+SLOT [ #01 v ]   ENABLE [ON]   XAUUSD   STATE: RUNNING
+[ LOGIC | FILTER | SAFETY ]    [ ROUTE / MODULE SELECTOR ]
+```
+
+The selected slot determines which slot's settings/status are shown in both left and right panels.
+
+A slot selector/list should allow the user to inspect/select #01-#50. A compact list/status representation may show, for example:
+
+```
+#01  ON   XAUUSD   A10/A10/A10
+#02  ON   GBPUSD   O01/O01/O01
+#03  OFF  EURUSD   A11/A11/A11
+#04  ON   XAUUSD   A12/A13/A12
+#05  OFF  ---
+```
+
+The exact visual control may evolve, but the architectural rule is fixed: **one reusable panel workspace edits/views one selected slot while all enabled slots can continue running concurrently.**
+
+### Header / portfolio status
+
+The panel should expose compact portfolio-level status without opening every slot, including at least when implemented:
+
+- selected slot, e.g. #03 / 50
+- number of enabled slots
+- number of running slots
+- number of blocked/error slots
+
+Per-slot status should clearly distinguish states such as DISABLED, READY, RUNNING, FILTER BLOCK, SAFETY BLOCK, CONFIG ERROR, or other verified runtime states.
+
+### Panel responsibility by selected slot
+
+For the currently selected slot:
+
+- **Right panel** = Structure / FULL / E / M / X route selection and route APPLY.
+- **Left LOGIC tab** = selected slot's strategy/module settings.
+- **Left FILTER tab** = selected slot's COMMON FILTER settings plus NEW ENTRY / ADD ENTRY permission/status.
+- **Left SAFETY tab** = selected slot/common Safety settings and state according to the safety contract.
+
+Selecting another slot must load/display that slot's own Draft/Active route, settings, filter configuration, safety state, symbol and status. It must not silently copy values from the previously displayed slot.
+
+### FULL / SPLIT inside every slot
+
+Every slot independently selects either:
+
+- **FULL** = one registered whole-strategy module; or
+- **SPLIT** = independently routed ENTRY + MANAGE + EXIT modules, subject to registry/ownership compatibility validation.
+
+This means the host architecture can support combinations such as:
+
+```
+#01 XAUUSD -> SPLIT A10 / A10 / A10
+#02 XAUUSD -> FULL A11
+#03 GBPUSD -> SPLIT A10 / A10 / A10
+#04 EURUSD -> SPLIT A12 / A13 / A14
+#05 USDJPY -> FULL O01
+```
+
+These examples define the architecture, not currently registered/verified module availability. Unregistered or ownership-incompatible combinations must still fail safely.
+
+### Slot enable is separate from slot selection
+
+**Selected Slot** and **Enabled Slot** are different concepts.
+
+- selecting #05 means "show/edit #05";
+- enabling #05 means "#05 may participate in runtime after all validation/safety gates pass";
+- leaving #05 to view #06 must not disable #05;
+- disabling a slot must follow an explicit safe runtime contract and must not be implemented as an accidental side effect of UI navigation.
+
+### Draft / APPLY rule remains per-slot
+
+The existing Draft -> APPLY safety contract remains valid independently for every slot.
+
+Editing a selected slot may update its Draft display/settings, but must not silently change its Active route. Route activation occurs only after that slot's APPLY validation and transition safety checks pass.
+
+An APPLY on #03 must not alter #01, #02, #04, etc.
+
+### Execution ownership
+
+Broker execution must remain attributable to exactly one slot. Ownership must include sufficient identity such as slot/instance identity + Magic + resolved symbol under the execution contract.
+
+Multiple slots are allowed to trade the same symbol and even the same Alpha route, but their broker positions/orders and runtime state must remain isolated.
+
+### Development / migration order
+
+Multi-slot migration must be staged rather than rewriting the verified single-slot path at once:
+
+1. define the Slot data/config/runtime contract;
+2. add the compact #01-#50 selector without changing trading behavior;
+3. preserve current #01/single-slot NO_ORDERS parity;
+4. add independent Draft/Active configuration storage per slot;
+5. validate ENABLE/DISABLE and hidden-slot continuity with NO_ORDERS;
+6. add a small concurrent test first (#01/#02, then more slots);
+7. validate symbol + Magic + slot ownership isolation;
+8. expand toward the 50-slot target only after regression gates pass.
+
+No multi-slot architecture change authorizes changing frozen O01 logic or the verified A10 FULL/SPLIT decision logic.
+
 ## Multi-logic / multi-symbol target
 
 The long-term production architecture MUST support up to **50 independently configurable Logic Slots** inside the same Multi Alpha EA. This is a fixed product direction so later development must not drift back to a single-symbol or one-logic-per-EA design.

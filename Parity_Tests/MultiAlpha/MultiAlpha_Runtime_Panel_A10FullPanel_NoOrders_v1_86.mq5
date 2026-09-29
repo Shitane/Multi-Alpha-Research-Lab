@@ -272,8 +272,8 @@ int OnInit(){
   left_context.Split(MA150LogicName(initial_route.entry_module),MA150LogicName(initial_route.manage_module),MA150LogicName(initial_route.exit_module));
   a10_full_panel.Hide();
   if(initial_route.entry_module==MA_LOGIC_A10_V150)a10_panel.Display(a10_entry_cfg);else a10_panel.RestoreO01Labels();
-  if(initial_route.manage_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayManage(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreManageO01();
-  if(initial_route.exit_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayExit(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreExitO01();
+  if(initial_route.manage_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayManage(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreManageO01(runtime_cfg);
+  if(initial_route.exit_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayExit(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreExitO01(runtime_cfg);
  }
  Print("[MA_RUNTIME185_START] CORE=1.00 ADAPTER=1.20 PANEL_ROUTE=1.81 FOUNDATION=1.40 REGISTRY=1.75 FULL_DISPATCHER=1.74 A10_FULL_PANEL=1.01 LEFT_CONTEXT=1.80 ENTRY_DISPATCHER=1.72 EXEC_ADAPTER=1.73 LOG_POLICY=1.71 GATE_DEFAULT=FULL_A10 instance=",strategy.instance_id," magic=",strategy.magic," symbol=",strategy.symbol," entry=",strategy.entry_module," manage=",strategy.manage_module," exit=",strategy.exit_module," EXECUTION=",MA140_ExecutionText(InpExecutionMode)," BROKER_ACTIONS_ARMED=",(DemoExecution()?1:0)," VIRTUAL_NOT_FILL=",(DemoExecution()?0:1));
  return INIT_SUCCEEDED;
@@ -364,8 +364,8 @@ void OnChartEvent(const int id,const long &lparam,const double &dparam,const str
    else if(d.structure==MA_STRUCTURE_SPLIT_V150){
      left_context.Split(MA150LogicName(d.entry_module),MA150LogicName(d.manage_module),MA150LogicName(d.exit_module));a10_full_panel.Hide();
      if(d.entry_module==MA_LOGIC_A10_V150)a10_panel.Display(a10_entry_cfg);else a10_panel.RestoreO01Labels();
-     if(d.manage_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayManage(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreManageO01();
-     if(d.exit_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayExit(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreExitO01();
+     if(d.manage_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayManage(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreManageO01(runtime_cfg);
+     if(d.exit_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayExit(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreExitO01(runtime_cfg);
    }
    else {left_context.Restore();a10_full_panel.Hide();a10_panel.RestoreO01Labels();}
    bool route_registered=(d.structure==MA_STRUCTURE_FULL_V150?route_panel.DraftFullRegistered():(route_panel.DraftEntryRegistered()&&route_panel.DraftManageRegistered()&&route_panel.DraftExitRegistered()));
@@ -378,8 +378,8 @@ void OnChartEvent(const int id,const long &lparam,const double &dparam,const str
    else if(d.structure==MA_STRUCTURE_SPLIT_V150){
      left_context.Split(MA150LogicName(d.entry_module),MA150LogicName(d.manage_module),MA150LogicName(d.exit_module));a10_full_panel.Hide();
      if(d.entry_module==MA_LOGIC_A10_V150)a10_panel.Display(a10_entry_cfg);else a10_panel.RestoreO01Labels();
-     if(d.manage_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayManage(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreManageO01();
-     if(d.exit_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayExit(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreExitO01();
+     if(d.manage_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayManage(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreManageO01(runtime_cfg);
+     if(d.exit_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayExit(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreExitO01(runtime_cfg);
    }
    else {left_context.Restore();a10_full_panel.Hide();a10_panel.RestoreO01Labels();}}
  if(rr!=0){SMA_ModuleSelection150 ar=route_controller.Active();Print("[O01_RUNTIME153_ROUTE_PANEL] event=",rr," reason=",route_reason," active_structure=",MA150StructureName(ar.structure)," full=",MA150LogicName(ar.full_module)," entry=",MA150LogicName(ar.entry_module)," manage=",MA150LogicName(ar.manage_module)," exit=",MA150LogicName(ar.exit_module)," positions=",route_state.managed_positions," cycle_none=",(int)route_state.cycle_none," transition_pending=",(int)route_state.execution_transition_pending," EXECUTION=",MA140_ExecutionText(InpExecutionMode)," BROKER_ACTIONS_ARMED=",(DemoExecution()?1:0)," VIRTUAL_NOT_FILL=",(DemoExecution()?0:1));return;}

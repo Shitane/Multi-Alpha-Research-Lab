@@ -352,3 +352,23 @@ Every demo instance must have:
 ## Compatibility rule
 
 No change in this architecture document authorizes a change to the frozen O01 parity logic. FULL remains an independent whole-path reproduction; SPLIT remains independently routed Entry/Manage/Exit responsibilities.
+
+
+## A10 SPLIT integration priority — 2026-09-29
+
+A10 is the first A-series module to be integrated into the single Multi Alpha panel as a complete SPLIT route.
+
+Integration order:
+1. expose verified A10 ENTRY / MANAGE / EXIT capabilities;
+2. connect the documented A10 split virtual lifecycle to the current NO_ORDERS host;
+3. preserve the verified A10 FULL and SPLIT parity logic without optimization;
+4. add A10 ENTRY operating-stop controls before expanding to A11+.
+
+For **A10 ENTRY [E]**, the product-direction settings must include:
+- normal News Filter;
+- the original/special stop filter (Special Risk / Event-Day Filter);
+- user-selectable operating time where applicable.
+
+These filters gate **new A10 entry/cycle permission**. They must not silently disable A10 EXIT processing or common Emergency/Safety protection. MANAGE and EXIT keep their own responsibility-specific filter contracts as documented above.
+
+Until a mixed-module position/state ownership contract is connected and regression-tested, O01/O01/O01 and A10/A10/A10 are valid SPLIT ownership sets; mixed O01/A10 E/M/X combinations must fail safely rather than fallback.

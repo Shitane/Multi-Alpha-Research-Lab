@@ -14,7 +14,7 @@ class CMultiAlphaLeftWorkspaceTabs187
  void V(const string name,const bool on){if(ObjectFind(0,name)>=0)ObjectSetInteger(0,name,OBJPROP_TIMEFRAMES,(long)(on?OBJ_ALL_PERIODS:0));}
  void MakeButton(const string id,const int x,const string text){
   string n=m_prefix+id;if(ObjectFind(0,n)<0)ObjectCreate(0,n,OBJ_BUTTON,0,0,0);
-  ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,42);
+  ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,12);
   ObjectSetInteger(0,n,OBJPROP_XSIZE,88);ObjectSetInteger(0,n,OBJPROP_YSIZE,22);ObjectSetInteger(0,n,OBJPROP_FONTSIZE,8);
   ObjectSetInteger(0,n,OBJPROP_SELECTABLE,false);ObjectSetInteger(0,n,OBJPROP_SELECTED,false);ObjectSetInteger(0,n,OBJPROP_ZORDER,60);ObjectSetString(0,n,OBJPROP_TEXT,text);
  }
@@ -35,15 +35,15 @@ public:
  void Create(){
   string a[]={"L_H_ENTRY","L_H_GRID","L_H_EXIT","L_H_SAFETY","L_H_TIME","L_H_PRESETSEC","L_NEW","NEW","L_BUY","BUY","L_SELL","SELL","L_RSIP","RSIP","L_RSIL","RSIL","L_RSIU","RSIU","L_ATR1P","ATR1P","L_ATR2P","ATR2P","L_ATR2TF","ATR2TF","L_LOT","LOT","L_MULT","MULT","L_MAXLOT","MAXLOT","L_TOTLOT","TOTLOT","L_MAXORD","MAXORD","L_GRID","GRID","L_DYNORD","DYNORD","L_DYNPTS","DYNPTS","L_DISTM","DISTM","L_VSL","VSL","L_STS","STS","L_STL","STL","L_STD","STD","L_BTS","BTS","L_BTL","BTL","L_WARN","WARN","L_PAUSE","PAUSE","L_CLOSE","CLOSE","L_TMODE","TMODE","L_START","START","L_END","END","L_NEWS","NEWS","L_PRESETLAB","PRESET","L_SAVEDLAB","L_SAVEDVAL","NEXT","APPLY","SAVE","LOAD","DELETE","RESET"};
   ArrayResize(m_logic_ids,ArraySize(a));for(int i=0;i<ArraySize(a);i++)m_logic_ids[i]=a[i];
-  MakeButton("TAB_LOGIC",458,"[ LOGIC ]");MakeButton("TAB_FILTER",548,"FILTER");MakeButton("TAB_SAFETY",638,"SAFETY");
-  MakeLabel("FILTER_TITLE",466,104,"COMMON FILTER / TRADE PERMISSION",9);
-  MakeLabel("FILTER_LINE1",466,136,"UI FRAME ONLY - NOT CONNECTED",8);
-  MakeLabel("FILTER_LINE2",466,162,"NEW ENTRY: NOT CONNECTED",8);
-  MakeLabel("FILTER_LINE3",466,184,"ADD ENTRY: NOT CONNECTED",8);
-  MakeLabel("SAFETY_TITLE",466,104,"COMMON SAFETY",9);
-  MakeLabel("SAFETY_LINE1",466,136,"UI FRAME ONLY - NOT CONNECTED",8);
-  MakeLabel("SAFETY_LINE2",466,162,"Existing strategy safety unchanged",8);
-  MakeLabel("SAFETY_LINE3",466,184,"No runtime control from this page",8);
+  MakeButton("TAB_LOGIC",330,"[ LOGIC ]");MakeButton("TAB_FILTER",420,"FILTER");MakeButton("TAB_SAFETY",510,"SAFETY");
+  MakeLabel("FILTER_TITLE",24,104,"COMMON FILTER / TRADE PERMISSION",9);
+  MakeLabel("FILTER_LINE1",24,136,"UI FRAME ONLY - NOT CONNECTED",8);
+  MakeLabel("FILTER_LINE2",24,162,"NEW ENTRY: NOT CONNECTED",8);
+  MakeLabel("FILTER_LINE3",24,184,"ADD ENTRY: NOT CONNECTED",8);
+  MakeLabel("SAFETY_TITLE",24,104,"COMMON SAFETY",9);
+  MakeLabel("SAFETY_LINE1",24,136,"UI FRAME ONLY - NOT CONNECTED",8);
+  MakeLabel("SAFETY_LINE2",24,162,"Existing strategy safety unchanged",8);
+  MakeLabel("SAFETY_LINE3",24,184,"No runtime control from this page",8);
   Apply();
  }
  void Apply(){

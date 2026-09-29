@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #ifndef A10_SPLIT_DETAIL_PANEL_V1_00_MQH
 #define A10_SPLIT_DETAIL_PANEL_V1_00_MQH
-#include "A10_Full_Module_v1_00.mqh"
+#include "A10_Full_Module_v1_00.mqh"\n#include "..\\O01\\O01_Runtime_Settings_v1_10.mqh"
 
 class CA10SplitDetailPanel100
 {
@@ -41,18 +41,29 @@ public:
   Pair("STD",false);Pair("BTS",false);Pair("BTL",false);
  }
 
- void RestoreManageO01()
+ void RestoreManageO01(const SO01RuntimeSettings110 &s)
  {
   T("L_H_GRID","MANAGE / GRID / LOT  [O01]");
-  T("L_LOT","Initial Lot");T("L_MULT","Lot Mult");T("L_MAXLOT","Max Lot");
-  T("L_TOTLOT","Max Side Lots");T("L_MAXORD","Max Orders");T("L_GRID","Grid Distance");
+  T("L_LOT","Initial Lot");T("LOT",DoubleToString(s.initial_lot,2));
+  T("L_MULT","Lot Mult");T("MULT",DoubleToString(s.lot_multiplier,2));
+  T("L_MAXLOT","Max Lot");T("MAXLOT",DoubleToString(s.max_lot,2));
+  T("L_TOTLOT","Max Side Lots");T("TOTLOT",DoubleToString(s.max_total_lots_per_side,2));
+  T("L_MAXORD","Max Orders");T("MAXORD",IntegerToString(s.max_orders));
+  T("L_GRID","Grid Distance");T("GRID",IntegerToString(s.fixed_distance_points));
+  T("L_DYNORD","Dynamic Start #");T("DYNORD",IntegerToString(s.dynamic_start_order));
+  T("L_DYNPTS","Dynamic Points");T("DYNPTS",IntegerToString(s.dynamic_start_points));
+  T("L_DISTM","Distance Mult");T("DISTM",DoubleToString(s.distance_multiplier,2));
   Pair("DYNORD",true);Pair("DYNPTS",true);Pair("DISTM",true);
  }
- void RestoreExitO01()
+ void RestoreExitO01(const SO01RuntimeSettings110 &s)
  {
   T("L_H_EXIT","EXIT / TRAILING  [O01]");
-  T("L_VSL","Virtual SL");T("L_STS","Single Start");T("L_STL","Single Lock");
-  T("L_STD","Single Dist");T("L_BTS","Basket Start");T("L_BTL","Basket Lock");
+  T("L_VSL","Virtual SL");T("VSL",IntegerToString(s.virtual_sl_points));
+  T("L_STS","Single Start");T("STS",IntegerToString(s.single_trail_start));
+  T("L_STL","Single Lock");T("STL",IntegerToString(s.single_trail_lock));
+  T("L_STD","Single Dist");T("STD",IntegerToString(s.single_trail_distance));
+  T("L_BTS","Basket Start");T("BTS",IntegerToString(s.basket_trail_start));
+  T("L_BTL","Basket Lock");T("BTL",IntegerToString(s.basket_trail_lock));
   Pair("STD",true);Pair("BTS",true);Pair("BTL",true);
  }
 };

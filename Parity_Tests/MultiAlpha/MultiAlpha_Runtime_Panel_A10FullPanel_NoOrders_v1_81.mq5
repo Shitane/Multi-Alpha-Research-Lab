@@ -337,7 +337,7 @@ void OnTick(){
 }
 void OnChartEvent(const int id,const long &lparam,const double &dparam,const string &sparam){
  string route_reason="";SMA_RouteState150 route_state=LiveRouteState();
- int rr=route_panel.Event(id,sparam,route_state,route_reason);
+ int rr=route_panel.Event(id,sparam,route_state,route_reason,lparam,dparam);
  if(rr==1 || rr==2){
    SMA_ModuleSelection150 d=route_panel.Draft();
    bool draft_registered=(d.structure==MA_STRUCTURE_FULL_V150?route_panel.DraftFullRegistered():(route_panel.DraftEntryRegistered()&&route_panel.DraftManageRegistered()&&route_panel.DraftExitRegistered()));panel.SetRouteDraftContext(MA150StructureName(d.structure),MA150LogicName(d.full_module),MA150LogicName(d.entry_module),MA150LogicName(d.manage_module),MA150LogicName(d.exit_module),draft_registered);

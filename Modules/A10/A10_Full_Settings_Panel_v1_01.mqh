@@ -62,6 +62,6 @@ public:
  bool HandleClick(const string name,SA10FullConfig100 &s){
   if(name==p+"A10_FULL_MODE_NEXT"){if(Pull(s)){page=(page+1)%4;Display(s);}ObjectSetInteger(0,name,OBJPROP_STATE,false);ObjectSetInteger(0,name,OBJPROP_SELECTED,false);return true;}return false;
  }
- void Hide(){ModeButton(false);}
+ void Hide(){string n=p+"A10_FULL_MODE_NEXT";if(ObjectFind(0,n)>=0)ObjectDelete(0,n);}
 };
 #endif

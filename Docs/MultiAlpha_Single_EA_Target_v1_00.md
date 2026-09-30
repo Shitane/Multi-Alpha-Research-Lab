@@ -1,3 +1,15 @@
+## FILTER preset persistence contract — added 2026-09-30
+
+- FILTER configuration is persisted as a **50-slot set**. Slot #01..#50 remain independent after SAVE/LOAD.
+- Persistence uses a **user-named preset**, never one fixed hidden settings file.
+- Current infrastructure: `MultiAlpha_Slot_Filter_Preset_v1_20.mqh`.
+- The filter preset file is text/CSV under the MT5 `FILE_COMMON` area and carries a format identifier plus slot count.
+- SAVE validates every slot before writing. LOAD reads into temporary storage, validates all 50 slots, and only then replaces current filter configuration; malformed/incompatible files fail safely.
+- Preset-name sanitization is limited to letters, digits, underscore and hyphen.
+- This layer is configuration infrastructure only: **NO broker operations**, no EXIT ownership, no SAFETY ownership, and no change to frozen strategy decision logic.
+- Initial round-trip contract test: `MultiAlpha_Slot_Filter_Preset_NoOrders_v1_20.mq5`.
+- The UI wiring for Preset Name / SAVE / LOAD is a later panel step; the storage contract is deliberately separated first so UI work cannot redefine persistence semantics.
+
 ## FILTER parts philosophy — fixed 2026-09-30
 
 FILTER is a slot-local parts library, not a single global strategy rule.

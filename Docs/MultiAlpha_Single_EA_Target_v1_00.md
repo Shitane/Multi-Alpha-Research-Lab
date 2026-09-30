@@ -1,3 +1,16 @@
+## FILTER parts philosophy — fixed 2026-09-30
+
+FILTER is a slot-local parts library, not a single global strategy rule.
+
+- Each Logic Slot (#01..#50) owns its own independent FILTER configuration.
+- A filter part has at minimum: ON/OFF + user-editable parameters + permission scope.
+- The selected combination must fit that slot's logic; different slots may use completely different filter combinations and values.
+- The parts library should be broad. Current UI contract includes Trading Time, general News, FOMC, NFP, CPI, Month End, Month Start, Quarter End, Year End, Rollover, Friday stop, Spread, and Volatility.
+- Examples: Trading Time has Start/End; FOMC has Before/After hours; News/NFP/CPI have Before/After minutes; calendar-boundary filters have trading-day widths; Spread and Volatility have thresholds.
+- All parts default OFF so adding a new part cannot silently change a verified strategy baseline.
+- FILTER never owns EXIT or SAFETY and must not prevent an already-open position from being managed/exited.
+- Additional filter parts can be added later without changing E/M/X ownership.
+
 # Multi Alpha Single-EA Target v1.00
 
 ## Fixed product direction

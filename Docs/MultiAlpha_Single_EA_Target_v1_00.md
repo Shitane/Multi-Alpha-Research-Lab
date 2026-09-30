@@ -102,6 +102,18 @@ Switching left tabs is a **view operation only**. It must not:
 
 This tabbed workspace is the preferred way to add FILTER and SAFETY without increasing the existing two-panel footprint.
 
+## Common FILTER implementation staging — v2.00 (2026-09-30)
+
+The first implementation stage now follows the fixed COMMON FILTER ownership contract:
+
+- `MultiAlpha_Common_Filter_v1_00.mqh` defines slot-local filter configuration and separate NEW ENTRY / ADD ENTRY permissions.
+- `MultiAlpha_Filter_Panel_v1_00.mqh` provides the compact FILTER workspace.
+- `MultiAlpha_Runtime_Panel_A10FullPanel_NoOrders_v2_00.mq5` wires the FILTER UI/configuration to the selected Logic Slot.
+- All filter parts default OFF.
+- Trading Time evaluation exists in the common gate; News/FOMC/NFP/CPI/month/quarter event-state providers remain deliberately unconnected until their data/calendar contracts are implemented and verified.
+- v2.00 does **not yet gate A10/O01 runtime entries**. This staging boundary is intentional: first compile/UI/slot-state verification, then an all-OFF regression gate, then runtime permission wiring without changing EXIT or SAFETY behavior.
+- No filter logic is owned by A10 ENTRY or A10 MANAGE.
+
 ## Common Trade Permission Filter contract — fixed direction 2026-09-29
 
 Operating/risk filters are **NOT owned by ENTRY, MANAGE, or EXIT**. They are a cross-cutting **COMMON FILTER / Trade Permission Gate** shared by A10, A11, A12, ... and future Alpha modules.

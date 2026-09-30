@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #ifndef MULTIALPHA_FILTER_PANEL_V1_11_MQH
 #define MULTIALPHA_FILTER_PANEL_V1_11_MQH
-#include "MultiAlpha_Common_Filter_v1_11.mqh"
+#include "MultiAlpha_Common_Filter_v1_10.mqh"
 class CMultiAlphaFilterPanel111
 {
  string p;int slot;bool shown;

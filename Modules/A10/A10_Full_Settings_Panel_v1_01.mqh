@@ -19,7 +19,7 @@ class CA10FullSettingsPanel101
  int I(string id){return(int)StringToInteger(G(id));}
  void EnsureModeButton(){
   string n=p+"A10_FULL_MODE_NEXT";if(ObjectFind(0,n)<0)ObjectCreate(0,n,OBJ_BUTTON,0,0,0);
-  ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,516);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,169);
+  ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,516);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,108);
   ObjectSetInteger(0,n,OBJPROP_XSIZE,72);ObjectSetInteger(0,n,OBJPROP_YSIZE,19);ObjectSetInteger(0,n,OBJPROP_BGCOLOR,C'42,52,61');ObjectSetInteger(0,n,OBJPROP_COLOR,clrWhite);
   ObjectSetInteger(0,n,OBJPROP_BORDER_COLOR,C'80,92,104');ObjectSetInteger(0,n,OBJPROP_FONTSIZE,8);ObjectSetInteger(0,n,OBJPROP_SELECTABLE,false);ObjectSetInteger(0,n,OBJPROP_SELECTED,false);ObjectSetInteger(0,n,OBJPROP_HIDDEN,false);ObjectSetInteger(0,n,OBJPROP_ZORDER,40);ObjectSetString(0,n,OBJPROP_TEXT,"NEXT >");
  }

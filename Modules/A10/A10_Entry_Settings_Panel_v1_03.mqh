@@ -26,7 +26,7 @@ public:
   ObjectSetInteger(0,n,OBJPROP_XSIZE,72);ObjectSetInteger(0,n,OBJPROP_YSIZE,19);ObjectSetInteger(0,n,OBJPROP_BGCOLOR,C'42,52,61');ObjectSetInteger(0,n,OBJPROP_COLOR,clrWhite);
   ObjectSetInteger(0,n,OBJPROP_BORDER_COLOR,C'80,92,104');ObjectSetInteger(0,n,OBJPROP_FONTSIZE,8);ObjectSetInteger(0,n,OBJPROP_SELECTABLE,false);ObjectSetInteger(0,n,OBJPROP_SELECTED,false);ObjectSetInteger(0,n,OBJPROP_HIDDEN,false);ObjectSetInteger(0,n,OBJPROP_ZORDER,40);ObjectSetString(0,n,OBJPROP_TEXT,"NEXT >");
  }
- void ShowModeButton(const bool on){EnsureModeButton();ObjectSetInteger(0,p+"A10_MODE_NEXT",OBJPROP_TIMEFRAMES,on?OBJ_ALL_PERIODS:0);}
+ void ShowModeButton(const bool on){string n=p+"A10_MODE_NEXT";if(!on){if(ObjectFind(0,n)>=0)ObjectDelete(0,n);return;}EnsureModeButton();ObjectSetInteger(0,n,OBJPROP_TIMEFRAMES,OBJ_ALL_PERIODS);}
 
  void Display(SA10EntrySettings100 &s)
  {

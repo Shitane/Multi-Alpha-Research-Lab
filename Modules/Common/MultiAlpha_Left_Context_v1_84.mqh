@@ -13,14 +13,14 @@ class CMultiAlphaLeftContext184
 public:
  CMultiAlphaLeftContext184(){p="O01CFG160_";}
  void Restore(){
-  string a[]={"NEW","BUY","SELL","RSIP","RSIL","RSIU","ATR1P","ATR2P","ATR2TF","LOT","MULT","MAXLOT","TOTLOT","MAXORD","GRID","DYNORD","DYNPTS","DISTM","VSL","STS","STL","STD","BTS","BTL","WARN","PAUSE","CLOSE","TMODE","START","END","NEWS","PRESET"};
+  string a[]={"NEW","BUY","SELL","RSIP","RSIL","RSIU","ATR1P","ATR2P","ATR2TF","LOT","MULT","MAXLOT","TOTLOT","MAXORD","GRID","DYNORD","DYNPTS","DISTM","VSL","STS","STL","STD","BTS","BTL","WARN","PAUSE","CLOSE","TMODE","START","END","NEWS"};
   for(int i=0;i<ArraySize(a);i++)Pair(a[i],true);
   string h[]={"ENTRY","GRID","EXIT","SAFETY","TIME","PRESETSEC"};for(int i=0;i<ArraySize(h);i++)V("L_H_"+h[i],true);
   V("APPLY",true); string oldp[]={"L_H_PRESETSEC","L_PRESETLAB","PRESET","L_SAVEDLAB","L_SAVEDVAL","NEXT","SAVE","LOAD","DELETE","RESET"};for(int i=0;i<ArraySize(oldp);i++)V(oldp[i],false);
  }
  void Split(const string entry_name,const string manage_name,const string exit_name){
   Restore();
-  string x[]={"WARN","PAUSE","CLOSE","TMODE","START","END","NEWS","PRESET"};for(int i=0;i<ArraySize(x);i++)Pair(x[i],false);
+  string x[]={"WARN","PAUSE","CLOSE","TMODE","START","END","NEWS"};for(int i=0;i<ArraySize(x);i++)Pair(x[i],false);
   string h[]={"SAFETY","TIME","PRESETSEC"};for(int i=0;i<ArraySize(h);i++)V("L_H_"+h[i],false);
   string b[]={"SAVE","LOAD","DELETE","RESET","L_PRESETLAB","L_SAVEDLAB","L_SAVEDVAL"};for(int i=0;i<ArraySize(b);i++)V(b[i],false);
   T("L_H_ENTRY","ENTRY [E]  ["+entry_name+"]");T("L_H_GRID","MANAGE [M]  ["+manage_name+"]");T("L_H_EXIT","EXIT [X]  ["+exit_name+"]");ChartRedraw();

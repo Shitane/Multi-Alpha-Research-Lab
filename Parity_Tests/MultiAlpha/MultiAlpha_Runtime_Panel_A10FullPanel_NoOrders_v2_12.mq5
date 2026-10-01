@@ -463,7 +463,7 @@ void OnChartEvent(const int id,const long &lparam,const double &dparam,const str
   if(sr==1)SyncSelectedSlotDraft195();
   return;
  }
- if(left_tabs.Event(id,sparam)!=0){if(left_tabs.FilterVisible()){a10_full_panel.Hide();a10_panel.ShowModeButton(false);ObjectDelete(0,"O01CFG160_A10_FULL_MODE_NEXT");ObjectDelete(0,"O01CFG160_A10_MODE_NEXT");}else{SMA_ModuleSelection150 dv=route_panel.Draft();if(dv.structure==MA_STRUCTURE_FULL_V150&&dv.full_module==MA_LOGIC_A10_V150)a10_full_panel.Display(a10_full_cfg);else if(dv.structure==MA_STRUCTURE_SPLIT_V150&&dv.entry_module==MA_LOGIC_A10_V150)a10_panel.Display(a10_entry_cfg);}RefreshCommonFilter202();return;}
+ if(left_tabs.Event(id,sparam)!=0){if(!left_tabs.LogicVisible()){a10_full_panel.Hide();a10_panel.ShowModeButton(false);ObjectDelete(0,"O01CFG160_A10_FULL_MODE_NEXT");ObjectDelete(0,"O01CFG160_A10_MODE_NEXT");}else{SMA_ModuleSelection150 dv=route_panel.Draft();if(dv.structure==MA_STRUCTURE_FULL_V150&&dv.full_module==MA_LOGIC_A10_V150)a10_full_panel.Display(a10_full_cfg);else if(dv.structure==MA_STRUCTURE_SPLIT_V150&&dv.entry_module==MA_LOGIC_A10_V150)a10_panel.Display(a10_entry_cfg);}RefreshCommonFilter202();return;}
  int fpr=filter_preset_panel.Event(id,sparam);
  if(fpr!=0)
  {

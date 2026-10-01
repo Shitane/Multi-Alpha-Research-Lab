@@ -17,15 +17,15 @@ class CMultiAlphaPresetActionPanel212
 public:
  CMultiAlphaPresetActionPanel212(){m_ma212_visible=false;m_ma212_current_slot=1;}
  void Create(){
-  Lab("TITLE",24,518,"SAVE / LOAD",9,C'118,190,220');
-  Lab("NAME",24,542,"NAME"); Ed("EDIT",72,538,150,"");
-  Lab("CUR",24,570,"CURRENT SLOT",8,C'118,190,220');
-  Btn("DEFAULT",116,566,92,"LOAD DEFAULT"); Btn("SSAVE",214,566,82,"SAVE SLOT"); Btn("SLOAD",302,566,82,"LOAD SLOT");
-  Lab("ALL",24,598,"ALL 50 SLOTS",8,C'118,190,220');
-  Btn("ASAVE",116,594,92,"SAVE ALL"); Btn("ALOAD",214,594,92,"LOAD ALL");
-  Lab("FILTER",24,626,"FILTER ONLY",8,C'118,190,220');
-  Btn("FSAVE",116,622,92,"SAVE FILTER"); Btn("FLOAD",214,622,92,"LOAD FILTER");
-  Lab("STATUS",24,650,"READY",8,C'170,190,200'); Hide();
+  Lab("TITLE",24,105,"PRESET / SAVE / LOAD",9,C'118,190,220');
+  Lab("NAME",24,134,"NAME"); Ed("EDIT",72,130,180,"");
+  Lab("CUR",24,174,"CURRENT SLOT",8,C'118,190,220');
+  Btn("DEFAULT",116,170,92,"LOAD DEFAULT"); Btn("SSAVE",214,170,82,"SAVE SLOT"); Btn("SLOAD",302,170,82,"LOAD SLOT");
+  Lab("ALL",24,214,"ALL 50 SLOTS",8,C'118,190,220');
+  Btn("ASAVE",116,210,92,"SAVE ALL"); Btn("ALOAD",214,210,92,"LOAD ALL");
+  Lab("FILTER",24,254,"FILTER ONLY",8,C'118,190,220');
+  Btn("FSAVE",116,250,92,"SAVE FILTER"); Btn("FLOAD",214,250,92,"LOAD FILTER");
+  Lab("STATUS",24,290,"READY",8,C'170,190,200'); Hide();
  }
  void Show(int s){m_ma212_current_slot=s;m_ma212_visible=true;ObjectSetString(0,Prefix()+"CUR",OBJPROP_TEXT,StringFormat("CURRENT #%02d",m_ma212_current_slot));string a[]={"TITLE","NAME","EDIT","CUR","DEFAULT","SSAVE","SLOAD","ALL","ASAVE","ALOAD","FILTER","FSAVE","FLOAD","STATUS"};for(int i=0;i<ArraySize(a);i++)Vis(a[i],true);ChartRedraw();}
  void Hide(){m_ma212_visible=false;string a[]={"TITLE","NAME","EDIT","CUR","DEFAULT","SSAVE","SLOAD","ALL","ASAVE","ALOAD","FILTER","FSAVE","FLOAD","STATUS"};for(int i=0;i<ArraySize(a);i++)Vis(a[i],false);ChartRedraw();}

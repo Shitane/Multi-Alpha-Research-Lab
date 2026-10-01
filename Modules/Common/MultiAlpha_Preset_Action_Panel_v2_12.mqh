@@ -28,7 +28,7 @@ public:
  }
  void Show(int s){slot=s;shown=true;ObjectSetString(0,p+"CUR",OBJPROP_TEXT,StringFormat("CURRENT #%02d",slot));string a[]={"TITLE","NAME","EDIT","CUR","DEFAULT","SSAVE","SLOAD","ALL","ASAVE","ALOAD","FILTER","FSAVE","FLOAD","STATUS"};for(int i=0;i<ArraySize(a);i++)Vis(a[i],true);ChartRedraw();}
  void Hide(){shown=false;string a[]={"TITLE","NAME","EDIT","CUR","DEFAULT","SSAVE","SLOAD","ALL","ASAVE","ALOAD","FILTER","FSAVE","FLOAD","STATUS"};for(int i=0;i<ArraySize(a);i++)Vis(a[i],false);ChartRedraw();}
- string Name()const{return ObjectGetString(0,p+"EDIT",OBJPROP_TEXT);}
+ string Name(){return ObjectGetString(0,p+"EDIT",OBJPROP_TEXT);}
  void Status(string s,bool ok=true){ObjectSetString(0,p+"STATUS",OBJPROP_TEXT,s);ObjectSetInteger(0,p+"STATUS",OBJPROP_COLOR,ok?C'170,210,185':C'235,150,145');ChartRedraw();}
  int Event(int id,string name){if(!shown)return 0;int r=0;if((r=Hit(id,name,"DEFAULT",1))!=0)return r;if((r=Hit(id,name,"SSAVE",2))!=0)return r;if((r=Hit(id,name,"SLOAD",3))!=0)return r;if((r=Hit(id,name,"ASAVE",4))!=0)return r;if((r=Hit(id,name,"ALOAD",5))!=0)return r;if((r=Hit(id,name,"FSAVE",6))!=0)return r;if((r=Hit(id,name,"FLOAD",7))!=0)return r;return 0;}
  void Delete(){ObjectsDeleteAll(0,p);}

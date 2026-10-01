@@ -23,7 +23,8 @@
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Common_Filter_v1_10.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Filter_Panel_v1_11.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Slot_Filter_Preset_v1_20.mqh"
-#include "..\\..\\..\\Include\\Common\\MultiAlpha_Filter_Preset_Panel_v1_25.mqh"\n#include "..\\..\\..\\Include\\Common\\MultiAlpha_Preset_Action_Panel_v2_12.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Filter_Preset_Panel_v1_25.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Preset_Action_Panel_v2_12.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Slot_State_v1_95.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Slot_Panel_v2_12.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Left_Slot_Badge_v1_98.mqh"
@@ -122,7 +123,8 @@ CMultiAlphaLeftWorkspaceTabs200 left_tabs;
 CMultiAlphaFilterStore110 filter_store;
 CMultiAlphaFilterPanel111 filter_panel;
 CMultiAlphaSlotFilterPreset120 filter_preset;
-CMultiAlphaFilterPresetPanel125 filter_preset_panel;\nCMultiAlphaPresetActionPanel212 preset_action_panel;
+CMultiAlphaFilterPresetPanel125 filter_preset_panel;
+CMultiAlphaPresetActionPanel212 preset_action_panel;
 CMultiAlphaSlotState195 slot_state;
 CMultiAlphaSlotPanel211 slot_panel;
 CMultiAlphaLeftSlotBadge198 left_slot_badge;
@@ -301,7 +303,8 @@ int OnInit(){
  return INIT_SUCCEEDED;
 }
 void OnDeinit(const int reason){
- preset_action_panel.Delete();\n filter_preset_panel.Delete();
+ preset_action_panel.Delete();
+ filter_preset_panel.Delete();
  filter_panel.Delete();
  slot_panel.Delete();
  left_slot_badge.Delete();

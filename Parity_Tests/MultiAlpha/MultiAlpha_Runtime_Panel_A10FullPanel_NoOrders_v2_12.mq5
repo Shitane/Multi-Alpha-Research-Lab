@@ -26,7 +26,7 @@
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Filter_Preset_Panel_v1_25.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Preset_Action_Panel_v2_12.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Slot_State_v1_95.mqh"
-#include "..\\..\\..\\Include\\Common\\MultiAlpha_Slot_Panel_v2_12.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Slot_Panel_v2_11.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Left_Slot_Badge_v1_98.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Left_Header_Spacing_v1_99.mqh"
 

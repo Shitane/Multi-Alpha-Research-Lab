@@ -7,14 +7,15 @@
 #define MULTIALPHA_PRESET_ACTION_PANEL_V2_12_MQH
 class CMultiAlphaPresetActionPanel212
 {
- string m_prefix; bool shown; int slot;
- void Vis(string id,bool on){string n=m_prefix+id;if(ObjectFind(0,n)>=0)ObjectSetInteger(0,n,OBJPROP_TIMEFRAMES,(long)(on?OBJ_ALL_PERIODS:0));}
- void Lab(string id,int x,int y,string s,int fs=8,color c=clrWhite){string n=m_prefix+id;if(ObjectFind(0,n)<0)ObjectCreate(0,n,OBJ_LABEL,0,0,0);ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,y);ObjectSetInteger(0,n,OBJPROP_COLOR,c);ObjectSetInteger(0,n,OBJPROP_FONTSIZE,fs);ObjectSetInteger(0,n,OBJPROP_SELECTABLE,false);ObjectSetInteger(0,n,OBJPROP_ZORDER,71);ObjectSetString(0,n,OBJPROP_TEXT,s);}
- void Btn(string id,int x,int y,int w,string s){string n=m_prefix+id;if(ObjectFind(0,n)<0)ObjectCreate(0,n,OBJ_BUTTON,0,0,0);ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,y);ObjectSetInteger(0,n,OBJPROP_XSIZE,w);ObjectSetInteger(0,n,OBJPROP_YSIZE,20);ObjectSetInteger(0,n,OBJPROP_FONTSIZE,8);ObjectSetInteger(0,n,OBJPROP_COLOR,clrWhite);ObjectSetInteger(0,n,OBJPROP_BGCOLOR,C'42,52,61');ObjectSetInteger(0,n,OBJPROP_BORDER_COLOR,C'85,95,105');ObjectSetInteger(0,n,OBJPROP_SELECTABLE,false);ObjectSetInteger(0,n,OBJPROP_ZORDER,75);ObjectSetString(0,n,OBJPROP_TEXT,s);}
- void Ed(string id,int x,int y,int w,string s){string n=m_prefix+id;if(ObjectFind(0,n)<0)ObjectCreate(0,n,OBJ_EDIT,0,0,0);ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,y);ObjectSetInteger(0,n,OBJPROP_XSIZE,w);ObjectSetInteger(0,n,OBJPROP_YSIZE,20);ObjectSetInteger(0,n,OBJPROP_FONTSIZE,8);ObjectSetInteger(0,n,OBJPROP_COLOR,clrWhite);ObjectSetInteger(0,n,OBJPROP_BGCOLOR,C'35,45,53');ObjectSetInteger(0,n,OBJPROP_BORDER_COLOR,C'85,95,105');ObjectSetInteger(0,n,OBJPROP_ZORDER,76);ObjectSetString(0,n,OBJPROP_TEXT,s);}
- int Hit(int id,string name,string key,int code){if(id==CHARTEVENT_OBJECT_CLICK&&name==m_prefix+key){ObjectSetInteger(0,name,OBJPROP_STATE,false);return code;}return 0;}
+ bool shown; int slot;
+ string Prefix(){return "MAPRESET212_";}
+ void Vis(string id,bool on){string n=Prefix()+id;if(ObjectFind(0,n)>=0)ObjectSetInteger(0,n,OBJPROP_TIMEFRAMES,(long)(on?OBJ_ALL_PERIODS:0));}
+ void Lab(string id,int x,int y,string s,int fs=8,color c=clrWhite){string n=Prefix()+id;if(ObjectFind(0,n)<0)ObjectCreate(0,n,OBJ_LABEL,0,0,0);ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,y);ObjectSetInteger(0,n,OBJPROP_COLOR,c);ObjectSetInteger(0,n,OBJPROP_FONTSIZE,fs);ObjectSetInteger(0,n,OBJPROP_SELECTABLE,false);ObjectSetInteger(0,n,OBJPROP_ZORDER,71);ObjectSetString(0,n,OBJPROP_TEXT,s);}
+ void Btn(string id,int x,int y,int w,string s){string n=Prefix()+id;if(ObjectFind(0,n)<0)ObjectCreate(0,n,OBJ_BUTTON,0,0,0);ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,y);ObjectSetInteger(0,n,OBJPROP_XSIZE,w);ObjectSetInteger(0,n,OBJPROP_YSIZE,20);ObjectSetInteger(0,n,OBJPROP_FONTSIZE,8);ObjectSetInteger(0,n,OBJPROP_COLOR,clrWhite);ObjectSetInteger(0,n,OBJPROP_BGCOLOR,C'42,52,61');ObjectSetInteger(0,n,OBJPROP_BORDER_COLOR,C'85,95,105');ObjectSetInteger(0,n,OBJPROP_SELECTABLE,false);ObjectSetInteger(0,n,OBJPROP_ZORDER,75);ObjectSetString(0,n,OBJPROP_TEXT,s);}
+ void Ed(string id,int x,int y,int w,string s){string n=Prefix()+id;if(ObjectFind(0,n)<0)ObjectCreate(0,n,OBJ_EDIT,0,0,0);ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,y);ObjectSetInteger(0,n,OBJPROP_XSIZE,w);ObjectSetInteger(0,n,OBJPROP_YSIZE,20);ObjectSetInteger(0,n,OBJPROP_FONTSIZE,8);ObjectSetInteger(0,n,OBJPROP_COLOR,clrWhite);ObjectSetInteger(0,n,OBJPROP_BGCOLOR,C'35,45,53');ObjectSetInteger(0,n,OBJPROP_BORDER_COLOR,C'85,95,105');ObjectSetInteger(0,n,OBJPROP_ZORDER,76);ObjectSetString(0,n,OBJPROP_TEXT,s);}
+ int Hit(int id,string name,string key,int code){if(id==CHARTEVENT_OBJECT_CLICK&&name==Prefix()+key){ObjectSetInteger(0,name,OBJPROP_STATE,false);return code;}return 0;}
 public:
- CMultiAlphaPresetActionPanel212(){m_prefix="MAPRESET212_";shown=false;slot=1;}
+ CMultiAlphaPresetActionPanel212(){shown=false;slot=1;}
  void Create(){
   Lab("TITLE",24,518,"SAVE / LOAD",9,C'118,190,220');
   Lab("NAME",24,542,"NAME"); Ed("EDIT",72,538,150,"");
@@ -26,12 +27,12 @@ public:
   Btn("FSAVE",116,622,92,"SAVE FILTER"); Btn("FLOAD",214,622,92,"LOAD FILTER");
   Lab("STATUS",24,650,"READY",8,C'170,190,200'); Hide();
  }
- void Show(int s){slot=s;shown=true;ObjectSetString(0,m_prefix+"CUR",OBJPROP_TEXT,StringFormat("CURRENT #%02d",slot));string a[]={"TITLE","NAME","EDIT","CUR","DEFAULT","SSAVE","SLOAD","ALL","ASAVE","ALOAD","FILTER","FSAVE","FLOAD","STATUS"};for(int i=0;i<ArraySize(a);i++)Vis(a[i],true);ChartRedraw();}
+ void Show(int s){slot=s;shown=true;ObjectSetString(0,Prefix()+"CUR",OBJPROP_TEXT,StringFormat("CURRENT #%02d",slot));string a[]={"TITLE","NAME","EDIT","CUR","DEFAULT","SSAVE","SLOAD","ALL","ASAVE","ALOAD","FILTER","FSAVE","FLOAD","STATUS"};for(int i=0;i<ArraySize(a);i++)Vis(a[i],true);ChartRedraw();}
  void Hide(){shown=false;string a[]={"TITLE","NAME","EDIT","CUR","DEFAULT","SSAVE","SLOAD","ALL","ASAVE","ALOAD","FILTER","FSAVE","FLOAD","STATUS"};for(int i=0;i<ArraySize(a);i++)Vis(a[i],false);ChartRedraw();}
- string Name(){return ObjectGetString(0,m_prefix+"EDIT",OBJPROP_TEXT);}
+ string Name(){return ObjectGetString(0,Prefix()+"EDIT",OBJPROP_TEXT);}
  void Status(string msg,bool ok=true)
  {
-  string n=m_prefix+"STATUS";
+  string n=Prefix()+"STATUS";
   color status_color=C'170,210,185';
   if(!ok) status_color=C'235,150,145';
   ObjectSetString(0,n,OBJPROP_TEXT,msg);
@@ -44,7 +45,7 @@ public:
   string a[]={"TITLE","NAME","EDIT","CUR","DEFAULT","SSAVE","SLOAD","ALL","ASAVE","ALOAD","FILTER","FSAVE","FLOAD","STATUS"};
   for(int i=0;i<ArraySize(a);i++)
   {
-   string n=m_prefix+a[i];
+   string n=Prefix()+a[i];
    if(ObjectFind(0,n)>=0) ObjectDelete(0,n);
   }
  }

@@ -18,18 +18,20 @@ public:
  CMultiAlphaPresetActionPanel212(){m_ma212_visible=false;m_ma212_current_slot=1;}
  void Create(){
   Lab("TITLE",24,105,"PRESET / SAVE / LOAD",9,C'118,190,220');
-  Lab("NAME",24,134,"NAME"); Ed("EDIT",72,130,180,"");
-  Lab("CUR",24,174,"CURRENT SLOT",8,C'118,190,220');
-  Btn("DEFAULT",116,170,92,"LOAD DEFAULT"); Btn("SSAVE",214,170,82,"SAVE SLOT"); Btn("SLOAD",302,170,82,"LOAD SLOT");
-  Lab("ALL",24,214,"ALL 50 SLOTS",8,C'118,190,220');
-  Btn("ASAVE",116,210,92,"SAVE ALL"); Btn("ALOAD",214,210,92,"LOAD ALL");
-  Lab("FILTER",24,254,"FILTER ONLY",8,C'118,190,220');
-  Btn("FSAVE",116,250,92,"SAVE FILTER"); Btn("FLOAD",214,250,92,"LOAD FILTER");
-  Lab("STATUS",24,290,"READY",8,C'170,190,200'); Hide();
+  Lab("CUR",24,140,"CURRENT SLOT",8,C'118,190,220');
+  Lab("SNAME",24,164,"NAME"); Ed("SEDIT",72,160,210,"");
+  Btn("DEFAULT",292,160,92,"LOAD DEFAULT"); Btn("SSAVE",390,160,82,"SAVE SLOT"); Btn("SLOAD",478,160,82,"LOAD SLOT");
+  Lab("ALL",24,205,"ALL 50 SLOTS",8,C'118,190,220');
+  Lab("ANAME",24,229,"NAME"); Ed("AEDIT",72,225,210,"");
+  Btn("ASAVE",292,225,92,"SAVE ALL"); Btn("ALOAD",390,225,92,"LOAD ALL");
+  Lab("FILTER",24,270,"FILTER ONLY",8,C'118,190,220');
+  Lab("FNAME",24,294,"NAME"); Ed("FEDIT",72,290,210,"");
+  Btn("FSAVE",292,290,92,"SAVE FILTER"); Btn("FLOAD",390,290,92,"LOAD FILTER");
+  Lab("STATUS",24,330,"READY",8,C'170,190,200'); Hide();
  }
- void Show(int s){m_ma212_current_slot=s;m_ma212_visible=true;ObjectSetString(0,Prefix()+"CUR",OBJPROP_TEXT,StringFormat("CURRENT #%02d",m_ma212_current_slot));string a[]={"TITLE","NAME","EDIT","CUR","DEFAULT","SSAVE","SLOAD","ALL","ASAVE","ALOAD","FILTER","FSAVE","FLOAD","STATUS"};for(int i=0;i<ArraySize(a);i++)Vis(a[i],true);ChartRedraw();}
+ void Show(int s){m_ma212_current_slot=s;m_ma212_visible=true;ObjectSetString(0,Prefix()+"CUR",OBJPROP_TEXT,StringFormat("CURRENT #%02d",m_ma212_current_slot));string a[]={"TITLE","CUR","SNAME","SEDIT","DEFAULT","SSAVE","SLOAD","ALL","ANAME","AEDIT","ASAVE","ALOAD","FILTER","FNAME","FEDIT","FSAVE","FLOAD","STATUS"};for(int i=0;i<ArraySize(a);i++)Vis(a[i],true);ChartRedraw();}
  void Hide(){m_ma212_visible=false;string a[]={"TITLE","NAME","EDIT","CUR","DEFAULT","SSAVE","SLOAD","ALL","ASAVE","ALOAD","FILTER","FSAVE","FLOAD","STATUS"};for(int i=0;i<ArraySize(a);i++)Vis(a[i],false);ChartRedraw();}
- string Name(){return ObjectGetString(0,Prefix()+"EDIT",OBJPROP_TEXT);}
+ string SlotName(){return ObjectGetString(0,Prefix()+"SEDIT",OBJPROP_TEXT);} string AllName(){return ObjectGetString(0,Prefix()+"AEDIT",OBJPROP_TEXT);} string FilterName(){return ObjectGetString(0,Prefix()+"FEDIT",OBJPROP_TEXT);} string Name(){return SlotName();}
  void Status(string msg,bool ok=true)
  {
   string n=Prefix()+"STATUS";

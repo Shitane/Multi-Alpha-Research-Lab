@@ -395,9 +395,13 @@ void PrintFilterRegression202()
 }
 void RefreshCommonFilter202()
 {
- if(!left_tabs.FilterVisible()){filter_panel.Hide();filter_preset_panel.Hide();preset_action_panel.Hide();return;}
- SMA_CommonFilterConfig110 fc=filter_store.Get(slot_state.Selected());
- filter_panel.Show(slot_state.Selected(),fc);filter_preset_panel.Hide();preset_action_panel.Show(slot_state.Selected());
+ if(left_tabs.FilterVisible())
+ {
+  SMA_CommonFilterConfig110 fc=filter_store.Get(slot_state.Selected());
+  filter_panel.Show(slot_state.Selected(),fc);filter_preset_panel.Hide();preset_action_panel.Hide();return;
+ }
+ filter_panel.Hide();filter_preset_panel.Hide();
+ if(left_tabs.PresetVisible())preset_action_panel.Show(slot_state.Selected());else preset_action_panel.Hide();
 }
 
 bool SaveFilterPreset205(const string name,string &reason)

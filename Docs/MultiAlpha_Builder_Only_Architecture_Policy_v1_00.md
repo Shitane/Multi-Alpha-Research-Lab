@@ -511,3 +511,10 @@ The Builder UI shall use a single simple role-scoped workflow based on the v2.45
 ENTRY/MANAGE/EXIT definitions retain independent state while sharing the generic Free-Slot Builder/Parts Picker implementation. The v2.45 `+`/`-` variable-slot mechanism and `UP`/`DOWN` slot scrolling are retained. EA PARTS must not require a second normal role selector or present an unnecessarily mixed all-role catalog.
 
 Detailed behavior is fixed in `Docs/MultiAlpha_MultiInstance_Broker_Risk_Architecture_v1_00.md`, section 13.
+
+
+### 14.1 Fixed slot paging
+
+For the current Builder generation, each of ENTRY / MANAGE / EXIT has a standard capacity of **24 logical slots**, displayed as **8 slots x 3 pages**: 01-08, 09-16, 17-24. `UP` / `DOWN` switch pages. The new Builder generation does not use the v2.45 `+` / `-` one-slot capacity adjustment as its normal workflow; unused slots are EMPTY.
+
+24 is the standard/default UI capacity, not a permanent architectural ceiling. Internal definitions/evaluators must remain extensible to additional 8-slot pages if real evidence later requires them. Detailed rules are in `Docs/MultiAlpha_MultiInstance_Broker_Risk_Architecture_v1_00.md`, sections 13.7-13.8.

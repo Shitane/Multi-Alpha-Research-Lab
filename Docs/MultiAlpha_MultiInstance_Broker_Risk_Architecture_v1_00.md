@@ -531,3 +531,124 @@ This milestone is complete only when all of the following are true:
 - Reference-vs-Builder forward comparison has actual evidence.
 
 The immediate goal is therefore **not to finish every M0-M15 component first**. The immediate goal is to prove the complete Builder concept end-to-end with O01, while keeping every implementation compatible with the final multi-instance Builder-only architecture.
+
+
+---
+
+## 13. Fixed UI rule — Role-scoped Logic Builder / Parts Picker (2026-10-02)
+
+This UI/operation rule is fixed for the current Builder implementation unless a later evidence-backed architecture decision explicitly supersedes it.
+
+### 13.1 One simple editing flow
+
+The user edits one Builder role at a time:
+
+```text
+[ ENTRY BUILDER ] [ MANAGE BUILDER ] [ EXIT BUILDER ]
+```
+
+The selected Builder role controls the EA PARTS view automatically.
+
+- When **ENTRY BUILDER** is selected, EA PARTS shows/configures **ENTRY Builder parts only**.
+- When **MANAGE BUILDER** is selected, EA PARTS shows/configures **MANAGE Builder parts only**.
+- When **EXIT BUILDER** is selected, EA PARTS shows/configures **EXIT Builder parts only**.
+
+Do not make the normal user workflow depend on a mixed all-role parts catalog or an additional role selector inside EA PARTS. The current Builder role is the source of the Parts Picker context.
+
+### 13.2 Preserve the v2.45 Free-Slot interaction
+
+The v2.45 Free-Slot Builder interaction is the baseline and shall be preserved where compatible:
+
+- `+` adds empty slot capacity.
+- `-` removes empty slot capacity subject to safe validation.
+- `UP` / `DOWN` scroll the visible slot range.
+- `ADD` opens/selects configuration for the target slot.
+- EA PARTS configures the selected slot.
+- `APPLY` writes the selected part/configuration back to that Builder definition.
+- SAVE / LOAD / CLEAR operate on the currently selected Builder role/definition.
+- Validation/Readout evaluates the currently selected definition.
+
+Do not replace this with a second slot-management paradigm unless actual usability/technical evidence requires it.
+
+### 13.3 Independent state, shared UI engine
+
+ENTRY, MANAGE and EXIT keep independent definitions and editing state, but reuse the same general-purpose UI/engine.
+
+Conceptually:
+
+```text
+Generic Free-Slot Builder UI / Engine
+                |
+        Current Builder Role
+        /        |        \\
+     ENTRY     MANAGE     EXIT
+       |          |         |
+ EntryDefinition ManageDefinition ExitDefinition
+       |          |         |
+ Entry Parts   Manage Parts  Exit Parts
+```
+
+Switching roles must not erase or overwrite another role's definition.
+
+### 13.4 Role-scoped part families
+
+The exact registry grows only as required, but normal display is role-scoped.
+
+**ENTRY examples**
+- indicators/conditions such as RSI, MA, ATR and later generic reusable indicators,
+- price/market conditions,
+- AND / OR,
+- time/filter/side-state conditions needed for entry,
+- entry actions such as BUY / SELL.
+
+**MANAGE examples**
+- position count/state,
+- average/last price,
+- grid/distance logic,
+- lot progression and caps,
+- order/cycle limits,
+- add-position/hold actions.
+
+**EXIT examples**
+- position/move state,
+- fixed TP / virtual SL,
+- single/basket trailing,
+- AND / OR where composition is required,
+- close actions.
+
+A reusable generic part may be valid in more than one role internally. That does not require showing irrelevant parts in the current role's normal EA PARTS view.
+
+### 13.5 Part parameter editing
+
+EA PARTS is also the parameter editor for the selected part. Strategy logic values belong here/inside the saved Builder definition rather than being duplicated into ordinary Expert Properties.
+
+Example:
+
+```text
+ENTRY BUILDER -> select slot -> EA PARTS -> RSI
+
+Period       [8]
+Timeframe    [CURRENT]
+Condition    [BELOW]
+Level        [30.0]
+
+[APPLY]
+```
+
+The actual controls depend on the selected generic part.
+
+### 13.6 First completion target
+
+The first concrete target under this fixed UI rule is:
+
+1. select ENTRY BUILDER,
+2. use the existing variable Free-Slot mechanism,
+3. expose only ENTRY-relevant generic parts in EA PARTS,
+4. configure part parameters,
+5. APPLY them to slots,
+6. SAVE a complete O01 ENTRY definition,
+7. validate that saved definition against the already verified O01 ENTRY reference behavior.
+
+After ENTRY is proven, use the same UI/engine pattern for MANAGE and then EXIT.
+
+The Builder remains general-purpose: O01 is the first proof case, not a permanent O01-specific Builder design.

@@ -468,6 +468,12 @@ void SyncSelectedSlotDraft195()
 }
 
 void OnChartEvent(const int id,const long &lparam,const double &dparam,const string &sparam){
+ int rw=right_tabs.Event(id,sparam);
+ if(rw!=0){RefreshRightWorkspace221();return;}
+ if(!right_tabs.SlotVisible()){
+  // Builder workspaces are UI-only in v2.21. Existing SLOT/route/runtime behavior is untouched.
+  return;
+ }
  int sr=slot_panel.Event(id,sparam,lparam,dparam);
  if(sr!=0)
  {

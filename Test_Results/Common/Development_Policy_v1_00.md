@@ -348,3 +348,39 @@ If a new idea appears, classify it as one of:
 
 A change to the primary objective should be made only by an explicit development-policy decision and recorded in GitHub before implementation.
 
+
+
+### End-state migration policy — Builder replaces strategy-specific implementations (2026-10-02)
+
+O01 and A10-A15 are retained during development as **reference/oracle implementations for comparison, parity, regression, and forward validation**. They are not intended to remain permanent runtime dependencies.
+
+The intended end state is:
+
+```text
+DEVELOPMENT
+O01 / A10 / A11 / A12 / A13 / A14 / A15 reference code
+                         |
+                         v
+                  LOGIC BUILDER
+                         |
+                  parity / validation
+                         |
+                         v
+FINAL RUNTIME
+LOGIC BUILDER + generic reusable parts + saved Builder definitions
+```
+
+After a reference strategy has been fully reconstructed and verified through the required parity/forward gates, its behavior shall be representable by a saved/versioned Builder definition using generic reusable parts.
+
+The long-term objective is to retire strategy-specific O01/A10-A15 runtime implementations from the production/runtime architecture. The names O01, A10, etc. may remain as historical/reference identities or saved Builder-definition names, but their logic must not require dedicated O01/A10-A15 hard-coded runtime modules.
+
+Rules:
+
+1. Do not delete or modify frozen reference implementations during the reproduction phase.
+2. Reference modules remain available until the corresponding Builder reproduction has passed the required verification gates and migration has been explicitly approved.
+3. Do not create Builder parts such as `O01_RSI` or `A10_ENTRY_SPECIAL` merely to reproduce one strategy. Prefer generic parts such as RSI, MA, ATR, TIME, CYCLE_STATE, GRID, TP/SL, TRAILING, etc., with configurable parameters.
+4. Indicator type, timeframe, period, applied price, method, comparison condition, threshold/level, multiplier, and other relevant parameters must be data/configuration wherever practical rather than hard-coded per strategy.
+5. The final Builder must support both reconstructed historical strategies and entirely new strategies assembled from the same reusable parts.
+6. Reference-loading controls such as `O01 ENTRY` are development/migration aids, not required permanent controls in the final Builder UI.
+7. Removal of a strategy-specific runtime path occurs only after evidence-backed Builder equivalence and an explicit migration decision; historical source/evidence remains preserved in GitHub.
+8. The architectural destination is **one generic Logic Builder runtime**, not parallel permanent O01/A10-A15 engines.

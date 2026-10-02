@@ -652,3 +652,60 @@ The first concrete target under this fixed UI rule is:
 After ENTRY is proven, use the same UI/engine pattern for MANAGE and then EXIT.
 
 The Builder remains general-purpose: O01 is the first proof case, not a permanent O01-specific Builder design.
+
+
+### 13.7 Fixed slot paging specification — 24 slots per Builder role (2026-10-02)
+
+This specification supersedes the earlier v2.45 variable-capacity `+` / `-` behavior for the new Builder generation.
+
+Each Builder role has **24 logical slots by default**, displayed as three fixed pages of eight slots:
+
+```text
+ENTRY BUILDER
+  PAGE 1 = 01-08
+  PAGE 2 = 09-16
+  PAGE 3 = 17-24
+
+MANAGE BUILDER
+  PAGE 1 = 01-08
+  PAGE 2 = 09-16
+  PAGE 3 = 17-24
+
+EXIT BUILDER
+  PAGE 1 = 01-08
+  PAGE 2 = 09-16
+  PAGE 3 = 17-24
+```
+
+UI rules:
+
+- The panel displays eight slot rows at one time.
+- `UP` moves to the next eight-slot page: 01-08 -> 09-16 -> 17-24.
+- `DOWN` moves in the reverse direction.
+- The normal Builder UI does not require `+` or `-` to add/remove one slot at a time.
+- Unused slots remain `EMPTY` and have no runtime effect.
+- SAVE stores the complete definition including EMPTY slots; LOAD restores it.
+- ENTRY, MANAGE and EXIT each own their independent 24-slot definition.
+- On Builder-role selection, the normal/default visible page is PAGE 1 (01-08) to keep navigation predictable.
+
+The UI should show the current range clearly, for example `01-08 / 24`, `09-16 / 24`, or `17-24 / 24`.
+
+### 13.8 Extensibility rule
+
+**24 slots is the standard UI/default capacity, not a permanent hard-coded architectural ceiling.**
+
+Implement slot/page constants or equivalent generic capacity metadata so that a later evidence-based need can add PAGE 4 (25-32) or further pages without redesigning Builder definitions, saved-data semantics, the Part Registry, or evaluator architecture.
+
+Conceptually:
+
+```text
+SLOTS_PER_PAGE       = 8
+DEFAULT_PAGE_COUNT   = 3
+DEFAULT_SLOT_COUNT   = 24
+```
+
+Exact constant names are an implementation detail.
+
+Do not increase the visible/default capacity beyond 24 merely for hypothetical future complexity. If a real Builder definition exceeds 24 slots, first determine whether the logic should be decomposed into clearer reusable modules; expand capacity only when the use case justifies it.
+
+This fixed 24-slot / 3-page rule applies to the current O01 Builder completion work and subsequent Builder UI reconstruction.

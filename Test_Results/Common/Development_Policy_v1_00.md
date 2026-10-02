@@ -384,3 +384,29 @@ Rules:
 6. Reference-loading controls such as `O01 ENTRY` are development/migration aids, not required permanent controls in the final Builder UI.
 7. Removal of a strategy-specific runtime path occurs only after evidence-backed Builder equivalence and an explicit migration decision; historical source/evidence remains preserved in GitHub.
 8. The architectural destination is **one generic Logic Builder runtime**, not parallel permanent O01/A10-A15 engines.
+
+
+---
+
+## 7. Primary architecture decision — Builder-Only Runtime (2026-10-02)
+
+The project has adopted `Docs/MultiAlpha_Builder_Only_Architecture_Policy_v1_00.md` as the governing final-architecture policy.
+
+The final normal runtime shall be composed from independently saved and selected **ENTRY / MANAGE / EXIT Builder definitions**. O01 and A10-A15 are reclassified as Legacy Reference / Migration Oracle implementations: preserve them for parity/regression/evidence, but do not treat them as permanent active runtime engines.
+
+This decision supersedes earlier policy language that required permanent coexistence of Builder modules and code-defined O01/A10-A15 modules in the final product. Coexistence remains valid **during migration/testing only**.
+
+Immediate central development order is now:
+
+1. Builder Core/schema/Part Registry and fail-closed validation.
+2. Generic independent ENTRY / MANAGE / EXIT evaluators.
+3. Generic Route Composer for freely replaceable compatible role modules.
+4. Typed MT5 Context Provider.
+5. SAVE/LOAD/versioned module and route library.
+6. Free-slot Builder UI over the same definitions.
+7. Migrate/reference-test O01 -> A10 -> A11 -> A12 -> A13 -> A14 -> A15.
+8. Retire strategy-specific active runtime dependencies after evidence-backed migration.
+9. Validate Builder-only backtest/demo runtime.
+10. Only then create a separately approved execution host.
+
+Do not deepen an O01/A10-specific active runtime path when the same work can be implemented in the generic Builder-only core.

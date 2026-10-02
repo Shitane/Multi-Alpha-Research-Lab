@@ -542,7 +542,8 @@ void SyncSelectedSlotDraft195()
 
 void OnChartEvent(const int id,const long &lparam,const double &dparam,const string &sparam){
  int fb=free_slot_builder.OnChartEvent(id,lparam,dparam,sparam);
- if(fb==2){builder_parts_picker.SetRole(free_slot_builder.Role());builder_parts_picker.SetSlot(free_slot_builder.Selected(),free_slot_builder.SelectedPart(),free_slot_builder.SelectedParams());right_tabs.Select(2);RefreshRightWorkspace221();return;}\n if(fb==5){BuilderReadout243();return;}
+ if(fb==2){builder_parts_picker.SetRole(free_slot_builder.Role());builder_parts_picker.SetSlot(free_slot_builder.Selected(),free_slot_builder.SelectedPart(),free_slot_builder.SelectedParams());right_tabs.Select(2);RefreshRightWorkspace221();return;}
+ if(fb==5){BuilderReadout243();return;}
  if(fb==4){BuilderReadout243();return;}
  if(fb==3)return;
  if(fb==1)return;

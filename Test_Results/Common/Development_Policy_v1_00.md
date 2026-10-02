@@ -430,3 +430,12 @@ Key fixed decisions:
 8. Keep all central implementation NO_ORDERS until the separately approved execution stage.
 
 The governing implementation gates are M0 through M15 in the architecture document. Do not skip directly to execution, and do not deepen strategy-specific O01/A10 runtime work when the equivalent work belongs in the generic multi-instance Builder core.
+
+
+### Priority clarification — O01 Builder Demo first (2026-10-02)
+
+M0-M15 is not a strict numerical implementation schedule. It is a guide to the required architecture and verification gates.
+
+Current central priority is to complete the general-purpose ENTRY / MANAGE / EXIT Logic Builder using O01 as the first end-to-end proof, compose the three saved definitions, validate them through NO_ORDERS/market testing, and operate the Builder-defined O01 on one demo Strategy Instance with Reference-vs-Builder forward evidence.
+
+Only the Broker/Symbol, Context, Instance, Risk or other infrastructure needed for this milestone should be pulled forward as required. Full #01-#50 and Portfolio Guard completion must not unnecessarily block the first O01 Builder demo, while all implementation must remain compatible with that final architecture.

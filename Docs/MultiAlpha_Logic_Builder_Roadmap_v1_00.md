@@ -499,3 +499,34 @@ Retirement requires:
 Historical reference source and test evidence remain preserved even after removal from the active runtime.
 
 The destination is a **single generic Logic Builder architecture capable of reproducing O01/A10-A15 and creating strategies that never existed in the original reference set**.
+
+
+---
+
+## Superseding architecture decision — Builder-Only Runtime (2026-10-02)
+
+The final architecture has now been fixed by:
+
+`Docs/MultiAlpha_Builder_Only_Architecture_Policy_v1_00.md`
+
+That policy supersedes earlier roadmap wording that implied permanent coexistence of code-defined O01/A10-A15 modules with Builder modules in the final active runtime.
+
+The final target is now explicitly:
+
+```text
+Saved ENTRY Builder Module
+          +
+Saved MANAGE Builder Module
+          +
+Saved EXIT Builder Module
+          |
+      Builder Route
+          |
+   Builder-only Runtime
+```
+
+O01 and A10-A15 remain frozen **Legacy Reference / Migration Oracle** implementations during migration and verification, but they are not permanent normal runtime selections. Historical source and evidence remain preserved after retirement from the active runtime.
+
+Development priority is also updated: before deepening O01-specific live-market integration, implement the generic Builder Core, independent generic ENTRY/MANAGE/EXIT evaluators, Route Composer, and typed Context Provider described as phases B1-B4 in the Builder-Only Architecture Policy. O01 -> A10 -> ... -> A15 then becomes the migration/parity curriculum used to prove the generic system, not the final runtime taxonomy.
+
+When this roadmap and the Builder-Only Architecture Policy differ about the intended final runtime, the Builder-Only Architecture Policy governs.

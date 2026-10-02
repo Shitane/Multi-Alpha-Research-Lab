@@ -405,3 +405,97 @@ A10 -> A11 -> A12 -> A13 -> A14 -> A15
 ```
 
 The current O01 Builder display is an intermediate verification view, not the final interaction model. Future UI work must move toward the free-slot construction board while preserving the data-model-first architecture, NO_ORDERS safety during research/parity, and the frozen reference implementations.
+
+
+## Final architecture decision — reference code is transitional (2026-10-02)
+
+O01 and A10-A15 have two different roles over the life of the project.
+
+### During development
+
+They remain frozen comparison references. They are used to answer:
+
+- Did the Builder reconstruct the same logic?
+- Does it make the same ENTRY / MANAGE / EXIT decisions?
+- Does the same saved Builder definition survive backtest and forward/demo validation?
+- Did a generic Builder-part change regress a previously reproduced strategy?
+
+Therefore reference code must remain intact while reproduction is underway.
+
+### Intended final state
+
+The final product/runtime shall not require separate O01, A10, A11, A12, A13, A14, or A15 strategy engines.
+
+Instead:
+
+```text
+Generic Part Registry
+        +
+Logic Builder evaluator
+        +
+Saved/versioned Builder definitions
+        |
+        +-- O01-equivalent definition
+        +-- A10-equivalent definition
+        +-- A11-equivalent definition
+        +-- ...
+        +-- new user-created definitions
+```
+
+An O01-equivalent strategy is therefore ultimately **data assembled in the Builder**, not an O01-specific program path. The same applies to A10-A15.
+
+### Generic-part requirement
+
+Reproduction must expand the generic vocabulary of the Builder rather than accumulate strategy-specific exceptions.
+
+For example:
+
+```text
+GOOD
+RSI(period=8, timeframe=CURRENT, price=CLOSE, condition=LT, level=30)
+MA(period=20, method=SMA, price=CLOSE)
+ATR(period=15, multiplier=2.0)
+TIME(...)
+CYCLE_STATE(...)
+GRID(...)
+TRAILING(...)
+
+AVOID
+O01_RSI
+O01_ENTRY_RULE
+A10_SPECIAL_FILTER
+A11_ONLY_EXIT
+```
+
+A strategy-specific exception is permitted only when the underlying behavior genuinely cannot be represented as a reusable concept, and it must be documented before implementation.
+
+### Parameter freedom
+
+Reusable parts must expose the meaningful parameters needed to reconstruct references and create new logic. Values must not be fixed merely because O01 or A10 used one value.
+
+Examples include indicator period, timeframe, applied price, MA method, comparison operator, threshold/level, ATR multiplier, session values, distance, position counts, lot/grid settings, TP/SL/trailing values, and other part-specific settings.
+
+### Reference loader lifecycle
+
+Buttons or selectors such as `O01 ENTRY` exist to accelerate development and parity testing. They load a known reference definition into the general Builder.
+
+They are **development/migration tools**, not a required part of the final user-facing architecture. Once migration is complete, reference definitions may be loaded through the ordinary Builder SAVE/LOAD mechanism or retained only in the test/reference environment.
+
+### Retirement gate
+
+Do not remove a strategy-specific implementation merely because its Builder layout looks equivalent.
+
+Retirement requires:
+
+1. complete Builder reconstruction,
+2. valid structured definition,
+3. event-level parity evidence,
+4. required backtest/regression evidence,
+5. required demo/forward evidence,
+6. frozen/versioned Builder definition,
+7. confirmation that no runtime dependency still requires the strategy-specific module,
+8. explicit migration/retirement decision recorded in GitHub.
+
+Historical reference source and test evidence remain preserved even after removal from the active runtime.
+
+The destination is a **single generic Logic Builder architecture capable of reproducing O01/A10-A15 and creating strategies that never existed in the original reference set**.

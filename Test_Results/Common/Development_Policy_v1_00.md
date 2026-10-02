@@ -298,7 +298,25 @@ Logic Builder development must preserve these rules:
 
 ### Immediate Builder milestone
 
-The first Builder milestone is deliberately small:
+The first Builder milestone is deliberately small.
+
+### Fixed reproduction order (policy decision — 2026-10-02)
+
+The Builder reproduction order is fixed as:
+
+```text
+O01 -> A10 -> A11 -> A12 -> A13 -> A14 -> A15
+```
+
+**O01 is the mandatory first target.** Do not advance the main Builder reproduction track to A10 until O01 has been reconstructed with Builder parts, parity-tested against the O01 reference, and operated successfully on a demo account with recorded evidence.
+
+After O01 is completed, proceed sequentially through A10, A11, A12, A13, A14, and A15. Do not reorder or skip a target for ordinary implementation convenience. A change to this sequence requires an explicit development-policy decision recorded in GitHub before implementation.
+
+For each target, the completion gate is: Builder reconstruction -> validation -> reference parity evidence -> demo/forward evidence where applicable -> freeze the verified Builder definition -> proceed to the next target.
+
+### LB-01 — O01 Builder completion
+
+LB-01 is specifically the O01 milestone, not "O01 or A10".
 
 - Builder data model / schema
 - dedicated Builder panel shell
@@ -312,9 +330,11 @@ The first Builder milestone is deliberately small:
 - AND/OR grouping
 - SAVE/LOAD of a named Builder definition
 - registration as a research module
-- one O01 or A10 reference path reconstructed and parity-tested
+- O01 reference path reconstructed and parity-tested
+- O01 Builder definition registered through the existing module architecture
+- O01 Builder operated on a demo account and compared with the O01 reference using recorded forward evidence
 
-After the first parity PASS, expand the part library only as required to reproduce the remaining O01/A10-A15 behaviors.
+Only after the O01 Builder completion gate is satisfied may the central reproduction track proceed to A10. After that, expand the part library only as required for A10 -> A11 -> A12 -> A13 -> A14 -> A15.
 
 ### Direction-change rule
 

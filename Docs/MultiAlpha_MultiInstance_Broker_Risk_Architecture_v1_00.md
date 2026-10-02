@@ -709,3 +709,40 @@ Exact constant names are an implementation detail.
 Do not increase the visible/default capacity beyond 24 merely for hypothetical future complexity. If a real Builder definition exceeds 24 slots, first determine whether the logic should be decomposed into clearer reusable modules; expand capacity only when the use case justifies it.
 
 This fixed 24-slot / 3-page rule applies to the current O01 Builder completion work and subsequent Builder UI reconstruction.
+
+
+### 13.9 SAVE scope — role 24 and complete route 72 (2026-10-02)
+
+The Builder SAVE workflow shall support **both** of the following scopes:
+
+1. **ROLE SAVE (24 slots)**
+   - Saves only the currently selected Builder role.
+   - ENTRY SAVE = ENTRY slots 01-24.
+   - MANAGE SAVE = MANAGE slots 01-24.
+   - EXIT SAVE = EXIT slots 01-24.
+   - This is used to build, reuse, swap and test ENTRY / MANAGE / EXIT modules independently.
+
+2. **ALL / ROUTE SAVE (72 slots)**
+   - Saves the complete composed strategy definition as one unit:
+
+```text
+ENTRY   01-24
+MANAGE  01-24
+EXIT    01-24
+----------------
+TOTAL      72 slots
+```
+
+   - ALL/ROUTE LOAD restores all three role definitions together.
+   - The combined save must retain the identity/boundaries of ENTRY, MANAGE and EXIT; it must not flatten them into an ambiguous undifferentiated 72-slot program.
+
+The UI should make the two scopes unmistakable. Exact button labels may be finalized during implementation, but the intended operation is equivalent to:
+
+```text
+[SAVE 24]   [SAVE ALL 72]
+[LOAD 24]   [LOAD ALL 72]
+```
+
+The existing simple role-scoped editing workflow remains unchanged: selecting ENTRY/MANAGE/EXIT controls EA PARTS. ALL/72 SAVE is an additional composition-level persistence operation, not a fourth Builder role.
+
+Both save formats must be versioned/validated so incompatible or corrupted definitions fail closed rather than silently loading partial strategy state.

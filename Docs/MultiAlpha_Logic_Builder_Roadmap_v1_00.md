@@ -315,3 +315,26 @@ When choosing what to develop next, ask:
 If yes, it belongs on the central roadmap.
 
 If not, treat it as supporting or future work unless an explicit policy decision changes the roadmap.
+
+
+## Right-side Builder workspace UI decision (2026-10-02)
+
+The right-side workspace shall use the same tab concept and visual language as the left-side LOGIC / FILTER / PRESET selector.
+
+Fixed top-level right workspace tabs:
+
+```text
+SLOT | EA LOGIC | EA PARTS
+```
+
+Responsibilities:
+
+- **SLOT** — preserves the existing slot selection/enable workflow and existing route/runtime context.
+- **EA LOGIC** — edits the Builder logic structure: role (ENTRY/MANAGE/EXIT), ordered slots, groups, AND/OR composition, validation, definition identity, SAVE/LOAD/REGISTER.
+- **EA PARTS** — selects and edits one reusable Part Registry component used by EA LOGIC. It is not an independent strategy editor.
+
+EA PARTS is therefore required, but it must be coupled to EA LOGIC through the same BuilderDefinition / Part Registry data model. Selecting a logic slot in EA LOGIC selects the corresponding part in EA PARTS; edits in EA PARTS update that selected Builder slot only after validation/apply. EA LOGIC must immediately reflect the resulting part identity/status.
+
+The UI is not the source of truth. EA LOGIC and EA PARTS are two views/editors over the same structured Builder data.
+
+Initial implementation is UI-only and non-invasive: preserve the verified v2.20 runtime, create a new versioned host, add the three right-side tabs and Builder workspace shells, and keep trading/runtime behavior unchanged. Do not connect Builder definitions to execution until the schema/Part Registry and O01 reproduction path are implemented and separately validated.

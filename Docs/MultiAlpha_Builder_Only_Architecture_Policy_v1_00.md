@@ -468,3 +468,33 @@ This extension fixes the following requirements:
 - O01/A10-A15 remain Legacy Reference/Migration Oracles and are not permanent active runtime engines.
 
 The implementation sequence M0-M15 in the extension document is the governing development order for this architecture. Where earlier immediate-work wording conflicts with that sequence, the M0-M15 sequence governs.
+
+
+---
+
+## 13. Current execution priority — O01 Builder end-to-end demo (2026-10-02)
+
+The M0-M15 sequence referenced by the Multi-Instance / Broker / Risk extension is an architectural guide and gate map, **not a mandatory waterfall schedule**.
+
+The current highest-priority implementation objective is to complete the general-purpose LOGIC BUILDER for O01 end-to-end:
+
+```text
+ENTRY BUILDER -> saved O01 ENTRY definition
+MANAGE BUILDER -> saved O01 MANAGE definition
+EXIT BUILDER  -> saved O01 EXIT definition
+                    |
+                    v
+             O01 Builder Route
+                    |
+             NO_ORDERS validation
+                    |
+        Strategy Tester / market context
+                    |
+             single-instance DEMO
+                    |
+       Reference vs Builder forward evidence
+```
+
+Implement only the portions of Broker/Symbol, Context, Risk, Instance or other infrastructure needed to safely reach this milestone; broader #01-#50 and portfolio completion may follow. All such work must remain compatible with the final Builder-only multi-instance architecture.
+
+Detailed current-milestone steps and completion criteria are recorded in `Docs/MultiAlpha_MultiInstance_Broker_Risk_Architecture_v1_00.md`, section 12.

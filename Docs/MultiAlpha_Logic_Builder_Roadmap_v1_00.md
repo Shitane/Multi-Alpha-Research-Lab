@@ -74,7 +74,13 @@ A14
 A15
 ```
 
-The exact reproduction order may follow dependency efficiency, but skipping parity is not allowed.
+The reproduction order is **fixed** and must not follow a different dependency/convenience order:
+
+```text
+O01 -> A10 -> A11 -> A12 -> A13 -> A14 -> A15
+```
+
+**O01 is the mandatory first Builder target.** The central Builder track does not proceed to A10 until O01 has been reconstructed in the Builder, parity-tested against the O01 reference, and successfully operated on a demo account with recorded forward evidence. After O01, proceed sequentially through A10, A11, A12, A13, A14, and A15. Reordering or skipping requires an explicit policy decision recorded in GitHub before implementation.
 
 ## Builder part model
 
@@ -239,7 +245,7 @@ Similar profit is not sufficient.
 
 Do not begin with a universal Builder.
 
-Milestone LB-01:
+Milestone LB-01 is specifically **O01 Builder completion**:
 
 1. Builder definition/schema v1
 2. Part Registry v1
@@ -254,10 +260,14 @@ Milestone LB-01:
 11. validation
 12. named SAVE/LOAD
 13. Module Registry bridge
-14. one O01 or A10 path reconstructed
-15. Original/Reference vs Builder parity test
+14. O01 path reconstructed with Builder parts
+15. O01 Reference vs Builder parity test
+16. O01 Builder definition registered through the existing module architecture
+17. O01 Builder demo-account operation
+18. O01 Reference vs Builder forward/demo evidence recorded
+19. verified O01 Builder definition frozen
 
-Only after LB-01 parity succeeds should the part library expand toward complete O01/A10-A15 reproduction.
+Only after LB-01 completes through the O01 demo/forward gate should the central track proceed to A10. Continue thereafter in the fixed order A10 -> A11 -> A12 -> A13 -> A14 -> A15, adding generic reusable parts only as each next reference requires them.
 
 ## After reproduction
 

@@ -410,3 +410,23 @@ Immediate central development order is now:
 10. Only then create a separately approved execution host.
 
 Do not deepen an O01/A10-specific active runtime path when the same work can be implemented in the generic Builder-only core.
+
+
+---
+
+## 8. Multi-Instance / Broker / Risk implementation policy (2026-10-02)
+
+The central Builder-only program shall follow `Docs/MultiAlpha_MultiInstance_Broker_Risk_Architecture_v1_00.md`.
+
+Key fixed decisions:
+
+1. Freeze v2.45 as the UI/parts baseline and rebuild in a new Builder-only v3 generation.
+2. Support up to 50 independently configured Strategy Instances in one host.
+3. Allow each instance to independently select logical symbol, ENTRY, MANAGE, EXIT and Risk Profile.
+4. Separate broker symbol resolution/specification from Builder logic.
+5. Keep ordinary Expert Properties focused on environment and portfolio-level safety rather than strategy logic parameters.
+6. Use both Instance Risk and Portfolio Guard before risk-increasing actions.
+7. Build and test a multi-symbol Context Provider and Scheduler; do not rely on a single chart-symbol OnTick path.
+8. Keep all central implementation NO_ORDERS until the separately approved execution stage.
+
+The governing implementation gates are M0 through M15 in the architecture document. Do not skip directly to execution, and do not deepen strategy-specific O01/A10 runtime work when the equivalent work belongs in the generic multi-instance Builder core.

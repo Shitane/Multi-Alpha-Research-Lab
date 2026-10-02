@@ -445,3 +445,26 @@ The architecture objective is reached when a user can:
 10. create a strategy that has no O01/A10-A15 hard-coded implementation behind it.
 
 That is the target Multi Alpha EA.
+
+
+---
+
+## 12. Governing extension — Multi-Instance / Broker / Risk Architecture (2026-10-02)
+
+The Builder-only final architecture is extended by:
+
+`Docs/MultiAlpha_MultiInstance_Broker_Risk_Architecture_v1_00.md`
+
+This extension fixes the following requirements:
+
+- `MultiAlpha_Runtime_Panel_A10FullPanel_NoOrders_v2_45` is frozen as the UI/parts reconstruction baseline for the v3 Builder-only generation.
+- One host shall support up to **50 independent Strategy Instances (#01-#50)**.
+- Every instance may independently choose a logical symbol plus saved ENTRY / MANAGE / EXIT Builder modules.
+- Builder logic uses logical symbols; a Broker/Symbol Resolver maps them to actual broker symbols such as `XAUUSD-m`.
+- Expert Properties are kept primarily for environment/broker/global portfolio-safety configuration; strategy logic values belong to Builder/panel definitions.
+- Risk management is split into **Instance Risk** and **Portfolio Risk / Portfolio Guard**.
+- Broker-aware lot/risk calculations use actual symbol specifications and volume rules.
+- Multi-symbol operation must use a tested scheduler/context architecture rather than assuming the chart symbol's `OnTick()` can drive all instances.
+- O01/A10-A15 remain Legacy Reference/Migration Oracles and are not permanent active runtime engines.
+
+The implementation sequence M0-M15 in the extension document is the governing development order for this architecture. Where earlier immediate-work wording conflicts with that sequence, the M0-M15 sequence governs.

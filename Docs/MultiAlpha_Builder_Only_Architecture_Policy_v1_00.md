@@ -498,3 +498,16 @@ EXIT BUILDER  -> saved O01 EXIT definition
 Implement only the portions of Broker/Symbol, Context, Risk, Instance or other infrastructure needed to safely reach this milestone; broader #01-#50 and portfolio completion may follow. All such work must remain compatible with the final Builder-only multi-instance architecture.
 
 Detailed current-milestone steps and completion criteria are recorded in `Docs/MultiAlpha_MultiInstance_Broker_Risk_Architecture_v1_00.md`, section 12.
+
+
+## 14. Fixed Builder UI interaction rule (2026-10-02)
+
+The Builder UI shall use a single simple role-scoped workflow based on the v2.45 Free-Slot Builder:
+
+- ENTRY BUILDER selected -> EA PARTS shows/configures ENTRY parts.
+- MANAGE BUILDER selected -> EA PARTS shows/configures MANAGE parts.
+- EXIT BUILDER selected -> EA PARTS shows/configures EXIT parts.
+
+ENTRY/MANAGE/EXIT definitions retain independent state while sharing the generic Free-Slot Builder/Parts Picker implementation. The v2.45 `+`/`-` variable-slot mechanism and `UP`/`DOWN` slot scrolling are retained. EA PARTS must not require a second normal role selector or present an unnecessarily mixed all-role catalog.
+
+Detailed behavior is fixed in `Docs/MultiAlpha_MultiInstance_Broker_Risk_Architecture_v1_00.md`, section 13.

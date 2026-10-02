@@ -19,7 +19,9 @@
 #include "..\\..\\..\\Include\\A10\\A10_Full_Settings_Panel_v1_02.mqh"
 #include "..\\..\\..\\Include\\A10\\A10_Split_Detail_Panel_v1_00.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Left_Context_v1_84.mqh"
-#include "..\\..\\..\\Include\\Common\\MultiAlpha_Left_Workspace_Tabs_v2_02.mqh"\n#include "..\\..\\..\\Include\\Common\\MultiAlpha_Right_Workspace_Tabs_v1_00.mqh"\n#include "..\\..\\..\\Include\\Common\\MultiAlpha_Builder_Workspace_Shell_v1_00.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Left_Workspace_Tabs_v2_02.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Right_Workspace_Tabs_v1_00.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Builder_Workspace_Shell_v1_00.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Common_Filter_v1_10.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Filter_Panel_v1_11.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Slot_Filter_Preset_v1_20.mqh"
@@ -119,7 +121,9 @@ SA10FullConfig100 a10_full_cfg;
 CA10FullSettingsPanel102 a10_full_panel;
 CA10SplitDetailPanel100 a10_split_detail_panel;
 CMultiAlphaLeftContext184 left_context;
-CMultiAlphaLeftWorkspaceTabs202 left_tabs;\nCMultiAlphaRightWorkspaceTabs100 right_tabs;\nCMultiAlphaBuilderWorkspaceShell100 builder_workspace;
+CMultiAlphaLeftWorkspaceTabs202 left_tabs;
+CMultiAlphaRightWorkspaceTabs100 right_tabs;
+CMultiAlphaBuilderWorkspaceShell100 builder_workspace;
 CMultiAlphaFilterStore110 filter_store;
 CMultiAlphaFilterPanel111 filter_panel;
 CMultiAlphaSlotFilterPreset120 filter_preset;
@@ -149,7 +153,27 @@ void CleanupLegacyWorkspaceObjects220()
  for(int j=0;j<ArraySize(retired);j++) ObjectDelete(0,"O01CFG160_"+retired[j]);
  ChartRedraw();
 }
-void SetPrefixVisible221(const string prefix,const bool on)\n{\n int total=ObjectsTotal(0,0,-1);\n for(int i=total-1;i>=0;i--)\n {\n  string n=ObjectName(0,i,0,-1);\n  if(StringFind(n,prefix)==0)ObjectSetInteger(0,n,OBJPROP_TIMEFRAMES,(long)(on?OBJ_ALL_PERIODS:0));\n }\n}\nvoid RefreshRightWorkspace221()\n{\n bool slot=right_tabs.SlotVisible();\n SetPrefixVisible221("MASLOT211_",slot);\n if(right_tabs.LogicVisible())builder_workspace.ShowLogic();\n else if(right_tabs.PartsVisible())builder_workspace.ShowParts();\n else builder_workspace.HideAll();\n ChartRedraw();\n}\n\nvoid A10FullDefaults175(SA10FullConfig100 &c)
+void SetPrefixVisible221(const string prefix,const bool on)
+{
+ int total=ObjectsTotal(0,0,-1);
+ for(int i=total-1;i>=0;i--)
+ {
+  string n=ObjectName(0,i,0,-1);
+  if(StringFind(n,prefix)==0)ObjectSetInteger(0,n,OBJPROP_TIMEFRAMES,(long)(on?OBJ_ALL_PERIODS:0));
+ }
+}
+void RefreshRightWorkspace221()
+{
+ bool slot=right_tabs.SlotVisible();
+ SetPrefixVisible221("MASLOT211_",slot);
+ SetPrefixVisible221("MA_ROUTE175_",slot);
+ if(right_tabs.LogicVisible())builder_workspace.ShowLogic();
+ else if(right_tabs.PartsVisible())builder_workspace.ShowParts();
+ else builder_workspace.HideAll();
+ ChartRedraw();
+}
+
+void A10FullDefaults175(SA10FullConfig100 &c)
 {
  c.max_positions=4;c.skip_opposite=true;c.entry_ttl_seconds=120;
  c.mode[0].enabled=true;c.mode[0].brick=17;c.mode[0].bb_period=20;c.mode[0].deviation=1.0;c.mode[0].squeeze_width=1.0;c.mode[0].entry_run=2;c.mode[0].tp=24;c.mode[0].sl=42;c.mode[0].max_hold=1230;c.mode[0].cooldown=5;c.mode[0].max_spread=.35;

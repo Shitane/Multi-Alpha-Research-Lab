@@ -518,3 +518,13 @@ Detailed behavior is fixed in `Docs/MultiAlpha_MultiInstance_Broker_Risk_Archite
 For the current Builder generation, each of ENTRY / MANAGE / EXIT has a standard capacity of **24 logical slots**, displayed as **8 slots x 3 pages**: 01-08, 09-16, 17-24. `UP` / `DOWN` switch pages. The new Builder generation does not use the v2.45 `+` / `-` one-slot capacity adjustment as its normal workflow; unused slots are EMPTY.
 
 24 is the standard/default UI capacity, not a permanent architectural ceiling. Internal definitions/evaluators must remain extensible to additional 8-slot pages if real evidence later requires them. Detailed rules are in `Docs/MultiAlpha_MultiInstance_Broker_Risk_Architecture_v1_00.md`, sections 13.7-13.8.
+
+
+### 14.2 SAVE scopes: 24-role and 72-complete
+
+Persistence must support both independent role-module saves and complete strategy saves:
+
+- SAVE/LOAD current role = 24 slots (ENTRY or MANAGE or EXIT).
+- SAVE/LOAD ALL = ENTRY 24 + MANAGE 24 + EXIT 24 = 72 slots as one composed strategy package.
+
+The 72-slot package preserves all three role boundaries and does not replace the ability to save/load and swap each 24-slot role independently. Detailed rules are in `Docs/MultiAlpha_MultiInstance_Broker_Risk_Architecture_v1_00.md`, section 13.9.

@@ -437,3 +437,97 @@ UI prototypes may be developed in parallel, but runtime dependencies must follow
 15. Execution is a separate, later-approved boundary.
 16. PASS requires actual evidence.
 17. GitHub remains the durable source of truth.
+
+
+---
+
+## 12. Development-order clarification and current top priority (2026-10-02)
+
+### M0-M15 are architectural guide rails, not a mandatory waterfall
+
+The M0-M15 phases in this document define the components and verification gates required to reach the intended final architecture. They are **not a rule that every phase must be completed strictly in numerical order before work on a later phase may begin**.
+
+Development may take the required portion of a later phase earlier when that directly advances the current verified milestone, provided that:
+
+1. the Builder-only final architecture is not contradicted,
+2. temporary work does not become an undocumented permanent dependency,
+3. safety/validation gates relevant to the work are preserved,
+4. GitHub records any material architecture decision,
+5. verified/frozen references are not modified merely for convenience.
+
+Examples:
+
+- A minimal Symbol Resolver may be implemented before the full multi-instance scheduler when it is required to run O01 Builder on a demo broker symbol such as `XAUUSD-m`.
+- The complete #01-#50 scheduler and Portfolio Risk Engine do not need to block the first single-instance O01 Builder demo milestone.
+- UI/Builder work may advance before every final portfolio component exists, as long as its data/runtime boundaries remain compatible with the target architecture.
+
+### Current highest-priority milestone — O01 Builder Demo
+
+Until this milestone is completed or explicitly reprioritized in GitHub, the central development priority is:
+
+```text
+GENERAL LOGIC BUILDER
+  |
+  +-- ENTRY BUILDER
+  |      -> construct/save O01 ENTRY using generic parts
+  |
+  +-- MANAGE BUILDER
+  |      -> construct/save O01 MANAGE using generic parts
+  |
+  +-- EXIT BUILDER
+         -> construct/save O01 EXIT using generic parts
+                |
+                v
+       O01 BUILDER ROUTE
+   ENTRY + MANAGE + EXIT
+                |
+                v
+       NO_ORDERS validation
+                |
+                v
+     Strategy Tester / market input
+                |
+                v
+        DEMO ACCOUNT RUN
+                |
+                v
+ O01 Reference vs Builder forward evidence
+```
+
+The Builder must remain general-purpose. Do **not** solve this milestone by creating an O01-specific fixed Builder form or by making O01-specific parts where a generic reusable part can express the behavior.
+
+### Practical implementation sequence for the current milestone
+
+1. **Freeze/use v2.45 as the UI baseline.** Do not rewrite the verified baseline merely to advance Builder work.
+2. **Complete ENTRY BUILDER.** The free-slot UI, part selection, parameter editing, validation and structured definition must be sufficient to construct and save O01 ENTRY from generic parts.
+3. **Complete MANAGE BUILDER.** Construct and save O01 MANAGE from generic position/cycle/grid/lot parts.
+4. **Complete EXIT BUILDER.** Construct and save O01 EXIT from generic TP/SL/trailing/close/state parts.
+5. **Compose the O01 Builder Route.** Select the three independently saved definitions as one route without introducing a dedicated O01 strategy engine into the final Builder runtime.
+6. **Run NO_ORDERS parity/regression.** Reuse the existing verified O01 Builder evidence and add tests needed for the actual saved definitions/panel/runtime path.
+7. **Connect real MT5 market/context input.** Use the generic context boundary; add only the broker/symbol-resolution functionality needed for the demo environment.
+8. **Run Strategy Tester / controlled market validation.** Confirm that the saved Builder definitions are the definitions actually consumed by runtime.
+9. **Run one-instance O01 Builder on a demo account.** Begin with one validated Strategy Instance; #01-#50 completion is not a prerequisite.
+10. **Collect O01 Reference vs Builder forward evidence.** Compare observable ENTRY/MANAGE/EXIT lifecycle behavior and record actual evidence.
+11. **Freeze the verified O01 Builder definitions.** Only evidence-backed PASS is recorded.
+12. **Then expand the central migration track to A10**, while continuing the broader M0-M15 architecture as required.
+
+### Existing O01 parity work remains valid
+
+Existing controlled evidence for O01 ENTRY, MANAGE, EXIT and combined Builder behavior is retained as valuable proof. The next task is not to discard that work, but to move from test-specific O01 Builder evaluators toward the actual general-purpose panel -> saved definition -> generic runtime -> demo path.
+
+### Definition of the O01 Builder Demo milestone
+
+This milestone is complete only when all of the following are true:
+
+- O01 ENTRY is representable by a saved generic ENTRY Builder definition.
+- O01 MANAGE is representable by a saved generic MANAGE Builder definition.
+- O01 EXIT is representable by a saved generic EXIT Builder definition.
+- The three definitions can be independently selected and composed.
+- The runtime consumes those saved definitions rather than a hidden O01-specific implementation.
+- Required symbol/broker mapping for the demo environment is validated.
+- NO_ORDERS / controlled validation has actual evidence.
+- Strategy Tester / market-input validation has actual evidence where applicable.
+- Demo operation has actual evidence.
+- Reference-vs-Builder forward comparison has actual evidence.
+
+The immediate goal is therefore **not to finish every M0-M15 component first**. The immediate goal is to prove the complete Builder concept end-to-end with O01, while keeping every implementation compatible with the final multi-instance Builder-only architecture.

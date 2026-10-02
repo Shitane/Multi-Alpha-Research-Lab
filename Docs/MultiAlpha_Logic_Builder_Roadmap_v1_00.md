@@ -338,3 +338,70 @@ EA PARTS is therefore required, but it must be coupled to EA LOGIC through the s
 The UI is not the source of truth. EA LOGIC and EA PARTS are two views/editors over the same structured Builder data.
 
 Initial implementation is UI-only and non-invasive: preserve the verified v2.20 runtime, create a new versioned host, add the three right-side tabs and Builder workspace shells, and keep trading/runtime behavior unchanged. Do not connect Builder definitions to execution until the schema/Part Registry and O01 reproduction path are implemented and separately validated.
+
+
+## Fixed UI concept — Free-slot Logic Builder (2026-10-02)
+
+The Logic Builder must be designed as a **general-purpose empty-slot construction board**.
+
+The primary UI concept is:
+
+1. The Builder first presents an empty foundation containing ordered slots.
+2. The user freely inserts reusable parts into those slots.
+3. Indicator/condition parts such as RSI, MA, ATR, time, position state, etc. are parts.
+4. Logical connectors such as **AND / OR are also user-placeable composition parts/controls**.
+5. The user builds ENTRY / MANAGE / EXIT logic by arranging these parts rather than editing an O01-specific fixed form.
+6. Selecting a placed part opens its parameters in EA PARTS for inspection/editing.
+7. The structured BuilderDefinition remains the source of truth; the visible slot board is its editor/view.
+
+Conceptual UI:
+
+```text
+EA LOGIC BUILDER
+
+ENTRY
+  [ SLOT 01 : RSI ]
+  [ SLOT 02 : AND ]
+  [ SLOT 03 : MA ]
+  [ SLOT 04 : AND ]
+  [ SLOT 05 : TIME ]
+  [ SLOT 06 : BUY ]
+
+MANAGE
+  [ SLOT 01 : ... ]
+  [ SLOT 02 : ... ]
+
+EXIT
+  [ SLOT 01 : ... ]
+  [ SLOT 02 : ... ]
+```
+
+A different definition may freely use another composition, for example:
+
+```text
+[ RSI ] -> [ AND ] -> [ ATR ] -> [ OR ] -> [ BREAKOUT ] -> [ SELL ]
+```
+
+### Critical distinction
+
+**The goal is not to create an O01-specific fixed Builder screen.**
+
+O01 is the first reference strategy used to prove that the general-purpose slot Builder can reproduce an existing verified strategy.
+
+Therefore the development order is:
+
+```text
+GENERAL EMPTY-SLOT FOUNDATION
+        |
+REUSABLE PARTS + AND/OR COMPOSITION
+        |
+RECONSTRUCT O01 USING ONLY THOSE PARTS
+        |
+O01 REFERENCE vs BUILDER PARITY
+        |
+FREEZE THE VERIFIED BUILDER FOUNDATION
+        |
+A10 -> A11 -> A12 -> A13 -> A14 -> A15
+```
+
+The current O01 Builder display is an intermediate verification view, not the final interaction model. Future UI work must move toward the free-slot construction board while preserving the data-model-first architecture, NO_ORDERS safety during research/parity, and the frozen reference implementations.

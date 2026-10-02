@@ -543,10 +543,13 @@ void SyncSelectedSlotDraft195()
 void OnChartEvent(const int id,const long &lparam,const double &dparam,const string &sparam){
  int fb=free_slot_builder.OnChartEvent(id,lparam,dparam,sparam);
  if(fb==2){builder_parts_picker.SetSlot(free_slot_builder.Selected(),free_slot_builder.SelectedPart(),free_slot_builder.SelectedParams());right_tabs.Select(2);RefreshRightWorkspace221();return;}
- if(fb==4){BuilderReadout243();return;}\n if(fb==3)return;\n if(fb==1)return;
+ if(fb==4){BuilderReadout243();return;}
+ if(fb==3)return;
+ if(fb==1)return;
  int bp=builder_parts_picker.OnChartEvent(id,sparam);
  if(bp==2){if(free_slot_builder.PutSelected(builder_parts_picker.Chosen(),builder_parts_picker.Parameters())){right_tabs.Select(1);RefreshRightWorkspace221();}return;}
- if(bp==3){right_tabs.Select(1);RefreshRightWorkspace221();return;}\n if(bp==4){free_slot_builder.DeleteSelected();right_tabs.Select(1);RefreshRightWorkspace221();return;}
+ if(bp==3){right_tabs.Select(1);RefreshRightWorkspace221();return;}
+ if(bp==4){free_slot_builder.DeleteSelected();right_tabs.Select(1);RefreshRightWorkspace221();return;}
  if(bp==1)return;
  int rw=right_tabs.Event(id,sparam);
  if(rw!=0){RefreshRightWorkspace221();return;}

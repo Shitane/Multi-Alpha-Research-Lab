@@ -25,7 +25,8 @@
 #include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Workspace_O01_v1_00.mqh"
 #include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_FreeSlot_Panel_v1_18.mqh"
 #include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Parts_Picker_v1_12.mqh"
-#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Interpreter_v1_01.mqh"\n#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Instance_Composer_v1_00.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Interpreter_v1_01.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Instance_Composer_v1_01.mqh"
 #include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Readout_Panel_v1_03.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Common_Filter_v1_10.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Filter_Panel_v1_11.mqh"
@@ -134,7 +135,8 @@ CMultiAlphaBuilderWorkspaceO01100 o01_builder_workspace;
 CMultiAlphaBuilderFreeSlotPanel118 free_slot_builder;
 CMultiAlphaBuilderPartsPicker112 builder_parts_picker;
 CMultiAlphaBuilderInterpreter101 builder_interpreter;
-CMultiAlphaBuilderReadoutPanel103 builder_readout;\nCMultiAlphaBuilderInstanceComposer100 builder_instance_composer;
+CMultiAlphaBuilderReadoutPanel103 builder_readout;
+CMultiAlphaBuilderInstanceComposer101 builder_instance_composer;
 CMultiAlphaFilterStore110 filter_store;
 CMultiAlphaFilterPanel111 filter_panel;
 CMultiAlphaSlotFilterPreset120 filter_preset;

@@ -41,3 +41,25 @@ These results prove each persisted role definition independently. They do **not 
 
 ## Next gate
 Build and run a persisted saved-definition O01 Route Tester that loads the saved ENTRY, MANAGE, and EXIT definitions and compares the resulting ENTRY -> MANAGE -> EXIT route with the O01 reference route under Strategy Tester market context, still with broker actions disabled.
+
+
+## Integrated persisted Route — PASS
+- Tester: `MA_Builder_O01_Saved_Route_Parity_Tester_v1_00`
+- Symbol / TF: XAUUSD_DUKA / M15
+- Model: real ticks
+- Period: 2026-08-16 through 2026-08-29
+- Loaded persisted definitions:
+  - ENTRY: `O01_ENTRY_GENERIC_V1`
+  - MANAGE: `O01_MANAGE_GENERIC_V1`
+  - EXIT trail ON: `O01_EXIT_GENERIC_V1`
+  - EXIT trail OFF: `O01_EXIT_FIXEDTP_GENERIC_V1`
+- Total route samples: `114409`
+- ENTRY parity: `114409/114409 BUY=1 SELL=12467`
+- MANAGE parity: `114409/114409 ADD_BUY=57205 ADD_SELL=57204`
+- EXIT parity: `114409/114409 VSL=32689 TP=16344 SINGLE=16344 BASKET=16344`
+- Result: `PASS - O01 reference route == persisted SAVE24 generic Builder route`
+- Scope: persisted ENTRY/MANAGE/EXIT SAVE24 definitions + generic evaluators + real tester RSI/ticks + deterministic virtual routed state.
+- Safety: `NO ORDERS / VIRTUAL NOT FILL / BROKER ACTIONS ARMED=0`
+
+## Milestone interpretation
+This closes the persisted saved-definition parity gate for the O01 Builder migration path under the tested Strategy Tester context. The next milestone is a separately versioned single-instance Builder demo host/runtime path. Broker execution must not be enabled merely because parity passed; demo execution requires its own compile, symbol/broker validation, runtime safety, and forward-evidence gates.

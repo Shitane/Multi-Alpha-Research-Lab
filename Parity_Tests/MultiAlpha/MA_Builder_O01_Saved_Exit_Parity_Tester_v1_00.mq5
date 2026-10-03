@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #property strict
 #property version "1.00"
-#include "..\\..\\..\\Modules\\O01\\O01_GSG_RSI30_Exit_Module_v1_00.mqh"
+#include "..\\..\\..\\Include\\O01\\O01_GSG_RSI30_Exit_Module_v1_00.mqh"
 #include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Saved_Exit_Action_Evaluator_v1_00.mqh"
 input string InpExitName="O01_EXIT_GENERIC_V1";
 CO01ExitModule g_ref; CMultiAlphaBuilderSavedExitActionEvaluator100 g_builder; SMA_BuilderSavedDefinition100 g_x;

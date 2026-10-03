@@ -50,7 +50,8 @@ public:
  {
   if(logical==""){o.valid=false;o.reason="EMPTY LOGICAL SYMBOL";return false;}
   // Exact broker symbol always wins.
-  if(SymbolExist(logical,false))return Snapshot(logical,logical,o);
+  bool is_custom=false;
+  if(SymbolExist(logical,is_custom))return Snapshot(logical,logical,o);
   string match="";int matches=0,total=SymbolsTotal(false);
   for(int i=0;i<total;i++){string s=SymbolName(i,false);if(Candidate(logical,s)){match=s;matches++;}}
   if(matches==0)

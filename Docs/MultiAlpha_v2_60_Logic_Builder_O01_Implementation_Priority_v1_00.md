@@ -255,3 +255,23 @@ Before creating any new test, module or infrastructure component, answer:
 If that integration purpose is unclear, it is not a current-priority task.
 
 GitHub remains the durable source of truth, and actual MetaEditor/MT5 compile/runtime evidence remains the PASS gate.
+
+---
+
+## 11. Fixed #01-#50 independent-instance ownership rule (2026-10-03)
+
+The governing ownership policy is documented in:
+
+Docs/MultiAlpha_v2_60_50_Independent_Instance_Ownership_Policy_v1_00.md
+
+For all v2_60-line implementation work:
+
+- #01-#50 are 50 independent strategy/EA instances inside the Multi Alpha host, not mere storage slots.
+- Magic Number is instance-local. There is no one global Magic shared by all 50 instances.
+- Symbol, SLOT-local FILTER, ENTRY/MANAGE/EXIT selection and mutable runtime state are instance-local.
+- Multiple instances may trade the same symbol while remaining isolated by validated ownership identity/Magic and state.
+- Saved Builder definitions may be reused by multiple instances, but mutable cycle/grid/trailing/position state must never be shared.
+- The 8% Warning / 12% Grid Pause / 15% Emergency Close ladder is EA-global safety and remains outside Builder logic in Expert Properties.
+- O01 #01 demo may be the first execution milestone, but it must already use the ownership/state model that can scale to #01-#50.
+
+This rule supersedes any earlier wording that implies one global Magic Number for the complete EA or treats the 50 SLOTs as passive save locations.

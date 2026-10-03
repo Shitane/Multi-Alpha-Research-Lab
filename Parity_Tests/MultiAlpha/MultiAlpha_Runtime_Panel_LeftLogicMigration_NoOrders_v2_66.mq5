@@ -23,10 +23,10 @@
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Right_Workspace_Tabs_v1_03.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Builder_Workspace_Shell_v1_01.mqh"
 #include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Workspace_O01_v1_00.mqh"
-#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_FreeSlot_Panel_v1_21.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_FreeSlot_Panel_v1_22.mqh"
 #include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Parts_Picker_v1_12.mqh"
 #include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Interpreter_v1_01.mqh"
-#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Instance_Composer_v1_01.mqh"\n#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Slot_Workspace_Store_v1_00.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Instance_Composer_v1_01.mqh"\n#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Slot_Workspace_Store_v1_01.mqh"
 #include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Readout_Panel_v1_03.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Common_Filter_v1_10.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Filter_Panel_v1_11.mqh"
@@ -132,11 +132,11 @@ CMultiAlphaLeftWorkspaceTabs203 left_tabs;
 CMultiAlphaRightWorkspaceTabs103 right_tabs;
 CMultiAlphaBuilderWorkspaceShell101 builder_workspace;
 CMultiAlphaBuilderWorkspaceO01100 o01_builder_workspace;
-CMultiAlphaBuilderFreeSlotPanel121 free_slot_builder;
+CMultiAlphaBuilderFreeSlotPanel122 free_slot_builder;
 CMultiAlphaBuilderPartsPicker112 builder_parts_picker;
 CMultiAlphaBuilderInterpreter101 builder_interpreter;
 CMultiAlphaBuilderReadoutPanel103 builder_readout;
-CMultiAlphaBuilderInstanceComposer101 builder_instance_composer;\nCMultiAlphaBuilderSlotWorkspaceStore100 builder_slot_workspace;
+CMultiAlphaBuilderInstanceComposer101 builder_instance_composer;\nCMultiAlphaBuilderSlotWorkspaceStore101 builder_slot_workspace;
 CMultiAlphaFilterStore110 filter_store;
 CMultiAlphaFilterPanel111 filter_panel;
 CMultiAlphaSlotFilterPreset120 filter_preset;
@@ -559,11 +559,11 @@ void SaveBuilderWorkspaceToSlot266(const int target)
 {
  for(int role_index=0;role_index<3;role_index++)
  {
-  string parts[];
-  string values[];
-  free_slot_builder.ExportRole(role_index,parts,values);
-  builder_slot_workspace.PutRole(target,role_index,free_slot_builder.DefinitionName(role_index),parts,values);
+  builder_slot_workspace.BeginRole(target,role_index,free_slot_builder.DefinitionName(role_index));
+  for(int part_index=0;part_index<24;part_index++)
+   builder_slot_workspace.SetItem(target,role_index,part_index,free_slot_builder.PartAt(role_index,part_index),free_slot_builder.ParamsAt(role_index,part_index));
  }
+ builder_slot_workspace.Commit(target);
  Print("[MA_BUILDER266_WORKSPACE_SAVE] slot=",target," revision=",builder_slot_workspace.Revision(target)," NO_ORDERS=1");
 }
 void LoadBuilderWorkspaceFromSlot266(const int target)
@@ -572,20 +572,12 @@ void LoadBuilderWorkspaceFromSlot266(const int target)
  {
   for(int role_index=0;role_index<3;role_index++)
   {
-   string parts[];
-   string values[];
    string definition_name="";
    if(role_index==0) definition_name="BUILDER_ENTRY_SLOT"+IntegerToString(target);
    else if(role_index==1) definition_name="BUILDER_MANAGE_SLOT"+IntegerToString(target);
    else definition_name="BUILDER_EXIT_SLOT"+IntegerToString(target);
-   ArrayResize(parts,24);
-   ArrayResize(values,24);
-   for(int part_index=0;part_index<24;part_index++)
-   {
-    parts[part_index]="EMPTY";
-    values[part_index]="";
-   }
-   free_slot_builder.ImportRole(role_index,definition_name,parts,values);
+   free_slot_builder.BeginRoleImport(role_index,definition_name);
+   for(int part_index=0;part_index<24;part_index++) free_slot_builder.SetRoleItem(role_index,part_index,"EMPTY","");
   }
   SaveBuilderWorkspaceToSlot266(target);
  }
@@ -593,11 +585,9 @@ void LoadBuilderWorkspaceFromSlot266(const int target)
  {
   for(int role_index=0;role_index<3;role_index++)
   {
-   string parts[];
-   string values[];
-   string definition_name="";
-   builder_slot_workspace.GetRole(target,role_index,definition_name,parts,values);
-   free_slot_builder.ImportRole(role_index,definition_name,parts,values);
+   free_slot_builder.BeginRoleImport(role_index,builder_slot_workspace.RoleNameAt(target,role_index));
+   for(int part_index=0;part_index<24;part_index++)
+    free_slot_builder.SetRoleItem(role_index,part_index,builder_slot_workspace.PartAt(target,role_index,part_index),builder_slot_workspace.ParamsAt(target,role_index,part_index));
   }
  }
  Print("[MA_BUILDER266_WORKSPACE_LOAD] slot=",target," revision=",builder_slot_workspace.Revision(target)," NO_ORDERS=1");

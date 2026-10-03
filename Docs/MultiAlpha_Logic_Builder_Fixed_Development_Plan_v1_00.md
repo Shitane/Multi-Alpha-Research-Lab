@@ -12,9 +12,9 @@ v2.69/v2.70 are reference work only. Useful generic Builder changes may be selec
 ## Product concept
 Multi Alpha Research Lab is an environment for creating and testing original strategies by freely combining independently built modules:
 
-EA PARTS -> MODULE BUILDER -> ENTRY / MANAGE / EXIT MODULES -> SLOT STRATEGY -> SYMBOL RESOLVER -> GENERIC RUNTIME -> GLOBAL SAFETY -> EXECUTION.
+EA PARTS -> MODULE BUILDER -> ENTRY / GRID / MANAGE / EXIT MODULES -> SLOT STRATEGY -> SYMBOL RESOLVER -> GENERIC RUNTIME -> GLOBAL SAFETY -> EXECUTION.
 
-ENTRY, MANAGE and EXIT modules are independent reusable definitions. They are not fixed O01/A10 IDs.
+ENTRY, GRID, MANAGE and EXIT modules are independent reusable definitions. They are not fixed O01/A10 IDs.
 
 ## UI ownership during Builder completion
 Do not redesign/unify the panels yet.
@@ -27,12 +27,14 @@ Right workspace remains:
 Left FILTER and PRESET remain as existing functionality. Cosmetic panel unification is postponed until Builder + Symbol Resolver + demo execution are working.
 
 ## Builder capacity
-Each ENTRY / MANAGE / EXIT module has 40 part slots:
-- 8 visible rows per page
-- 5 pages
-- slots 01-08, 09-16, 17-24, 25-32, 33-40
+Each ENTRY / GRID / MANAGE / EXIT module has 40 part slots:
+- 10 visible rows per page
+- 4 pages
+- slots 01-10, 11-20, 21-30, 31-40
 
-Total editable capacity across the three roles is 120 slots.
+Total editable capacity across the four module roles is 160 slots.
+
+GRID is an independent reusable module for averaging/add-on order logic (distance, lot progression, maximum orders/lots, add-buy/add-sell, etc.). MANAGE is reserved for position-management behavior such as trailing/basket management.
 
 The storage/schema must use 40 as the role capacity. Do not implement 40 only as a visual UI extension.
 
@@ -40,7 +42,7 @@ The storage/schema must use 40 as the role capacity. Do not implement 40 only as
 Role save/load becomes the module persistence concept:
 - SAVE MODULE / LOAD MODULE for one ENTRY, MANAGE or EXIT definition.
 - Existing legacy 24-slot files should remain readable where practical; missing slots 25-40 are EMPTY.
-- Combined ENTRY + MANAGE + EXIT persistence is the strategy-definition concept.
+- Combined ENTRY + GRID + MANAGE + EXIT persistence is the strategy-definition concept.
 
 Saved Builder Definition is the runtime source of truth. UI state must not become a hidden runtime dependency.
 
@@ -49,6 +51,7 @@ Each SLOT ultimately owns:
 - Enabled
 - logical Symbol
 - Entry Module
+- Grid Module
 - Manage Module
 - Exit Module
 - independent Builder/strategy definition
@@ -63,7 +66,7 @@ A SLOT stores a logical symbol such as XAUUSD. Symbol Resolver maps it to the br
 No Builder strategy should hard-code TitanFX suffixes.
 
 ## Generic runtime
-Runtime evaluates the Saved Builder Definition using generic ENTRY / MANAGE / EXIT evaluators.
+Runtime evaluates the Saved Builder Definition using generic ENTRY / GRID / MANAGE / EXIT evaluators.
 
 O01 is the first parity/reference recipe only. Runtime must not silently fall back to O01-specific logic.
 
@@ -89,7 +92,7 @@ Development order:
 5. Complete generic ENTRY evaluator.
 6. Complete generic MANAGE evaluator.
 7. Complete generic EXIT evaluator.
-8. Compose independently selected ENTRY + MANAGE + EXIT in SLOT.
+8. Compose independently selected ENTRY + GRID + MANAGE + EXIT in SLOT.
 9. Reproduce O01 from Builder definitions and verify parity in NO_ORDERS.
 10. Implement Symbol Resolver.
 11. Strategy Tester validation.
@@ -109,11 +112,12 @@ Development order:
 ## Immediate gate
 Gate B40-1:
 - create a new Builder panel version based on v1_22
-- expand role capacity 24 -> 40
-- page count 3 -> 5
-- keep 8 visible rows
+- expand the Builder from the legacy 3-role/24-slot layout to four independent module roles: ENTRY / GRID / MANAGE / EXIT
+- module capacity = 40
+- visible rows = 10
+- page count = 4
 - update indexing/range/navigation
-- update role and combined persistence format for 40/120
+- update module and combined persistence format for 40 slots per module / 160 total
 - preserve compatibility with legacy 24/72 files where practical
 - integrate it into a short-named EA derived from v2.68
 - compile locally before any further runtime change

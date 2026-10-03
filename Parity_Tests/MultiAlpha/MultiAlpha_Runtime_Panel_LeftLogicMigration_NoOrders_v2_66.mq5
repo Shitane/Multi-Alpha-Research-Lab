@@ -557,37 +557,60 @@ void PrintSelectedFilter210(const string phase)
 
 void SaveBuilderWorkspaceToSlot266(const int target)
 {
- for(int role_index=0;role_index<3;role_index++)
+ int rr=0;
+ int ii=0;
+ rr=0;
+ while(rr<3)
  {
-  builder_slot_workspace.BeginRole(target,role_index,free_slot_builder.DefinitionName(role_index));
-  for(int part_index=0;part_index<24;part_index++)
-   builder_slot_workspace.SetItem(target,role_index,part_index,free_slot_builder.PartAt(role_index,part_index),free_slot_builder.ParamsAt(role_index,part_index));
+  builder_slot_workspace.BeginRole(target,rr,free_slot_builder.DefinitionName(rr));
+  ii=0;
+  while(ii<24)
+  {
+   builder_slot_workspace.SetItem(target,rr,ii,free_slot_builder.PartAt(rr,ii),free_slot_builder.ParamsAt(rr,ii));
+   ii++;
+  }
+  rr++;
  }
  builder_slot_workspace.Commit(target);
  Print("[MA_BUILDER266_WORKSPACE_SAVE] slot=",target," revision=",builder_slot_workspace.Revision(target)," NO_ORDERS=1");
 }
 void LoadBuilderWorkspaceFromSlot266(const int target)
 {
+ int rr=0;
+ int ii=0;
+ string dn="";
  if(!builder_slot_workspace.Initialized(target))
  {
-  for(int role_index=0;role_index<3;role_index++)
+  rr=0;
+  while(rr<3)
   {
-   string definition_name="";
-   if(role_index==0) definition_name="BUILDER_ENTRY_SLOT"+IntegerToString(target);
-   else if(role_index==1) definition_name="BUILDER_MANAGE_SLOT"+IntegerToString(target);
-   else definition_name="BUILDER_EXIT_SLOT"+IntegerToString(target);
-   free_slot_builder.BeginRoleImport(role_index,definition_name);
-   for(int part_index=0;part_index<24;part_index++) free_slot_builder.SetRoleItem(role_index,part_index,"EMPTY","");
+   if(rr==0) dn="BUILDER_ENTRY_SLOT"+IntegerToString(target);
+   else if(rr==1) dn="BUILDER_MANAGE_SLOT"+IntegerToString(target);
+   else dn="BUILDER_EXIT_SLOT"+IntegerToString(target);
+   free_slot_builder.BeginRoleImport(rr,dn);
+   ii=0;
+   while(ii<24)
+   {
+    free_slot_builder.SetRoleItem(rr,ii,"EMPTY","");
+    ii++;
+   }
+   rr++;
   }
   SaveBuilderWorkspaceToSlot266(target);
  }
  else
  {
-  for(int role_index=0;role_index<3;role_index++)
+  rr=0;
+  while(rr<3)
   {
-   free_slot_builder.BeginRoleImport(role_index,builder_slot_workspace.RoleNameAt(target,role_index));
-   for(int part_index=0;part_index<24;part_index++)
-    free_slot_builder.SetRoleItem(role_index,part_index,builder_slot_workspace.PartAt(target,role_index,part_index),builder_slot_workspace.ParamsAt(target,role_index,part_index));
+   free_slot_builder.BeginRoleImport(rr,builder_slot_workspace.RoleNameAt(target,rr));
+   ii=0;
+   while(ii<24)
+   {
+    free_slot_builder.SetRoleItem(rr,ii,builder_slot_workspace.PartAt(target,rr,ii),builder_slot_workspace.ParamsAt(target,rr,ii));
+    ii++;
+   }
+   rr++;
   }
  }
  Print("[MA_BUILDER266_WORKSPACE_LOAD] slot=",target," revision=",builder_slot_workspace.Revision(target)," NO_ORDERS=1");

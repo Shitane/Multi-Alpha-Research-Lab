@@ -107,21 +107,25 @@ Global Safety is outside Builder strategy logic:
 15% Emergency Close is not an EXIT module condition.
 
 ## Execution gates
-Development order:
-1. Freeze v2.68 as baseline.
-2. Expand Builder role capacity from 24 to 40 (8 x 5) end-to-end.
-3. Make one-role persistence a formal reusable Module Definition.
-4. Complete Canonical Schema / loader compatibility.
-5. Complete generic ENTRY evaluator.
-6. Complete generic MANAGE evaluator.
-7. Complete generic EXIT evaluator.
-8. Compose independently selected ENTRY + GRID + MANAGE + EXIT in SLOT.
-9. Reproduce O01 from Builder definitions and verify parity in NO_ORDERS.
-10. Implement Symbol Resolver.
-11. Strategy Tester validation.
-12. Add explicit Demo Execution Safety Gate.
-13. TitanFX Demo / XAUUSD-m validation.
-14. Only after functional completion, unify panel design.
+Development proceeds one compile-checked gate at a time:
+
+1. Gate M4-1: starting from v2.68, change only the Builder skeleton from 3 roles to the canonical 4 roles ENTRY / GRID / MANAGE / EXIT. Keep 24 Parts and NO_ORDERS. Do not create the 50-slot Module Library yet.
+2. Gate M4-2: expand each role from 24 Parts to 40 Parts, with 10 visible rows x 4 pages, including indexing/navigation and persistence.
+3. Gate M4-3: split EA PARTS semantically into ENTRY / GRID / MANAGE / EXIT. Inspect O01 behavior before moving mixed legacy MANAGE parts; do not classify by name alone.
+4. Gate ML-1: create a dedicated Module Slot Library data store: 50 slots independently for ENTRY, GRID, MANAGE and EXIT.
+5. Gate ML-2: create Module Slot selector UI with role, #01-#50, Module Name, Enabled and EDIT.
+6. Gate ML-3: connect EDIT to the 40-Part Logic Builder and verify independent Module Slot retention.
+7. Gate SL-1: make Strategy SLOT #01-#50 store references to four Module Slot IDs rather than duplicated module logic.
+8. Gate SL-2: expose only SAVED + ENABLED modules as new Strategy selection candidates; preserve disabled references as INVALID with no automatic substitution.
+9. Gate RT-1: connect the four referenced modules to Generic Runtime under NO_ORDERS.
+10. Gate O01-1: reproduce O01 from four generic module definitions and perform parity validation.
+11. Gate SR-1: implement Symbol Resolver after Builder/module persistence/runtime are stable.
+12. Strategy Tester validation.
+13. Add explicit Demo Execution Safety Gate.
+14. TitanFX Demo / resolved broker-symbol validation.
+15. Only after functional completion, unify panel design.
+
+Each gate stops for the user's local MetaEditor compile and MT5 confirmation before the next gate begins.
 
 ## Safety during development
 - Preserve NO_ORDERS / VIRTUAL NOT FILL until the explicit demo gate.
@@ -133,17 +137,16 @@ Development order:
 - User local MT5 runtime is the final Runtime PASS.
 
 ## Immediate gate
-Gate B40-1:
-- create a new Builder panel version based on v1_22
-- expand the Builder from the legacy 3-role/24-slot layout to four independent module roles: ENTRY / GRID / MANAGE / EXIT
-- module capacity = 40
-- visible rows = 10
-- page count = 4
-- update indexing/range/navigation
-- update module and combined persistence format for 40 slots per module / 160 total
-- preserve compatibility with legacy 24/72 files where practical
-- integrate it into a short-named EA derived from v2.68
-- compile locally before any further runtime change
+Gate M4-1:
+- base strictly on v2.68
+- add the fourth Builder role and fix canonical ordering to ENTRY / GRID / MANAGE / EXIT
+- keep the current 24-Part / 8-row / 3-page Builder capacity unchanged in this gate
+- update only the minimum Builder panel/picker/workspace/composer integration needed for the four-role skeleton
+- keep GRID semantic contents intentionally unassigned until Gate M4-3 where legacy MANAGE behavior is inspected and split
+- do not implement 40 Parts, 50 Module Slots, Strategy Module references, Generic Runtime changes, Symbol Resolver or Demo execution in this gate
+- use a short EA filename suitable for Strategy Tester
+- stop after GitHub commit and wait for the user's local MetaEditor compile result
+
 ## Fixed Module Slot Library Specification
 
 The reusable module layer is fixed as follows.

@@ -590,7 +590,8 @@ void LoadBuilderWorkspaceFromSlot266(const int target)
   while(rr<4)
   {
    if(rr==0) dn="BUILDER_ENTRY_SLOT"+IntegerToString(target);
-   else if(rr==1) dn="BUILDER_MANAGE_SLOT"+IntegerToString(target);
+   else if(rr==1) dn="BUILDER_GRID_SLOT"+IntegerToString(target);
+   else if(rr==2) dn="BUILDER_MANAGE_SLOT"+IntegerToString(target);
    else dn="BUILDER_EXIT_SLOT"+IntegerToString(target);
    free_slot_builder.BeginRoleImport(rr,dn);
    ii=0;

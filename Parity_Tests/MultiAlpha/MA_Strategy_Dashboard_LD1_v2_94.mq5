@@ -40,7 +40,8 @@
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Slot_State_v1_95.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Slot_Panel_v2_15.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Left_Slot_Badge_v1_99.mqh"
-#include "..\\..\\..\\Include\\Common\\MultiAlpha_Left_Header_Spacing_v1_99.mqh"\n#include "..\\..\\..\\Include\\Common\\MultiAlpha_Strategy_Dashboard_v1_07.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Left_Header_Spacing_v1_99.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Strategy_Dashboard_v1_07.mqh"
 
 enum O01_TIME_MODE { O01_AUTO_GMT=0,O01_SERVER_TIME=1,O01_CUSTOM_GMT=2 };
 

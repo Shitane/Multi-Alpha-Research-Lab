@@ -121,3 +121,88 @@ Gate B40-1:
 - preserve compatibility with legacy 24/72 files where practical
 - integrate it into a short-named EA derived from v2.68
 - compile locally before any further runtime change
+## Fixed Module Slot Library Specification
+
+The reusable module layer is fixed as follows.
+
+### Module slot capacity
+Each module role has 50 independent Module Slots:
+- ENTRY MODULE: #01-#50
+- MANAGE MODULE: #01-#50
+- GRID MODULE: #01-#50
+- EXIT MODULE: #01-#50
+
+Each saved Module Slot contains one module definition with up to 40 Builder Parts, displayed as 10 rows x 4 pages.
+
+The architecture is therefore:
+EA PARTS -> LOGIC BUILDER -> MODULE SLOT LIBRARY -> STRATEGY SLOT -> Symbol Resolver -> Generic Runtime -> Global Safety -> Execution.
+
+### Module role selection UI
+Provide role-selection buttons for ENTRY / MANAGE / GRID / EXIT.
+
+Selecting a role opens that role's 50-slot Module Slot selector. Reuse the current Strategy SLOT selection/enabling interaction pattern where practical rather than introducing an unrelated navigation method.
+
+Each Module Slot must support:
+- slot number #01-#50
+- module name
+- EMPTY / SAVED state
+- ENABLED / DISABLED state
+- EDIT action
+- saved 40-Part module definition and parameters
+
+EDIT opens the Logic Builder for that exact Module Slot. Saving writes the Builder definition back to that Module Slot.
+
+### Enabled-only Strategy selection
+A Strategy SLOT may select only Module Slots that are currently SAVED and ENABLED for the corresponding role.
+
+Example:
+- enabled ENTRY modules: #01, #03, #13
+- Strategy ENTRY selector must offer only #01, #03, #13
+- DISABLED and EMPTY Module Slots must not appear as selectable candidates.
+
+This filtering is independent for ENTRY, MANAGE, GRID and EXIT.
+
+### Referenced module becomes disabled
+If a Strategy SLOT already references a Module Slot and that Module Slot is later disabled, do not silently substitute another module.
+
+Keep the stored reference visible and mark it invalid/disabled, for example:
+ENTRY #13 [DISABLED]
+STATE INVALID
+
+The affected Strategy SLOT must not begin new trading through an invalid required module reference until the reference is made valid again or the user explicitly selects another enabled Module Slot.
+
+No automatic fallback or automatic module-number replacement is allowed.
+
+### Module Slot state model
+Module Slots have three distinct states:
+1. EMPTY
+2. SAVED + DISABLED
+3. SAVED + ENABLED
+
+Disabling a Module Slot must not erase its saved logic or parameters. Re-enabling restores it as a selectable candidate.
+
+Deletion/clearing and disabling are separate operations.
+
+### Strategy SLOT references
+Strategy SLOT #01-#50 stores module references, not independent duplicated copies of the module logic.
+
+Target display/reference structure:
+- ENTRY: module slot number + module name
+- MANAGE: module slot number + module name
+- GRID: module slot number + module name
+- EXIT: module slot number + module name
+
+Example:
+ENTRY  #13 RSI_ENTRY_A
+MANAGE #07 BASKET_TRAIL
+GRID   #18 GRID_200_1.5
+EXIT   #09 TP_VSL
+
+This enables controlled module reuse and module-by-module comparison across Strategy Slots.
+
+### Separation of capacities
+Do not confuse these two capacities:
+- Module Slot Library capacity: 50 saved modules per role
+- Logic Builder capacity inside each Module Slot: 40 Parts (10 x 4)
+
+With four roles, the library can hold up to 200 Module Slots total, while each individual Module Slot contains at most 40 Parts.

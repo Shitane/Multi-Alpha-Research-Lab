@@ -310,3 +310,69 @@ Do not confuse these two capacities:
 - Logic Builder capacity inside each Module Slot: 40 Parts (10 x 4)
 
 With four roles, the library can hold up to 200 Module Slots total, while each individual Module Slot contains at most 40 Parts.
+
+
+## Fixed Strategy Dashboard and Production Cleanup Plan (2026-10-05)
+
+This section is the mainline rule for the remaining development. Do not repeat the failed approach of replacing the whole legacy panel at once.
+
+### Strategy Dashboard rebuild baseline
+Return the visual-development baseline to `MA_Builder_ModuleValid_v2_82`.
+
+The legacy LOGIC panel policy is:
+- preserve the proven panel geometry, theme, spacing, tabs and left/right alignment;
+- remove/replace legacy logic-specific contents incrementally;
+- rebuild the inside as the new Strategy Dashboard;
+- never create a visually similar replacement panel when the existing proven canvas can be reused;
+- one visible change per gate where practical;
+- do not proceed to the next gate until the user confirms local MetaEditor 0 errors / 0 warnings and the MT5 screen is acceptable.
+
+Dashboard implementation sequence:
+- LD-1A: create a new-version baseline derived from v2_82 with no intentional visual change. Confirm identical layout first.
+- LD-1B: replace only the legacy LOGIC panel title/header with Strategy Dashboard wording. Do not move or resize the panel.
+- LD-1C: replace only the basic-information content with SLOT # / ENABLED / SYMBOL / MAGIC placeholders. Keep the existing canvas.
+- LD-1D: add ENTRY / GRID / MANAGE / EXIT display rows, still without broad layout redesign.
+- LD-1E: add the Strategy Status display area.
+- LD-2: connect SLOT # / Enabled / Symbol / Magic to current Strategy SLOT data.
+- LD-3: connect ENTRY / GRID / MANAGE / EXIT module number, module name and VALID/INVALID to Strategy references and Module Library.
+- LD-4: derive the whole-Strategy state READY / INVALID / INCOMPLETE / DISABLED from the four module references and Strategy state.
+
+The experimental Dashboard versions created during the earlier replacement attempt remain in Git history/reference only and are not the visual baseline.
+
+### Continue to demo before structural cleanup
+After Dashboard gates, continue the functional mainline through:
+Builder/Module Library -> Strategy references -> Generic Runtime -> Symbol Resolver -> Global Safety -> NO_ORDERS runtime validation -> Strategy Tester -> Demo Execution Safety Gate -> TitanFX demo deployment.
+
+Do not perform a large architecture cleanup in the middle of functional parity work. Preserve NO_ORDERS / VIRTUAL NOT FILL until the explicit demo execution gate.
+
+### Gate RC-1: Production Cleanup / Architecture Freeze
+After the EA has reached the demo-account deployment milestone and its required behavior has been confirmed, perform a dedicated cleanup gate before future cosmetic redesign.
+
+RC-1 objectives:
+1. Separate UI from trading/runtime behavior so future panel design changes do not require editing Strategy, Runtime, Safety or Execution code.
+2. Establish one production main EA and a small, explicit production dependency set.
+3. Create a Production Dependency Manifest listing every file required by the current production EA and its purpose.
+4. Move obsolete/experimental versions out of the active production path while preserving Git history.
+5. Remove obsolete includes and hidden legacy UI dependencies from the production mainline only after dependency inspection.
+6. Centralize shared UI geometry/theme constants where practical so panel coordinates, spacing, fonts and theme are not duplicated across unrelated runtime files.
+7. Keep Strategy / Module Library / Runtime / Safety / Symbol Resolver / Persistence interfaces independent from visual layout.
+8. Re-run local MetaEditor compile, Strategy Tester and demo runtime checks after cleanup before declaring the architecture frozen.
+
+Target production separation:
+- Main: production EA composition only.
+- UI: Strategy Dashboard, Strategy Slot, Module Library, Logic Builder, EA Parts and shared UI theme/layout.
+- Strategy: Strategy Slot references, Module Library model and validation.
+- Runtime: ENTRY / GRID / MANAGE / EXIT generic evaluation/runtime.
+- Safety: global DD warning 8%, Grid Pause 12%, Emergency Close 15%.
+- Core: Symbol Resolver and persistence/common services.
+- Execution: demo/live execution adapter isolated from UI.
+
+### Post-RC-1 change rule
+After Architecture Freeze:
+- UI-only requests must not modify Runtime / Strategy / Safety / Execution unless a documented interface change is genuinely required.
+- A panel-design change must first be implemented inside the UI layer and validated visually.
+- Functional changes and cosmetic changes use separate gates/commits.
+- Production files are never overwritten blindly; keep a confirmed rollback point.
+- Git history/archive may retain old versions, but only files listed in the Production Dependency Manifest are considered required for the current release.
+- Local MetaEditor 0 errors / 0 warnings remains the only Compile PASS.
+- Local MT5/demo behavior remains the Runtime PASS.

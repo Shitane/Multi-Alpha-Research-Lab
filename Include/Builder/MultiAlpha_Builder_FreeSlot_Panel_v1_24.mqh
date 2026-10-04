@@ -72,9 +72,9 @@ public:
                  "FIXED_DISTANCE","AND","DYNAMIC_DISTANCE","AND","INITIAL_LOT","AND","LOT_MULTIPLIER","AND","MAX_LOT","AND",
                  "MAX_TOTAL_LOT","AND","ADD_BUY"};
   for(int i=0;i<23;i++)slot[2][i]=mp[i];
-  params[3][0]="SIDE=CURRENT;COND=GT;VALUE=0";
-  params[3][2]="COUNT=10";params[3][4]="ENABLED=1";params[3][8]="ENABLED=1";
-  params[3][10]="POINTS=200";params[2][12]="START_ORDER=3;START_POINTS=300;MULT=1.20";
+  params[2][0]="SIDE=CURRENT;COND=GT;VALUE=0";
+  params[2][2]="COUNT=10";params[2][4]="ENABLED=1";params[2][8]="ENABLED=1";
+  params[2][10]="POINTS=200";params[2][12]="START_ORDER=3;START_POINTS=300;MULT=1.20";
   params[2][14]="LOT=0.01";params[2][16]="MULT=1.50";params[2][18]="LOT=5.00";params[2][20]="LOT=1.20";
   // ADD_BUY is side-neutral at recipe level through SIDE=CURRENT. Runtime evaluator will resolve the active side.
   params[2][22]="SIDE=CURRENT";
@@ -90,11 +90,11 @@ public:
   role=0;page[0]=page[1]=page[2]=page[3]=0;
  }
  bool SaveNamed(string &reason){return SaveRoleFile(role,Name24(),reason);} bool LoadNamed(string &reason){return LoadRoleFile(role,Name24(),reason);}
- bool SaveAll72(string &reason){string nm=Name72();if(nm==""){reason="NAME REQUIRED";return false;}string fn="MultiAlpha_Builder_ALL_"+nm+".csv";int h=FileOpen(fn,FILE_WRITE|FILE_CSV|FILE_COMMON,'|');if(h==INVALID_HANDLE){reason="FILE OPEN";return false;}FileWrite(h,"MA_BUILDER_ALL","1.24",4,24,96);for(int r=0;r<4;r++){FileWrite(h,"ROLE",r,r==0?"ENTRY":r==1?"MANAGE":"EXIT");for(int i=0;i<24;i++)FileWrite(h,r,i+1,slot[r][i],params[r][i]);}FileClose(h);reason="SAVED ALL 96: "+nm;return true;}
+ bool SaveAll72(string &reason){string nm=Name72();if(nm==""){reason="NAME REQUIRED";return false;}string fn="MultiAlpha_Builder_ALL_"+nm+".csv";int h=FileOpen(fn,FILE_WRITE|FILE_CSV|FILE_COMMON,'|');if(h==INVALID_HANDLE){reason="FILE OPEN";return false;}FileWrite(h,"MA_BUILDER_ALL","1.24",4,24,96);for(int r=0;r<4;r++){FileWrite(h,"ROLE",r,r==0?"ENTRY":r==1?"GRID":r==2?"MANAGE":"EXIT");for(int i=0;i<24;i++)FileWrite(h,r,i+1,slot[r][i],params[r][i]);}FileClose(h);reason="SAVED ALL 96: "+nm;return true;}
  bool LoadAll72(string &reason){string nm=Name72();if(nm==""){reason="NAME REQUIRED";return false;}string fn="MultiAlpha_Builder_ALL_"+nm+".csv";int h=FileOpen(fn,FILE_READ|FILE_CSV|FILE_COMMON,'|');if(h==INVALID_HANDLE){reason="NOT FOUND ALL: "+nm;return false;}string sig=FileReadString(h),ver=FileReadString(h);int rc=(int)FileReadNumber(h),sp=(int)FileReadNumber(h),tot=(int)FileReadNumber(h);if(sig!="MA_BUILDER_ALL"||rc!=4||sp!=24||tot!=96){FileClose(h);reason="INVALID ALL FILE";return false;}for(int r=0;r<4;r++){string mark=FileReadString(h);int rr=(int)FileReadNumber(h);string rn=FileReadString(h);if(mark!="ROLE"||rr!=r){FileClose(h);reason="INVALID ROLE BLOCK";return false;}ClearRole(r);for(int i=0;i<24&&!FileIsEnding(h);i++){int fr=(int)FileReadNumber(h),no=(int)FileReadNumber(h);string pt=FileReadString(h),pa=FileReadString(h);if(fr!=r||no<1||no>24){FileClose(h);reason="INVALID SLOT BLOCK";return false;}slot[r][no-1]=pt;params[r][no-1]=pa;}}FileClose(h);reason="LOADED ALL 96: "+nm;return true;}
  void Show(){CaptureNames();Delete();Box();Lab("TITLE",656,70,"EA LOGIC / LOGIC BUILDER",10);Btn("ROLE_E",656,94,90,"ENTRY",role==0?2:0);Btn("ROLE_G",756,94,90,"GRID",role==1?2:0);Btn("ROLE_M",856,94,90,"MANAGE",role==2?2:0);Btn("ROLE_X",956,94,90,"EXIT",role==3?2:0);Lab("SUB",1060,99,"Role: "+RoleName()+"   NO ORDERS",8);Lab("HELP",656,124,"ADD/EDIT -> EA PARTS -> configure -> APPLY.  UP/DOWN changes 8-slot page.",8);int y=150,start=page[role]*8;for(int r=0;r<8;r++){int i=start+r;string no=(i<9?"0":"")+IntegerToString(i+1);Lab("N"+IntegerToString(r),656,y+4,(i==selected[role]?"> ":"  ")+no,8);string shown=slot[role][i];if(params[role][i]!="")shown+="  {"+params[role][i]+"}";int row_state=(i==selected[role]?2:(slot[role][i]!="EMPTY"?1:0));Btn("S"+IntegerToString(r),686,y,360,shown,row_state);Btn("E"+IntegerToString(r),1055,y,90,(slot[role][i]=="EMPTY"?"ADD":"EDIT"),row_state);y+=30;}Btn("UP",1155,150,70,"UP");Btn("DOWN",1155,180,70,"DOWN");Lab("RANGE",1155,215,(start<9?"0":"")+IntegerToString(start+1)+"-"+IntegerToString(start+8)+" / 24",8);Btn("CLEAR",1155,240,70,"CLEAR");
  Lab("N24",656,407,"Name 24",8);Edit("NAME24",710,403,180,name24[role]);Btn("SAVE",900,403,90,"SAVE 24");Btn("LOAD",1000,403,90,"LOAD 24");Btn("NEXT24",1100,403,90,"NEXT");
- Lab("N72",656,437,"Name 72",8);Edit("NAME72",710,433,180,name72);Btn("SAVEALL",900,433,90,"SAVE 72");Btn("LOADALL",1000,433,90,"LOAD 72");Btn("NEXT72",1100,433,90,"NEXT");
+ Lab("N72",656,437,"Name 96",8);Edit("NAME72",710,433,180,name72);Btn("SAVEALL",900,433,90,"SAVE 96");Btn("LOADALL",1000,433,90,"LOAD 96");Btn("NEXT72",1100,433,90,"NEXT");
  Lab("STATUS",656,476,"Ready",8);ChartRedraw();}
  void Status(string s,color c=clrWhite){Lab("STATUS",656,476,s,8);ObjectSetInteger(0,p+"STATUS",OBJPROP_COLOR,c);ChartRedraw();}
  void Hide(){int total=ObjectsTotal(0,0,-1);for(int i=total-1;i>=0;i--){string n=ObjectName(0,i,0,-1);if(StringFind(n,p)==0)ObjectSetInteger(0,n,OBJPROP_TIMEFRAMES,0);}ChartRedraw();} void Delete(){ObjectsDeleteAll(0,p);}

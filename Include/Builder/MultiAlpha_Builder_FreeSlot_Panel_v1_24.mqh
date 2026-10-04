@@ -4,13 +4,13 @@
 //+------------------------------------------------------------------+
 #ifndef MULTIALPHA_BUILDER_FREE_SLOT_PANEL_V1_24_MQH
 #define MULTIALPHA_BUILDER_FREE_SLOT_PANEL_V1_24_MQH
-#define MA_BUILDER_FREE_SLOT_PANEL_VERSION "1.18"
+#define MA_BUILDER_FREE_SLOT_PANEL_VERSION "1.24"
 #define MA_BUILDER_ROLE_COUNT 4
 #define MA_BUILDER_SLOTS_PER_ROLE 24
 #define MA_BUILDER_VISIBLE_ROWS 8
 #define MA_BUILDER_PAGE_COUNT 3
 
-enum ENUM_MA_BUILDER_ROLE124 { MA_BUILDER_ENTRY122=0,MA_BUILDER_MANAGE122=1,MA_BUILDER_EXIT122=2 };
+enum ENUM_MA_BUILDER_ROLE124 { MA_BUILDER_ENTRY124=0,MA_BUILDER_GRID124=1,MA_BUILDER_MANAGE124=2,MA_BUILDER_EXIT124=3 };
 
 class CMultiAlphaBuilderFreeSlotPanel124{
  string p,slot[MA_BUILDER_ROLE_COUNT][MA_BUILDER_SLOTS_PER_ROLE],params[MA_BUILDER_ROLE_COUNT][MA_BUILDER_SLOTS_PER_ROLE];
@@ -21,11 +21,11 @@ class CMultiAlphaBuilderFreeSlotPanel124{
  void Btn(string id,int x,int y,int w,string s,int state=0){string n=p+id;if(ObjectFind(0,n)<0)ObjectCreate(0,n,OBJ_BUTTON,0,0,0);ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,y);ObjectSetInteger(0,n,OBJPROP_XSIZE,w);ObjectSetInteger(0,n,OBJPROP_YSIZE,22);color bg=(state==2?C'32,135,160':(state==1?C'30,82,98':C'24,39,49'));ObjectSetInteger(0,n,OBJPROP_BGCOLOR,bg);ObjectSetInteger(0,n,OBJPROP_COLOR,clrWhite);ObjectSetInteger(0,n,OBJPROP_FONTSIZE,8);ObjectSetInteger(0,n,OBJPROP_ZORDER,40);ObjectSetString(0,n,OBJPROP_TEXT,s);}
  void Edit(string id,int x,int y,int w,string s){string n=p+id;if(ObjectFind(0,n)<0)ObjectCreate(0,n,OBJ_EDIT,0,0,0);ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,x);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,y);ObjectSetInteger(0,n,OBJPROP_XSIZE,w);ObjectSetInteger(0,n,OBJPROP_YSIZE,22);ObjectSetInteger(0,n,OBJPROP_BGCOLOR,C'20,31,40');ObjectSetInteger(0,n,OBJPROP_COLOR,clrWhite);ObjectSetInteger(0,n,OBJPROP_BORDER_COLOR,C'65,90,105');ObjectSetInteger(0,n,OBJPROP_FONTSIZE,8);ObjectSetInteger(0,n,OBJPROP_ZORDER,45);ObjectSetString(0,n,OBJPROP_TEXT,s);}
  void Box(){string n=p+"BG";if(ObjectFind(0,n)<0)ObjectCreate(0,n,OBJ_RECTANGLE_LABEL,0,0,0);ObjectSetInteger(0,n,OBJPROP_CORNER,CORNER_LEFT_UPPER);ObjectSetInteger(0,n,OBJPROP_XDISTANCE,640);ObjectSetInteger(0,n,OBJPROP_YDISTANCE,58);ObjectSetInteger(0,n,OBJPROP_XSIZE,660);ObjectSetInteger(0,n,OBJPROP_YSIZE,550);ObjectSetInteger(0,n,OBJPROP_BGCOLOR,C'12,20,27');ObjectSetInteger(0,n,OBJPROP_BORDER_COLOR,C'55,70,80');ObjectSetInteger(0,n,OBJPROP_SELECTABLE,false);ObjectSetInteger(0,n,OBJPROP_ZORDER,20);}
- string RoleName(){return role==0?"ENTRY":role==1?"GRID":role==2?"MANAGE":"EXIT";} string DefaultName(){return "BUILDER_"+(role==0?"E01":role==1?"M01":"X01");}
+ string RoleName(){return role==0?"ENTRY":role==1?"GRID":role==2?"MANAGE":"EXIT";} string DefaultName(){return "BUILDER_"+(role==0?"E01":role==1?"G01":role==2?"M01":"X01");}
  void CaptureNames(){string n24=p+"NAME24",n72=p+"NAME72";if(ObjectFind(0,n24)>=0)name24[role]=ObjectGetString(0,n24,OBJPROP_TEXT);if(ObjectFind(0,n72)>=0)name72=ObjectGetString(0,n72,OBJPROP_TEXT);}
  string Name24(){string n=p+"NAME24";if(ObjectFind(0,n)>=0)return ObjectGetString(0,n,OBJPROP_TEXT);return name24[role];}
  string Name72(){string n=p+"NAME72";if(ObjectFind(0,n)>=0)return ObjectGetString(0,n,OBJPROP_TEXT);return name72;}
- string RolePrefix(const int rr){return "MultiAlpha_Builder_"+(rr==0?"ENTRY_":rr==1?"MANAGE_":"EXIT_");}
+ string RolePrefix(const int rr){return "MultiAlpha_Builder_"+(rr==0?"ENTRY_":rr==1?"GRID_":rr==2?"MANAGE_":"EXIT_");}
  string RoleFileName(const int rr,const string nm){return RolePrefix(rr)+nm+".csv";}
  string StripName(const string fn,const string pre){if(StringFind(fn,pre)!=0)return "";string nm=StringSubstr(fn,StringLen(pre));int n=StringLen(nm);if(n>4&&StringSubstr(nm,n-4)==".csv")nm=StringSubstr(nm,0,n-4);return nm;}
  string NextByMask(const string mask,const string pre,const string current){string fn,first="",next="";bool take=false;long h=FileFindFirst(mask,fn,FILE_COMMON);if(h==INVALID_HANDLE)return current;do{string nm=StripName(fn,pre);if(nm=="")continue;if(first=="")first=nm;if(take){next=nm;break;}if(nm==current)take=true;}while(FileFindNext(h,fn));FileFindClose(h);if(next!="")return next;if(first!="")return first;return current;}

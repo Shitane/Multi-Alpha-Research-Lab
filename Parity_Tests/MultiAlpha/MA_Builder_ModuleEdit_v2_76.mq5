@@ -31,7 +31,7 @@
 #include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Readout_Panel_v1_03.mqh"
 #include "..\\..\\..\\Include\\Builder\\MultiAlpha_Module_Library_Store_v1_00.mqh"
 #include "..\\..\\..\\Include\\Builder\\MultiAlpha_Module_Library_Panel_v1_00.mqh"
-#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Module_Edit_Nav_v1_00.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Module_Edit_Nav_v1_01.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Common_Filter_v1_10.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Filter_Panel_v1_11.mqh"
 #include "..\\..\\..\\Include\\Common\\MultiAlpha_Slot_Filter_Preset_v1_20.mqh"
@@ -144,7 +144,7 @@ CMultiAlphaBuilderInstanceComposer103 builder_instance_composer;
 CMultiAlphaBuilderSlotWorkspaceStore103 builder_slot_workspace;
 CMultiAlphaModuleLibraryStore100 module_library_store;
 CMultiAlphaModuleLibraryPanel100 module_library_panel;
-CMultiAlphaModuleEditNav100 module_edit_nav;
+CMultiAlphaModuleEditNav101 module_edit_nav;
 bool module_edit_active276=false;
 int module_edit_role276=0,module_edit_slot276=0;
 CMultiAlphaFilterStore110 filter_store;

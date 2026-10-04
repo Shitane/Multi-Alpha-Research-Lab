@@ -17,14 +17,71 @@ EA PARTS -> MODULE BUILDER -> ENTRY / GRID / MANAGE / EXIT MODULES -> SLOT STRAT
 ENTRY, GRID, MANAGE and EXIT modules are independent reusable definitions. They are not fixed O01/A10 IDs.
 
 ## UI ownership during Builder completion
-Do not redesign/unify the panels yet.
 
 Right workspace remains:
 - SLOT: strategy/runtime assignment
-- EA LOGIC: module builder
+- EA LOGIC: Module Library / Logic Builder
 - EA PARTS: reusable parts picker/editor
 
-Left FILTER and PRESET remain as existing functionality. Cosmetic panel unification is postponed until Builder + Symbol Resolver + demo execution are working.
+### Fixed left LOGIC panel direction
+The old left LOGIC panel contents are legacy O01/A10-specific information and are no longer the product model.
+
+**Mainline specification: inherit the existing left LOGIC panel's visual design, but discard its legacy contents and rebuild it as the Strategy Dashboard.**
+
+The Strategy Dashboard is the read-only/current-state overview for the selected Strategy SLOT. The right workspace remains the place where strategies, modules and Parts are selected or edited.
+
+Target ownership:
+- Left LOGIC / Strategy Dashboard: selected Strategy SLOT overview and execution readiness.
+- Right EA LOGIC: Module Library and Logic Builder editing.
+- Right EA PARTS: reusable Parts selection/editing.
+
+Legacy strategy-specific fields such as Brick Size, BB Period, Entry Run, TP/SL bricks, Cooldown, Single Dist and Basket Start are not part of the new Strategy Dashboard. Strategy-specific parameters belong to Module/Parts definitions.
+
+### Strategy Dashboard implementation gates
+Develop the new left dashboard incrementally and stop for the user's local MetaEditor/MT5 confirmation after each gate.
+
+**Gate LD-1 — Dashboard shell**
+- Create the new left Strategy Dashboard shell and display layout.
+- Reuse the existing left LOGIC panel's overall visual language (panel size/background/transparency/spacing where practical).
+- Do not display the legacy O01/A10 logic-specific fields in the new dashboard.
+- This gate is primarily visual/layout verification; do not pretend unconnected fields are live data.
+- Preserve NO_ORDERS / VIRTUAL NOT FILL.
+
+**Gate LD-2 — Strategy basic information**
+Connect the dashboard basic information to the selected Strategy SLOT:
+- SLOT number
+- Enabled state
+- logical Symbol
+- Magic
+
+Do not hard-code broker symbol suffixes. Broker-resolved symbol is a later Symbol Resolver concern.
+
+**Gate LD-3 — Four Module references and validity**
+Connect the selected Strategy SLOT's four Module references to the dashboard in canonical order:
+1. ENTRY
+2. GRID
+3. MANAGE
+4. EXIT
+
+For each role display:
+- Module Slot number
+- Module name
+- Module validity/status
+
+INVALID is a valid saved development state and must remain visible. INVALID does not mean delete the Module or reject SAVE.
+
+**Gate LD-4 — Strategy aggregate status**
+Derive and display the selected Strategy SLOT's aggregate state from Strategy Enabled plus its required Module references/statuses.
+
+Target states:
+- READY
+- INVALID
+- INCOMPLETE
+- DISABLED
+
+An INVALID required Module must prevent runtime execution of that Strategy, but must not erase or automatically replace the stored Module reference.
+
+After LD-1 through LD-4 are confirmed, continue the mainline Strategy reference gates (SL-1/SL-2) and Generic Runtime work. Dashboard work must not reintroduce fixed O01/A10 runtime ownership.
 
 
 ## Fixed Module Role Order
@@ -115,15 +172,19 @@ Development proceeds one compile-checked gate at a time:
 4. Gate ML-1: create a dedicated Module Slot Library data store: 50 slots independently for ENTRY, GRID, MANAGE and EXIT.
 5. Gate ML-2: create Module Slot selector UI with role, #01-#50, Module Name, Enabled and EDIT.
 6. Gate ML-3: connect EDIT to the 40-Part Logic Builder and verify independent Module Slot retention.
-7. Gate SL-1: make Strategy SLOT #01-#50 store references to four Module Slot IDs rather than duplicated module logic.
-8. Gate SL-2: expose only SAVED + ENABLED modules as new Strategy selection candidates; preserve disabled references as INVALID with no automatic substitution.
-9. Gate RT-1: connect the four referenced modules to Generic Runtime under NO_ORDERS.
-10. Gate O01-1: reproduce O01 from four generic module definitions and perform parity validation.
-11. Gate SR-1: implement Symbol Resolver after Builder/module persistence/runtime are stable.
-12. Strategy Tester validation.
-13. Add explicit Demo Execution Safety Gate.
-14. TitanFX Demo / resolved broker-symbol validation.
-15. Only after functional completion, unify panel design.
+7. Gate LD-1: rebuild the left LOGIC panel shell as the Strategy Dashboard while inheriting the existing visual design.
+8. Gate LD-2: connect SLOT number, Enabled, logical Symbol and Magic to the selected Strategy SLOT.
+9. Gate LD-3: display selected ENTRY / GRID / MANAGE / EXIT Module Slot number, name and validity.
+10. Gate LD-4: derive/display Strategy READY / INVALID / INCOMPLETE / DISABLED.
+11. Gate SL-1: make Strategy SLOT #01-#50 store references to four Module Slot IDs rather than duplicated module logic.
+12. Gate SL-2: expose only SAVED + ENABLED modules as new Strategy selection candidates; preserve disabled references as INVALID with no automatic substitution.
+13. Gate RT-1: connect the four referenced modules to Generic Runtime under NO_ORDERS.
+14. Gate O01-1: reproduce O01 from four generic module definitions and perform parity validation.
+15. Gate SR-1: implement Symbol Resolver after Builder/module persistence/runtime are stable.
+16. Strategy Tester validation.
+17. Add explicit Demo Execution Safety Gate.
+18. TitanFX Demo / resolved broker-symbol validation.
+19. Only after functional completion, perform remaining cosmetic panel unification.
 
 Each gate stops for the user's local MetaEditor compile and MT5 confirmation before the next gate begins.
 

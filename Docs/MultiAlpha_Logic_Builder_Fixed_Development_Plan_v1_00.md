@@ -127,6 +127,18 @@ Development proceeds one compile-checked gate at a time:
 
 Each gate stops for the user's local MetaEditor compile and MT5 confirmation before the next gate begins.
 
+## Deferred panel/UI improvement register
+
+The following visual issue was confirmed during the user's local Gate M4-2 runtime check and is deliberately deferred so functional Builder development is not mixed with panel redesign.
+
+### EA LOGIC lower-area text/control overlap
+- In the 40-Part Builder panel, the lower area around `Name 40`, `Name 160`, `Ready` and `READ` has insufficient vertical spacing.
+- Text, edit controls and status/readout lines can visually overlap.
+- This is a recorded panel-development improvement item, not a reason to alter the functional M4 gates.
+- Do not forget or silently close this item after Builder/runtime work is complete.
+- During the final panel-development / layout-unification stage, adjust row spacing, vertical margins, edit-control positions and the status/readout area so that no text or controls overlap.
+- Re-check this layout at the target MT5 panel size after the final functional architecture is stable.
+
 ## Safety during development
 - Preserve NO_ORDERS / VIRTUAL NOT FILL until the explicit demo gate.
 - Do not change broker execution while developing Builder storage/UI/evaluation.
@@ -136,7 +148,12 @@ Each gate stops for the user's local MetaEditor compile and MT5 confirmation bef
 - User local MetaEditor 0 errors / 0 warnings is the only Compile PASS.
 - User local MT5 runtime is the final Runtime PASS.
 
-## Immediate gate
+## Current gate status
+- Gate M4-1: PASS by user local MetaEditor and MT5 runtime confirmation.
+- Gate M4-2: PASS by user local MetaEditor (0 errors / 0 warnings) and MT5 01-10 / 11-20 / 21-30 / 31-40 page confirmation.
+- Current development gate: M4-3 semantic split of legacy MANAGE content into GRID / MANAGE / EXIT after source inspection.
+
+## Historical M4-1 gate definition
 Gate M4-1:
 - base strictly on v2.68
 - add the fourth Builder role and fix canonical ordering to ENTRY / GRID / MANAGE / EXIT

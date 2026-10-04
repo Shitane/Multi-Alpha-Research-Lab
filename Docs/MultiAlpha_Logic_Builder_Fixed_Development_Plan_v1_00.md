@@ -26,6 +26,29 @@ Right workspace remains:
 
 Left FILTER and PRESET remain as existing functionality. Cosmetic panel unification is postponed until Builder + Symbol Resolver + demo execution are working.
 
+
+## Fixed Module Role Order
+
+The canonical module role order is permanently fixed as:
+
+1. ENTRY
+2. GRID
+3. MANAGE
+4. EXIT
+
+Canonical internal role indexes:
+- Role 0 = ENTRY
+- Role 1 = GRID
+- Role 2 = MANAGE
+- Role 3 = EXIT
+
+Use this same order consistently in UI buttons, arrays, persistence, Module Slot Library, Strategy SLOT references, validation, logging and Generic Runtime. Do not use ENTRY / MANAGE / GRID / EXIT ordering in new code.
+
+Rationale follows the strategy lifecycle:
+ENTRY creates the initial position; GRID handles averaging/additional entries; MANAGE handles already-open position/basket management; EXIT closes positions.
+
+Legacy three-role data must be migrated explicitly. Old role index 1 (legacy MANAGE) must not be blindly treated as new Role 1, because new Role 1 is GRID and legacy MANAGE contains logic that must be semantically split between GRID and MANAGE.
+
 ## Builder capacity
 Each ENTRY / GRID / MANAGE / EXIT module has 40 part slots:
 - 10 visible rows per page
@@ -128,8 +151,8 @@ The reusable module layer is fixed as follows.
 ### Module slot capacity
 Each module role has 50 independent Module Slots:
 - ENTRY MODULE: #01-#50
-- MANAGE MODULE: #01-#50
 - GRID MODULE: #01-#50
+- MANAGE MODULE: #01-#50
 - EXIT MODULE: #01-#50
 
 Each saved Module Slot contains one module definition with up to 40 Builder Parts, displayed as 10 rows x 4 pages.
@@ -138,7 +161,7 @@ The architecture is therefore:
 EA PARTS -> LOGIC BUILDER -> MODULE SLOT LIBRARY -> STRATEGY SLOT -> Symbol Resolver -> Generic Runtime -> Global Safety -> Execution.
 
 ### Module role selection UI
-Provide role-selection buttons for ENTRY / MANAGE / GRID / EXIT.
+Provide role-selection buttons for ENTRY / GRID / MANAGE / EXIT.
 
 Selecting a role opens that role's 50-slot Module Slot selector. Reuse the current Strategy SLOT selection/enabling interaction pattern where practical rather than introducing an unrelated navigation method.
 
@@ -160,7 +183,7 @@ Example:
 - Strategy ENTRY selector must offer only #01, #03, #13
 - DISABLED and EMPTY Module Slots must not appear as selectable candidates.
 
-This filtering is independent for ENTRY, MANAGE, GRID and EXIT.
+This filtering is independent for ENTRY, GRID, MANAGE and EXIT.
 
 ### Referenced module becomes disabled
 If a Strategy SLOT already references a Module Slot and that Module Slot is later disabled, do not silently substitute another module.
@@ -188,14 +211,14 @@ Strategy SLOT #01-#50 stores module references, not independent duplicated copie
 
 Target display/reference structure:
 - ENTRY: module slot number + module name
-- MANAGE: module slot number + module name
 - GRID: module slot number + module name
+- MANAGE: module slot number + module name
 - EXIT: module slot number + module name
 
 Example:
 ENTRY  #13 RSI_ENTRY_A
-MANAGE #07 BASKET_TRAIL
 GRID   #18 GRID_200_1.5
+MANAGE #07 BASKET_TRAIL
 EXIT   #09 TP_VSL
 
 This enables controlled module reuse and module-by-module comparison across Strategy Slots.

@@ -30,8 +30,9 @@ bool MA103ValidatePart(const int role,const string raw,const string params,strin
  {
   string en=MA101Param(params,"ENABLED","");
   if(!MA101IsBoolText(en)){reason="OVERLAP ENABLED";return false;}
-  string order=MA101Param(params,"ORDER","");
-  if(!MA101IsIntText(order)||StringToInteger(order)<2){reason="OVERLAP ORDER";return false;}
+  string orderText=MA101Param(params,"ORDER","");
+  int orderNo=(int)StringToInteger(orderText);
+  if(orderText=="" || orderNo<2){reason="OVERLAP ORDER";return false;}
   if(!MA101NonNegative(MA101Param(params,"PERCENT","-1"))){reason="OVERLAP PERCENT";return false;}
  }
  else if(p=="BASKET_FIXED_TP")

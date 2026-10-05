@@ -3,7 +3,7 @@
 //| Compile/runtime gate for canonical 4-role schema. NO ORDERS.     |
 //+------------------------------------------------------------------+
 #property strict
-#include "..\\..\\Include\\Builder\\MultiAlpha_Builder_Part_Schema_v1_01.mqh"
+#include <Builder\\MultiAlpha_Builder_Part_Schema_v1_01.mqh>
 
 int OnInit()
 {

@@ -1,0 +1,1442 @@
+//+------------------------------------------------------------------+
+//| MA_LD2A_O01BuilderBridge_v3_42.mq5                               |
+//| Gate LD-2A: connect Strategy Dashboard SLOT / ENABLED / SYMBOL / MAGIC to selected SLOT.       |
+//| v3.42: throttle ENTRY runtime diagnostics to state-change or 60-second cadence; trading logic unchanged. |
+//| ENTRY / GRID / MANAGE / EXIT. NO_ORDERS remains unchanged.   |
+//| A10 FULL uses the same verified v1.74 dispatcher/module path.     |
+//+------------------------------------------------------------------+
+#property strict
+#property version "3.42"
+
+#include "..\\..\\..\\Include\\O01\\O01_GSG_RSI30_Runtime_Adapter_v1_20.mqh"
+#include "..\\..\\..\\Include\\O01\\O01_Settings_Panel_v1_72.mqh"
+#include "..\\..\\..\\Include\\O01\\MultiAlpha_Foundation_v1_40.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Route_Selector_Panel_v1_85.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_A10_Split_Runtime_v1_85.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Full_Dispatcher_v1_74.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Entry_Dispatcher_v1_72.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Demo_Execution_Adapter_v1_73.mqh"
+#include "..\\..\\..\\Include\\A10\\A10_Entry_Settings_Panel_v1_03.mqh"
+#include "..\\..\\..\\Include\\A10\\A10_Full_Settings_Panel_v1_02.mqh"
+#include "..\\..\\..\\Include\\A10\\A10_Split_Detail_Panel_v1_00.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Left_Context_v1_84.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Left_Workspace_Tabs_v2_03.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Right_Workspace_Tabs_v1_03.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Builder_Workspace_Shell_v1_01.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Workspace_O01_v1_00.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_FreeSlot_Panel_v1_26.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Parts_Picker_v1_15.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Interpreter_v1_01.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Instance_Composer_v1_04.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Slot_Workspace_Store_v1_03.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_O01_Canonical_40Parts_v1_02.mqh"
+// UI Interpreter v1_01 and runtime Interpreter v1_05 coexist in this EA.
+// v1_05 includes v1_02, which uses the same legacy version macro name as v1_01.
+// Clear only that metadata macro before the runtime include; class/runtime logic is unchanged.
+#undef MA_BUILDER_INTERPRETER_VERSION
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Interpreter_v1_05.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Grid_Interpreter_v1_00.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Part_Schema_v1_03.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_O01_Exit_Evaluator_v1_00.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Builder_Readout_Panel_v1_03.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Module_Library_Store_v1_00.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Module_Library_Panel_v1_01.mqh"
+#include "..\\..\\..\\Include\\Builder\\MultiAlpha_Module_Edit_Nav_v1_03.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Common_Filter_v1_10.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Filter_Panel_v1_11.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Slot_Filter_Preset_v1_20.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Filter_Preset_Panel_v1_26.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Preset_Action_Panel_v2_14.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Slot_State_v1_95.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Slot_Panel_v2_15.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Left_Slot_Badge_v1_99.mqh"
+#include "..\\..\\..\\Include\\Common\\MultiAlpha_Left_Header_Spacing_v1_99.mqh"
+
+enum O01_TIME_MODE { O01_AUTO_GMT=0,O01_SERVER_TIME=1,O01_CUSTOM_GMT=2 };
+
+input ENUM_MA_EXECUTION_MODE InpExecutionMode=MA_EXECUTION_DEMO;
+input bool InpBuilderDemoOneShotArm=false; // retained disabled; v3.35 is live-state parity gate
+
+input group "Multi Alpha Instance Identity"
+input int  InpInstanceId=1;
+input long InpMagic=46102031;
+
+input group "Multi Alpha Route"
+input ENUM_MA_STRUCTURE_MODE_V150 InpStructure=MA_STRUCTURE_FULL_V150;
+input ENUM_MA_LOGIC_ID_V150 InpFullModule=MA_LOGIC_A10_V150;
+input ENUM_MA_LOGIC_ID_V150 InpEntryModule=MA_LOGIC_O01_V150;
+input ENUM_MA_LOGIC_ID_V150 InpManageModule=MA_LOGIC_O01_V150;
+input ENUM_MA_LOGIC_ID_V150 InpExitModule=MA_LOGIC_O01_V150;
+
+// O01 startup defaults. Expert Properties -> panel -> runtime.
+// These inputs are read only after initialization; panel APPLY/LOAD changes runtime, not these input values.
+input group "O01 Entry / Filter"
+input bool   InpNewCycles=true;
+input bool   InpTradeBuy=true;
+input bool   InpTradeSell=true;
+input int    InpRSIPeriod=8;
+input double InpRSILower=30.0;
+input double InpRSIUpper=70.0;
+input int    InpATR1Period=15;
+input int    InpATR2Period=15;
+input ENUM_TIMEFRAMES InpATR2Timeframe=PERIOD_CURRENT;
+input double InpATR1MinPoints=0.0;
+input double InpATR1MaxPoints=10000.0;
+input double InpATR2MinPoints=0.0;
+input double InpATR2MaxPoints=10000.0;
+
+input group "O01 Manage / Grid / Lot"
+input double InpInitialLot=0.01;
+input double InpLotMultiplier=1.50;
+input double InpMaxLot=5.00;
+input double InpMaxTotalLotsPerSide=1.20;
+input int    InpMaxOrders=10;
+input int    InpFixedDistancePoints=200;
+input int    InpDynamicStartOrder=3;
+input int    InpDynamicStartPoints=300;
+input double InpDistanceMultiplier=1.20;
+input bool   InpAllowGridOutsideTime=true;
+input bool   InpOneOrderPerBar=true;
+input bool   InpPauseGridWhileTrailing=true;
+
+input group "O01 Exit / Trailing"
+input int InpVirtualSLPoints=1500;
+input int InpSingleTrailStart=110;
+input int InpSingleTrailLock=60;
+input int InpSingleTrailDistance=50;
+input int InpSingleTrailStep=10;
+input int InpBasketTrailStart=100;
+input int InpBasketTrailLock=50;
+input int InpBasketTrailDistance=50;
+input int InpBasketTrailStep=10;
+
+input group "O01 Safety / DD"
+input int InpWarningDD=8;
+input int InpPauseGridDD=12;
+input int InpEmergencyCloseDD=15;
+
+input group "O01 Time / News"
+input O01_TIME_MODE InpTimeMode=O01_AUTO_GMT;
+input int InpStartHour=7;
+input int InpStartMinute=0;
+input int InpEndHour=11;
+input int InpEndMinute=0;
+input bool InpUseNewsFilter=true;
+input bool InpNewsManageOnly=true;
+
+SO01RuntimeSettings110 runtime_cfg;
+CO01SettingsPanel164 panel;
+CO01RuntimeAdapter120 adapter;
+CO01CoreInterface core;
+SMA140StrategyIdentity strategy;
+SMA140PanelTheme panel_theme;
+CMultiAlphaRouteController185 route_controller;
+CMultiAlphaRouteSelectorPanel185 route_panel;
+bool route_panel_created231=false;
+CMultiAlphaEntryDispatcher172 entry_dispatcher;
+CMultiAlphaFullDispatcher174 full_dispatcher;
+CMultiAlphaA10SplitRuntime185 a10_split_runtime;
+CMultiAlphaDemoExecutionAdapter173 execution_adapter;
+SA10EntrySettings100 a10_entry_cfg;
+CA10EntrySettingsPanel100 a10_panel;
+SA10FullConfig100 a10_full_cfg;
+CA10FullSettingsPanel102 a10_full_panel;
+CA10SplitDetailPanel100 a10_split_detail_panel;
+CMultiAlphaLeftContext184 left_context;
+CMultiAlphaLeftWorkspaceTabs203 left_tabs;
+CMultiAlphaRightWorkspaceTabs103 right_tabs;
+CMultiAlphaBuilderWorkspaceShell101 builder_workspace;
+CMultiAlphaBuilderWorkspaceO01100 o01_builder_workspace;
+CMultiAlphaBuilderFreeSlotPanel126 free_slot_builder;
+CMultiAlphaBuilderPartsPicker115 builder_parts_picker;
+CMultiAlphaBuilderInterpreter101 builder_interpreter;
+CMultiAlphaBuilderInterpreter105 builder_runtime_entry315;
+bool builder_runtime_entry_logged315=false;
+CMultiAlphaBuilderGridInterpreter100 builder_runtime_grid324;
+bool builder_runtime_grid_logged324=false;
+bool builder_runtime_manage_logged325=false;
+bool builder_runtime_manage_decision_logged329=false;
+bool builder_runtime_exit_logged326=false;
+bool builder_runtime_flow_logged327=false;
+CMultiAlphaBuilderO01ExitEvaluator100 builder_runtime_exit_eval328;
+SO01TrailState builder_exit_buy_trail328,builder_exit_sell_trail328;
+bool builder_runtime_exit_decision_logged328=false;
+bool builder_exec_request_logged330=false;
+bool builder_exec_entry_logged331=false;
+bool builder_exec_adapter_logged332=false;
+bool builder_entry_buy330=false,builder_entry_sell330=false;
+CMultiAlphaBuilderReadoutPanel103 builder_readout;
+CMultiAlphaBuilderInstanceComposer103 builder_instance_composer;
+CMultiAlphaBuilderSlotWorkspaceStore103 builder_slot_workspace;
+CMultiAlphaModuleLibraryStore100 module_library_store;
+CMultiAlphaModuleLibraryPanel101 module_library_panel;
+CMultiAlphaModuleEditNav103 module_edit_nav;
+bool module_edit_active276=false;
+int module_edit_role276=0,module_edit_slot276=0;
+CMultiAlphaFilterStore110 filter_store;
+CMultiAlphaFilterPanel111 filter_panel;
+CMultiAlphaSlotFilterPreset120 filter_preset;
+CMultiAlphaFilterPresetPanel126 filter_preset_panel;
+CMultiAlphaPresetActionPanel214 preset_action_panel;
+CMultiAlphaSlotState195 slot_state;
+CMultiAlphaSlotPanel215 slot_panel;
+CMultiAlphaLeftSlotBadge199 left_slot_badge;
+CMultiAlphaLeftHeaderSpacing199 left_header_spacing;
+
+struct VPos{double price,lot;datetime time,bar;};
+VPos buy[],sell[];
+SO01TrailState bt,st;
+int rh=INVALID_HANDLE,a1h=INVALID_HANDLE,a2h=INVALID_HANDLE;
+datetime lastBuyBar=0,lastSellBar=0;
+ulong ticks=0,entries=0,grids=0,closes=0,singleTrail=0,basketTrail=0,vsl=0,timeBlocks=0,newsBlocks=0,spreadBlocks=0,filterBlocks=0;
+
+
+void CleanupLegacyWorkspaceObjects220()
+{
+ // Remove orphan UI objects left by earlier panel generations.
+ // Current v2.20 objects are recreated immediately after this cleanup.
+ string prefixes[]={"MAPRESET212_","MAPRESET213_","MAPRESET214_","MAFPRESET123_","MAFPRESET124_","MAFPRESET125_","MAFPRESET126_","MARIGHT100_","MARIGHT101_","MALEFT202_","MALEFTSLOT198_"};
+ for(int i=0;i<ArraySize(prefixes);i++) ObjectsDeleteAll(0,prefixes[i]);
+ // Retired O01 preset controls shared the O01CFG160 prefix, so remove them by exact name.
+ string retired[]={"L_H_PRESETSEC","L_PRESETLAB","PRESET","L_SAVEDLAB","L_SAVEDVAL","NEXT","SAVE","LOAD","DELETE","RESET"};
+ for(int j=0;j<ArraySize(retired);j++) ObjectDelete(0,"O01CFG160_"+retired[j]);
+ ChartRedraw();
+}
+void SetPrefixVisible221(const string prefix,const bool on)
+{
+ int total=ObjectsTotal(0,0,-1);
+ for(int i=total-1;i>=0;i--)
+ {
+  string n=ObjectName(0,i,0,-1);
+  if(StringFind(n,prefix)==0)ObjectSetInteger(0,n,OBJPROP_TIMEFRAMES,(long)(on?OBJ_ALL_PERIODS:0));
+ }
+}
+void BuilderReadout243(){string pp[],pv[],why;free_slot_builder.Export(pp,pv);bool ok=builder_interpreter.Validate(pp,pv,why);string expr=builder_interpreter.Expression(pp,pv);builder_readout.Show(ok,why,expr);Print("[MA_BUILDER243_READ] valid=",(int)ok," reason=",why," expression=",expr," NO_ORDERS=1");}
+void AssignBuilderRoleToSelectedSlot264()
+{
+ string pp[],pv[],why;free_slot_builder.Export(pp,pv);
+ int target=slot_state.Selected(),role=free_slot_builder.Role();
+ string defname=free_slot_builder.DefinitionName(role);
+ bool ok=builder_instance_composer.AssignRole(target,role,defname,pp,pv,why);
+ if(ok) builder_instance_composer.SetIdentity(target,strategy.symbol,strategy.magic+(target-1));
+ Print("[MA_BUILDER264_ROLE_EMBED] slot=",target," role=",(role==0?"ENTRY":role==1?"GRID":role==2?"MANAGE":"EXIT"),
+       " definition=",defname," ok=",(int)ok," reason=",why,
+       " summary=",builder_instance_composer.Summary(target)," NO_ORDERS=1");
+}
+void EmbedAllBuilderRolesToSelectedSlot264()
+{
+ int target=slot_state.Selected(); bool all_ok=true; string all_reason="";
+ for(int role=0;role<4;role++)
+ {
+  string pp[],pv[],why;free_slot_builder.ExportRole(role,pp,pv);
+  string defname=free_slot_builder.DefinitionName(role);
+  bool ok=builder_instance_composer.AssignRole(target,role,defname,pp,pv,why);
+  Print("[MA_BUILDER264_ROLE_EMBED] slot=",target," role=",(role==0?"ENTRY":role==1?"GRID":role==2?"MANAGE":"EXIT"),
+        " definition=",defname," ok=",(int)ok," reason=",why," NO_ORDERS=1");
+  if(!ok){all_ok=false;if(all_reason!="")all_reason+=" | ";all_reason+=(role==0?"ENTRY":role==1?"GRID":role==2?"MANAGE":"EXIT")+": "+why;}
+ }
+ builder_instance_composer.SetIdentity(target,strategy.symbol,strategy.magic+(target-1));
+ string ready_reason="";bool ready=builder_instance_composer.Ready(target,ready_reason);
+ Print("[MA_BUILDER264_SLOT_EMBED] slot=",target," all_roles=",(int)all_ok," ready=",(int)ready,
+       " reason=",(all_ok?ready_reason:all_reason)," summary=",builder_instance_composer.Summary(target)," NO_ORDERS=1");
+}
+void RefreshRightWorkspace221()
+{
+ module_library_panel.Hide();
+ module_edit_nav.Hide();
+ bool slot=right_tabs.SlotVisible();
+ slot_panel.SetVisible(slot);
+ if(!slot)
+ {
+  SetPrefixVisible221("MA_ROUTE175_",false);
+ }
+ if(slot)
+ {
+  // v2.31: ROUTE uses a Canvas background. Hiding old chart objects and
+  // merely restoring TIMEFRAMES can leave that canvas black after a
+  // workspace round-trip. Recreate ROUTE from the selected-slot state,
+  // matching the known-good startup lifecycle.
+  SMA_ModuleSelection150 d=slot_state.CurrentRoute();
+  if(route_panel_created231) route_panel.Delete();
+  route_panel.Create(&route_controller,d,640,146,panel_theme.opacity);
+  route_panel_created231=true;
+  route_panel.SetDraft(d);
+  bool reg=(d.structure==MA_STRUCTURE_FULL_V150
+            ? route_panel.DraftFullRegistered()
+            : (route_panel.DraftEntryRegistered() &&
+               route_panel.DraftManageRegistered() &&
+               route_panel.DraftExitRegistered()));
+  panel.SetRouteDraftContext(MA150StructureName(d.structure),
+                             MA150LogicName(d.full_module),
+                             MA150LogicName(d.entry_module),
+                             MA150LogicName(d.manage_module),
+                             MA150LogicName(d.exit_module),reg);
+ }
+ if(right_tabs.LogicVisible())
+ {
+  builder_workspace.HideAll();o01_builder_workspace.Hide();builder_parts_picker.Hide();
+  if(module_edit_active276)
+  {
+   module_library_panel.Hide();
+   free_slot_builder.Show();
+   BuilderReadout243();
+   module_edit_nav.Show(module_edit_role276,module_edit_slot276,free_slot_builder.DefinitionName(module_edit_role276));
+  }
+  else
+  {
+   free_slot_builder.Hide();builder_readout.Hide();module_edit_nav.Hide();module_library_panel.Show();
+  }
+ }
+ else if(right_tabs.PartsVisible()){builder_readout.Hide();free_slot_builder.Hide();module_edit_nav.Hide();module_library_panel.Hide();o01_builder_workspace.Hide();builder_workspace.HideAll();builder_parts_picker.SetRole(free_slot_builder.Role());builder_parts_picker.SetSlot(free_slot_builder.Selected(),free_slot_builder.SelectedPart(),free_slot_builder.SelectedParams());builder_parts_picker.Show();}
+ else {builder_readout.Hide();free_slot_builder.Hide();builder_parts_picker.Hide();module_edit_nav.Hide();module_library_panel.Hide();o01_builder_workspace.Hide();builder_workspace.HideAll();}
+ ChartRedraw();
+}
+
+void A10FullDefaults175(SA10FullConfig100 &c)
+{
+ c.max_positions=4;c.skip_opposite=true;c.entry_ttl_seconds=120;
+ c.mode[0].enabled=true;c.mode[0].brick=17;c.mode[0].bb_period=20;c.mode[0].deviation=1.0;c.mode[0].squeeze_width=1.0;c.mode[0].entry_run=2;c.mode[0].tp=24;c.mode[0].sl=42;c.mode[0].max_hold=1230;c.mode[0].cooldown=5;c.mode[0].max_spread=.35;
+ c.mode[1].enabled=true;c.mode[1].brick=30;c.mode[1].bb_period=31;c.mode[1].deviation=1.2;c.mode[1].squeeze_width=1.0;c.mode[1].entry_run=1;c.mode[1].tp=28;c.mode[1].sl=48.5;c.mode[1].max_hold=2580;c.mode[1].cooldown=3;c.mode[1].max_spread=.35;
+ c.mode[2].enabled=true;c.mode[2].brick=30;c.mode[2].bb_period=5;c.mode[2].deviation=3.0;c.mode[2].squeeze_width=1.0;c.mode[2].entry_run=1;c.mode[2].tp=10;c.mode[2].sl=34.5;c.mode[2].max_hold=2220;c.mode[2].cooldown=3;c.mode[2].max_spread=.35;
+ c.mode[3].enabled=true;c.mode[3].brick=14;c.mode[3].bb_period=18;c.mode[3].deviation=2.4;c.mode[3].squeeze_width=34.5;c.mode[3].entry_run=1;c.mode[3].tp=26;c.mode[3].sl=31;c.mode[3].max_hold=2050;c.mode[3].cooldown=1;c.mode[3].max_spread=.35;
+}
+string A10FullModeName175(const int m){if(m==0)return "Breakout";if(m==1)return "Re-entry";if(m==2)return "Midline";if(m==3)return "Squeeze";return "Unknown";}
+
+void Defaults(){
+ runtime_cfg.new_cycles=InpNewCycles;runtime_cfg.trade_buy=InpTradeBuy;runtime_cfg.trade_sell=InpTradeSell;runtime_cfg.allow_grid_outside_time=InpAllowGridOutsideTime;runtime_cfg.one_order_per_bar=InpOneOrderPerBar;runtime_cfg.pause_grid_while_trailing=InpPauseGridWhileTrailing;
+ runtime_cfg.rsi_period=InpRSIPeriod;runtime_cfg.rsi_lower=InpRSILower;runtime_cfg.rsi_upper=InpRSIUpper;runtime_cfg.atr1_period=InpATR1Period;runtime_cfg.atr2_period=InpATR2Period;runtime_cfg.atr2_timeframe=(int)InpATR2Timeframe;runtime_cfg.atr1_min_points=InpATR1MinPoints;runtime_cfg.atr1_max_points=InpATR1MaxPoints;runtime_cfg.atr2_min_points=InpATR2MinPoints;runtime_cfg.atr2_max_points=InpATR2MaxPoints;
+ runtime_cfg.initial_lot=InpInitialLot;runtime_cfg.lot_multiplier=InpLotMultiplier;runtime_cfg.max_lot=InpMaxLot;runtime_cfg.max_total_lots_per_side=InpMaxTotalLotsPerSide;runtime_cfg.max_orders=InpMaxOrders;runtime_cfg.fixed_distance_points=InpFixedDistancePoints;runtime_cfg.dynamic_start_order=InpDynamicStartOrder;runtime_cfg.dynamic_start_points=InpDynamicStartPoints;runtime_cfg.distance_multiplier=InpDistanceMultiplier;
+ runtime_cfg.virtual_sl_points=InpVirtualSLPoints;runtime_cfg.single_trail_start=InpSingleTrailStart;runtime_cfg.single_trail_lock=InpSingleTrailLock;runtime_cfg.single_trail_distance=InpSingleTrailDistance;runtime_cfg.single_trail_step=InpSingleTrailStep;runtime_cfg.basket_trail_start=InpBasketTrailStart;runtime_cfg.basket_trail_lock=InpBasketTrailLock;runtime_cfg.basket_trail_distance=InpBasketTrailDistance;runtime_cfg.basket_trail_step=InpBasketTrailStep;
+ runtime_cfg.warning_dd=InpWarningDD;runtime_cfg.pause_grid_dd=InpPauseGridDD;runtime_cfg.emergency_close_dd=InpEmergencyCloseDD;runtime_cfg.time_mode=(int)InpTimeMode;runtime_cfg.start_hour=InpStartHour;runtime_cfg.start_minute=InpStartMinute;runtime_cfg.end_hour=InpEndHour;runtime_cfg.end_minute=InpEndMinute;runtime_cfg.use_news_filter=InpUseNewsFilter;runtime_cfg.news_manage_only=InpNewsManageOnly;
+}
+double B(int h){double x[1];return CopyBuffer(h,0,0,1,x)==1?x[0]:EMPTY_VALUE;}
+int C(VPos &p[]){return ArraySize(p);}
+double Lots(VPos &p[]){double s=0;for(int i=0;i<C(p);i++)s+=p[i].lot;return s;}
+double Avg(VPos &p[]){double pv=0,v=0;for(int i=0;i<C(p);i++){pv+=p[i].price*p[i].lot;v+=p[i].lot;}return v>0?pv/v:0;}
+double LastPrice(VPos &p[]){return C(p)?p[C(p)-1].price:0;}
+double LastLot(VPos &p[]){return C(p)?p[C(p)-1].lot:runtime_cfg.initial_lot;}
+double NormLot(double x){double mn=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN),mx=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MAX),step=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_STEP);if(step<=0)step=.01;x=MathMax(mn,MathMin(mx,MathMin(runtime_cfg.max_lot,x)));return NormalizeDouble(MathRound(x/step)*step,2);}
+double Dist(int n){if(n<runtime_cfg.dynamic_start_order)return runtime_cfg.fixed_distance_points;return runtime_cfg.dynamic_start_points*MathPow(runtime_cfg.distance_multiplier,n-runtime_cfg.dynamic_start_order);}
+int NM(int m){while(m<0)m+=1440;while(m>=1440)m-=1440;return m;}
+bool Win(int m,int s,int e){return s==e||(s<e?(m>=s&&m<e):(m>=s||m<e));}
+bool TimeOK(){MqlDateTime d;TimeToStruct(TimeTradeServer(),d);if(d.day_of_week<1||d.day_of_week>5)return false;int m=d.hour*60+d.min,s=runtime_cfg.start_hour*60+runtime_cfg.start_minute,e=runtime_cfg.end_hour*60+runtime_cfg.end_minute;if(runtime_cfg.time_mode==O01_AUTO_GMT||runtime_cfg.time_mode==O01_CUSTOM_GMT){s=NM(s+180);e=NM(e+180);}return Win(m,s,e);}
+bool SpreadOK(){return true;}
+bool NewsNewBlocked(){return false;}
+bool NewsGridBlocked(){return false;}
+bool DemoExecution(){return InpExecutionMode==MA_EXECUTION_DEMO;}
+int LiveCount(const bool isBuy){return execution_adapter.ManagedPositionsSide(isBuy?POSITION_TYPE_BUY:POSITION_TYPE_SELL);}
+double LiveLots(const bool isBuy){return execution_adapter.ManagedLotsSide(isBuy?POSITION_TYPE_BUY:POSITION_TYPE_SELL);}
+double LiveAvg(const bool isBuy){return execution_adapter.WeightedAveragePrice(isBuy?POSITION_TYPE_BUY:POSITION_TYPE_SELL);}
+double LiveLastPrice(const bool isBuy){return execution_adapter.NewestPositionPrice(isBuy?POSITION_TYPE_BUY:POSITION_TYPE_SELL);}
+double LiveLastLot(const bool isBuy){return execution_adapter.NewestPositionLot(isBuy?POSITION_TYPE_BUY:POSITION_TYPE_SELL);}
+bool ExecOpen(const bool isBuy,const double lot,const string tag){
+ string reason="";bool ok=execution_adapter.OpenMarket(isBuy?POSITION_TYPE_BUY:POSITION_TYPE_SELL,lot,tag,reason);
+ if(!ok)Print("[MA_RUNTIME185_OPEN_REJECT] side=",(isBuy?"BUY":"SELL")," tag=",tag," reason=",reason);
+ return ok;
+}
+bool ExecCloseSide(const bool isBuy,const string why){
+ string reason="";bool ok=execution_adapter.CloseSide(isBuy?POSITION_TYPE_BUY:POSITION_TYPE_SELL,reason);
+ if(!ok)Print("[MA_RUNTIME185_CLOSE_REJECT] side=",(isBuy?"BUY":"SELL")," why=",why," reason=",reason);
+ return ok;
+}
+void Add(VPos &p[],double px,double lot){int n=C(p);ArrayResize(p,n+1);p[n].price=px;p[n].lot=lot;p[n].time=TimeCurrent();p[n].bar=iTime(_Symbol,_Period,0);}
+void Clear(VPos &p[]){ArrayResize(p,0);}
+string EN(ENUM_O01_EXIT_DECISION d){if(d==O01_EXIT_VIRTUAL_SL)return "VIRTUAL_SL";if(d==O01_EXIT_SINGLE_TRAILING)return "SINGLE_TRAILING";if(d==O01_EXIT_BASKET_TRAILING)return "BASKET_TRAILING";if(d==O01_EXIT_FIXED_TP)return "FIXED_TP";return "NONE";}
+void LO(string side,string tag,double px,double lot,int n){Print("[O01_RUNTIME140_OPEN] t=",TimeToString(TimeCurrent(),TIME_DATE|TIME_SECONDS)," instance=",strategy.instance_id," magic=",strategy.magic," symbol=",strategy.symbol," side=",side," tag=",tag," count=",n," lot=",DoubleToString(lot,2)," px=",DoubleToString(px,_Digits)," EXECUTION=",MA140_ExecutionText(InpExecutionMode)," BROKER_ACTIONS_ARMED=",(DemoExecution()?1:0)," VIRTUAL_NOT_FILL=",(DemoExecution()?0:1));}
+void LX(string side,ENUM_O01_EXIT_DECISION d,int n,double avg,double px,double mv){Print("[O01_RUNTIME140_EXIT] t=",TimeToString(TimeCurrent(),TIME_DATE|TIME_SECONDS)," instance=",strategy.instance_id," magic=",strategy.magic," symbol=",strategy.symbol," side=",side," reason=",EN(d)," count=",n," avg=",DoubleToString(avg,_Digits)," px=",DoubleToString(px,_Digits)," move_pts=",DoubleToString(mv,1)," EXECUTION=",MA140_ExecutionText(InpExecutionMode)," BROKER_ACTIONS_ARMED=",(DemoExecution()?1:0)," VIRTUAL_NOT_FILL=",(DemoExecution()?0:1));}
+
+bool RebuildIndicatorHandles()
+{
+ int nr=iRSI(_Symbol,_Period,runtime_cfg.rsi_period,PRICE_CLOSE);
+ int na1=iATR(_Symbol,_Period,runtime_cfg.atr1_period);
+ int na2=iATR(_Symbol,(ENUM_TIMEFRAMES)runtime_cfg.atr2_timeframe,runtime_cfg.atr2_period);
+ if(nr==INVALID_HANDLE||na1==INVALID_HANDLE||na2==INVALID_HANDLE)
+ {
+  if(nr!=INVALID_HANDLE)IndicatorRelease(nr);if(na1!=INVALID_HANDLE)IndicatorRelease(na1);if(na2!=INVALID_HANDLE)IndicatorRelease(na2);
+  Print("[O01_RUNTIME140_HANDLES] rebuild failed");
+  return false;
+ }
+ if(rh!=INVALID_HANDLE)IndicatorRelease(rh);if(a1h!=INVALID_HANDLE)IndicatorRelease(a1h);if(a2h!=INVALID_HANDLE)IndicatorRelease(a2h);
+ rh=nr;a1h=na1;a2h=na2;
+ Print("[O01_RUNTIME140_HANDLES] rebuilt RSI=",runtime_cfg.rsi_period," ATR1=",runtime_cfg.atr1_period," ATR2=",runtime_cfg.atr2_period," TF2=",runtime_cfg.atr2_timeframe);
+ return true;
+}
+
+void Manage(bool isBuy,VPos &p[],SO01TrailState &ts,MqlTick &t){
+ bool live=DemoExecution();
+ int n=(live?LiveCount(isBuy):C(p));if(n<=0){core.ResetTrail(ts);return;}
+ double avg=(live?LiveAvg(isBuy):Avg(p)),px=isBuy?t.bid:t.ask,mv=isBuy?(px-avg)/_Point:(avg-px)/_Point;
+ SO01ExitConfig xc;adapter.ExitConfig(runtime_cfg,n,xc);ENUM_O01_EXIT_DECISION d=core.EvaluateExit(isBuy,n,mv,xc,ts);
+ if(d!=O01_EXIT_NONE){
+  LX(isBuy?"BUY":"SELL",d,n,avg,px,mv);
+  bool closed=(!live||ExecCloseSide(isBuy,EN(d)));
+  if(closed){closes++;if(d==O01_EXIT_SINGLE_TRAILING)singleTrail++;if(d==O01_EXIT_BASKET_TRAILING)basketTrail++;if(d==O01_EXIT_VIRTUAL_SL)vsl++;if(!live)Clear(p);core.ResetTrail(ts);}
+  return;
+ }
+ if(n>=runtime_cfg.max_orders||(runtime_cfg.pause_grid_while_trailing&&ts.active))return;
+ if(!runtime_cfg.allow_grid_outside_time&&!TimeOK())return;if(NewsGridBlocked()||!SpreadOK())return;
+ datetime bar=iTime(_Symbol,_Period,0);if(runtime_cfg.one_order_per_bar&&(isBuy?lastBuyBar:lastSellBar)==bar)return;
+ double lp=(live?LiveLastPrice(isBuy):LastPrice(p)),ds=Dist(n+1);if(lp<=0)return;
+ bool met=isBuy?t.ask<=lp-ds*_Point:t.bid>=lp+ds*_Point;if(!met)return;
+ double lastLot=(live?LiveLastLot(isBuy):LastLot(p));double lot=NormLot(lastLot*runtime_cfg.lot_multiplier);
+ double totalLots=(live?LiveLots(isBuy):Lots(p));if(runtime_cfg.max_total_lots_per_side>0&&totalLots+lot>runtime_cfg.max_total_lots_per_side+1e-9)return;
+ double op=isBuy?t.ask:t.bid;
+ bool opened=(!live||ExecOpen(isBuy,lot,"GRID #"+IntegerToString(n+1)));
+ if(opened){if(!live)Add(p,op,lot);if(isBuy)lastBuyBar=bar;else lastSellBar=bar;grids++;LO(isBuy?"BUY":"SELL","GRID #"+IntegerToString(n+1),op,lot,n+1);}
+}
+
+SMA_ModuleSelection150 StartupRoute(){
+ SMA_ModuleSelection150 s;s.structure=InpStructure;s.full_module=InpFullModule;s.entry_module=InpEntryModule;s.manage_module=InpManageModule;s.exit_module=InpExitModule;return s;
+}
+SMA_RouteState150 LiveRouteState(){
+ SMA_RouteState150 s;
+ // While broker actions remain unarmed, virtual positions preserve the parity
+ // cycle gate. Any real positions already owned by this Symbol+Magic are also
+ // counted so a route cannot be changed across an ownership boundary.
+ int real_positions=(execution_adapter.Initialized()?execution_adapter.ManagedPositions():0);
+ s.managed_positions=C(buy)+C(sell)+real_positions;
+ s.cycle_none=(s.managed_positions==0);
+ s.execution_transition_pending=execution_adapter.TransitionPending();
+ return s;
+}
+
+bool RuntimeBuilderExecPreflight333()
+{
+ bool demo=(AccountInfoInteger(ACCOUNT_TRADE_MODE)==ACCOUNT_TRADE_MODE_DEMO);
+ bool hedging=(AccountInfoInteger(ACCOUNT_MARGIN_MODE)==ACCOUNT_MARGIN_MODE_RETAIL_HEDGING);
+ bool terminalAllowed=(TerminalInfoInteger(TERMINAL_TRADE_ALLOWED)!=0);
+ bool eaAllowed=(MQLInfoInteger(MQL_TRADE_ALLOWED)!=0);
+ double minLot=SymbolInfoDouble(strategy.symbol,SYMBOL_VOLUME_MIN);
+ double maxLot=SymbolInfoDouble(strategy.symbol,SYMBOL_VOLUME_MAX);
+ double lotStep=SymbolInfoDouble(strategy.symbol,SYMBOL_VOLUME_STEP);
+ long filling=0;
+ bool symbolOK=(strategy.symbol!="" && SymbolInfoInteger(strategy.symbol,SYMBOL_FILLING_MODE,filling));
+ bool lotOK=(minLot>0.0 && maxLot>=minLot && lotStep>0.0 &&
+             runtime_cfg.initial_lot>=minLot-1e-9 && runtime_cfg.initial_lot<=maxLot+1e-9);
+ bool pass=(demo&&hedging&&terminalAllowed&&eaAllowed&&symbolOK&&lotOK);
+ Print("[MA_BUILDER333_EXEC_PREFLIGHT] result=",(pass?"PASS":"BLOCKED"),
+       " account=",(demo?"DEMO":"NOT_DEMO"),
+       " margin=",(hedging?"HEDGING":"NOT_HEDGING"),
+       " terminalTrade=",(terminalAllowed?1:0),
+       " eaTrade=",(eaAllowed?1:0),
+       " symbol=",strategy.symbol," symbolOK=",(symbolOK?1:0),
+       " minLot=",DoubleToString(minLot,2)," maxLot=",DoubleToString(maxLot,2),
+       " lotStep=",DoubleToString(lotStep,2)," requestLot=",DoubleToString(runtime_cfg.initial_lot,2),
+       " lotOK=",(lotOK?1:0)," fillingMask=",filling,
+       " path=READ_ONLY_EXECUTION_BOUNDARY_PREFLIGHT",
+       " NO_ORDERS=1 VIRTUAL_NOT_FILL=1 ORDER_SEND_CALLED=0");
+ return pass;
+}
+
+int OnInit(){
+ ModuleLibraryStoreSelfTest274();
+ ChartSetInteger(0,CHART_EVENT_MOUSE_MOVE,true);
+ if(InpExecutionMode!=MA_EXECUTION_DEMO){Print("[MA_BUILDER334_EXEC_REJECT] v3_34 requires DEMO execution mode.");return INIT_PARAMETERS_INCORRECT;}
+ if(AccountInfoInteger(ACCOUNT_TRADE_MODE)!=ACCOUNT_TRADE_MODE_DEMO){Print("[MA_BUILDER334_EXEC_REJECT] DEMO account required.");return INIT_PARAMETERS_INCORRECT;}
+ Defaults();MA140_DefaultIdentity(strategy,_Symbol);MA140_DefaultTheme(panel_theme);
+ if(InpInstanceId<=0 || InpMagic<=0){Print("[MA_RUNTIME161_IDENTITY] invalid instance_id=",InpInstanceId," magic=",InpMagic);return INIT_PARAMETERS_INCORRECT;}
+ strategy.instance_id=InpInstanceId;strategy.magic=InpMagic;
+ RuntimeBuilderExecPreflight333();
+ SMA_ModuleSelection150 initial_route=StartupRoute();string route_reason="";
+ if(!MA185ValidateRoute(initial_route,route_reason)){Print("[O01_RUNTIME153_ROUTE_INIT_REJECT] reason=",route_reason," EXECUTION=",MA140_ExecutionText(InpExecutionMode)," BROKER_ACTIONS_ARMED=",(DemoExecution()?1:0)," VIRTUAL_NOT_FILL=",(DemoExecution()?0:1));return INIT_PARAMETERS_INCORRECT;}
+ route_controller.SetInitial(initial_route);
+ // v1.62 validates the future broker boundary on DEMO/HEDGING accounts,
+ // but intentionally keeps broker actions unarmed.
+ if(InpExecutionMode==MA_EXECUTION_DEMO)
+ {
+  string exec_reason="";
+  if(!execution_adapter.Init(strategy.instance_id,strategy.symbol,strategy.magic,exec_reason))
+  {
+   Print("[MA_RUNTIME185_EXEC_INIT_REJECT] reason=",exec_reason," BROKER_ACTIONS_ARMED=0");
+   return INIT_PARAMETERS_INCORRECT;
+  }
+  Print("[MA_RUNTIME185_EXEC_GATE] DEMO identity validated; broker actions armed. BROKER_ACTIONS_ARMED=1");
+ }
+ if(InpExecutionMode==MA_EXECUTION_DEMO)
+ {
+  string state_reason="";
+  if(!execution_adapter.AuditOwnedState(state_reason))
+  {
+   Print("[MA_RUNTIME185_STATE_AUDIT_REJECT] phase=INIT reason=",state_reason);
+   return INIT_PARAMETERS_INCORRECT;
+  }
+ }
+ if(!adapter.Validate(runtime_cfg))return INIT_PARAMETERS_INCORRECT;
+ A10EntryDefaults100(a10_entry_cfg);
+ double a10_tick_size=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_SIZE);
+ if(!entry_dispatcher.InitA10(a10_entry_cfg,a10_tick_size)){Print("[MA_RUNTIME185_A10_ENTRY_INIT] failed");return INIT_FAILED;}
+ A10FullDefaults175(a10_full_cfg);
+ if(a10_tick_size<=0.0 || !full_dispatcher.InitA10(a10_full_cfg,a10_tick_size)){Print("[MA_RUNTIME185_A10_FULL_INIT] failed");return INIT_FAILED;}
+ if(!a10_split_runtime.Init(a10_entry_cfg,a10_full_cfg,a10_tick_size)){Print("[MA_RUNTIME185_A10_SPLIT_INIT] failed");return INIT_FAILED;}
+ if(!RebuildIndicatorHandles())return INIT_FAILED;
+ CleanupLegacyWorkspaceObjects220();
+ panel.SetInitialConfig(runtime_cfg); // exact Expert Properties startup snapshot for REFRESH
+ slot_state.Init(strategy.symbol,initial_route);filter_store.Init();filter_preset.Init();builder_instance_composer.Reset();builder_instance_composer.SetIdentity(1,strategy.symbol,strategy.magic);
+ // v3.14: populate #01 from the verified canonical O01 4-role 40-Part definition.
+ // The Builder/Workspace/Composer path remains generic; NO_ORDERS remains mandatory.
+ if(!SeedCanonicalO01Builder314())return INIT_FAILED;
+ SeedModuleLibraryUI275();
+ module_library_panel.Bind(&module_library_store);
+ // v3.14: persist canonical O01 Builder data into SLOT #01 workspace itself.
+ // This makes the 50-slot ownership explicit: #01 restores O01 after visiting an empty #02..#50.
+ SaveBuilderWorkspaceToSlot266(slot_state.Selected());
+ EmbedAllBuilderRolesToSelectedSlot264();
+ Print("[MA_BUILDER314_SLOT01_O01_PERSIST] target=#",slot_state.Selected()," revision=",builder_slot_workspace.Revision(slot_state.Selected())," ",builder_instance_composer.Summary(slot_state.Selected())," NO_ORDERS=1");
+ panel.Create(runtime_cfg,strategy,panel_theme);left_tabs.Create();right_tabs.Create();builder_workspace.Create();filter_panel.Create();filter_preset_panel.Create();preset_action_panel.Create();left_slot_badge.Create(slot_state.Selected());slot_panel.Create(&slot_state,640,58,panel_theme.opacity);RefreshRightWorkspace221();
+ bool initial_registered=(initial_route.structure==MA_STRUCTURE_FULL_V150?MA185IsRegistered(initial_route.full_module,MA_CAP_FULL_V185):(MA185IsRegistered(initial_route.entry_module,MA_CAP_ENTRY_V185)&&MA185IsRegistered(initial_route.manage_module,MA_CAP_MANAGE_V185)&&MA185IsRegistered(initial_route.exit_module,MA_CAP_EXIT_V185)));
+ panel.SetRouteDraftContext(MA150StructureName(initial_route.structure),MA150LogicName(initial_route.full_module),MA150LogicName(initial_route.entry_module),MA150LogicName(initial_route.manage_module),MA150LogicName(initial_route.exit_module),initial_registered);
+ SMA_SlotState195 initial_dash_slot=slot_state.Current();
+ panel.SetStrategySlotInfo(initial_dash_slot.slot_id,initial_dash_slot.enabled,initial_dash_slot.symbol,strategy.magic+(initial_dash_slot.slot_id-1));
+ route_panel.Create(&route_controller,initial_route,640,146,panel_theme.opacity);
+ route_panel_created231=true;
+ if(initial_route.structure==MA_STRUCTURE_FULL_V150 && initial_route.full_module==MA_LOGIC_A10_V150){left_context.A10Full();a10_full_panel.Display(a10_full_cfg);}
+ else if(initial_route.structure==MA_STRUCTURE_SPLIT_V150){
+  left_context.Split(MA150LogicName(initial_route.entry_module),MA150LogicName(initial_route.manage_module),MA150LogicName(initial_route.exit_module));
+  a10_full_panel.Hide();
+  if(initial_route.entry_module==MA_LOGIC_A10_V150)a10_panel.Display(a10_entry_cfg);else a10_panel.RestoreO01Labels();
+  if(initial_route.manage_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayManage(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreManageO01(runtime_cfg);
+  if(initial_route.exit_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayExit(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreExitO01(runtime_cfg);
+ }
+ left_header_spacing.Apply();RefreshCommonFilter202();PrintFilterRegression202();
+ // v2.29 startup UI sync: route_panel must already exist before the same
+ // SLOT re-entry refresh used by workspace switching is executed.
+ // v2.28 called RefreshRightWorkspace221() before route_panel.Create(),
+ // leaving the initial SLOT/ROUTE view stale until the user changed tabs.
+ RefreshRightWorkspace221();
+ Print("[MA_RUNTIME185_START] CORE=1.00 ADAPTER=1.20 PANEL_ROUTE=1.81 FOUNDATION=1.40 REGISTRY=1.75 FULL_DISPATCHER=1.74 A10_FULL_PANEL=1.01 LEFT_CONTEXT=1.80 ENTRY_DISPATCHER=1.72 EXEC_ADAPTER=1.73 LOG_POLICY=1.71 GATE_DEFAULT=FULL_A10 instance=",strategy.instance_id," magic=",strategy.magic," symbol=",strategy.symbol," entry=",strategy.entry_module," manage=",strategy.manage_module," exit=",strategy.exit_module," EXECUTION=",MA140_ExecutionText(InpExecutionMode)," BROKER_ACTIONS_ARMED=",(DemoExecution()?1:0)," VIRTUAL_NOT_FILL=",(DemoExecution()?0:1));
+ return INIT_SUCCEEDED;
+}
+void OnDeinit(const int reason){
+ preset_action_panel.Delete();
+ filter_preset_panel.Delete();
+ filter_panel.Delete();
+ module_library_panel.Delete();
+ module_edit_nav.Delete();
+ builder_readout.Delete();
+ builder_parts_picker.Delete();
+ free_slot_builder.Delete();
+ o01_builder_workspace.Delete();
+ builder_workspace.Delete();
+ right_tabs.Delete();
+ slot_panel.Delete();
+ left_slot_badge.Delete();
+ left_tabs.Delete();
+ SMA_ModuleSelection150 final_route=route_controller.Active();
+ if(final_route.structure==MA_STRUCTURE_FULL_V150 && final_route.full_module==MA_LOGIC_A10_V150)
+  Print("[MA_RUNTIME201_A10_FULL_SUMMARY] ticks=",full_dispatcher.A10Ticks(),
+        " entries=",full_dispatcher.A10Entries()," exits=",full_dispatcher.A10Exits(),
+        " open=",full_dispatcher.A10OpenCount(),
+        " breakout_entries=",full_dispatcher.A10ModeEntries(0)," breakout_exits=",full_dispatcher.A10ModeExits(0),
+        " reentry_entries=",full_dispatcher.A10ModeEntries(1)," reentry_exits=",full_dispatcher.A10ModeExits(1),
+        " midline_entries=",full_dispatcher.A10ModeEntries(2)," midline_exits=",full_dispatcher.A10ModeExits(2),
+        " squeeze_entries=",full_dispatcher.A10ModeEntries(3)," squeeze_exits=",full_dispatcher.A10ModeExits(3),
+        " reason=",reason," NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1");
+ route_panel.Delete();panel.Delete();if(rh!=INVALID_HANDLE)IndicatorRelease(rh);if(a1h!=INVALID_HANDLE)IndicatorRelease(a1h);if(a2h!=INVALID_HANDLE)IndicatorRelease(a2h);
+ Print("[O01_RUNTIME140_SUMMARY] instance=",strategy.instance_id," magic=",strategy.magic," symbol=",strategy.symbol," ticks=",ticks," entries=",entries," grids=",grids," closes=",closes," single_trail=",singleTrail," basket_trail=",basketTrail," virtual_sl=",vsl," buy_open=",(DemoExecution()?LiveCount(true):C(buy))," sell_open=",(DemoExecution()?LiveCount(false):C(sell))," time_blocks=",timeBlocks," news_blocks=",newsBlocks," spread_blocks=",spreadBlocks," filter_blocks=",filterBlocks," EXECUTION=",MA140_ExecutionText(InpExecutionMode)," BROKER_ACTIONS_ARMED=",(DemoExecution()?1:0)," VIRTUAL_NOT_FILL=",(DemoExecution()?0:1));
+}
+
+bool RuntimeBuilderEntry315(const MqlTick &tick,const double rsi,const double atr1pts,const double atr2pts)
+{
+ string name="",parts[],params[];
+ if(!builder_slot_workspace.GetRole(1,0,name,parts,params))
+ {
+  if(!builder_runtime_entry_logged315)Print("[MA_BUILDER315_ENTRY_RUNTIME] slot=1 result=FAIL reason=WORKSPACE_READ NO_ORDERS=1 ORDER_SEND_CALLED=0");
+  builder_runtime_entry_logged315=true;return false;
+ }
+ bool cv[];ArrayResize(cv,40);for(int i=0;i<40;i++)cv[i]=true;
+ bool spread_ok=(tick.ask>0.0&&tick.bid>0.0&&tick.ask>=tick.bid);
+ bool a1ok=(atr1pts>=0.0&&atr1pts<=10000.0),a2ok=(atr2pts>=0.0&&atr2pts<=10000.0);
+ cv[0]=true;cv[2]=true;cv[4]=true;cv[6]=true;cv[8]=spread_ok;
+ cv[10]=a1ok;cv[12]=a2ok;cv[14]=true;cv[16]=(rsi<30.0);
+ cv[20]=true;cv[22]=true;cv[24]=true;cv[26]=true;cv[28]=spread_ok;
+ cv[30]=a1ok;cv[32]=a2ok;cv[34]=true;cv[36]=(rsi>70.0);
+ bool entryBuy315=false,entrySell315=false;string trace="",why="";
+ bool ok=builder_runtime_entry315.EvaluateEntry40(parts,cv,entryBuy315,entrySell315,trace,why);
+ builder_entry_buy330=(ok&&entryBuy315);
+ builder_entry_sell330=(ok&&entrySell315);
+ static datetime builder_entry_last_log342=0;
+ static string builder_entry_last_state342="";
+ string entryState342=IntegerToString((int)ok)+"|"+IntegerToString((int)entryBuy315)+"|"+IntegerToString((int)entrySell315)+"|"+why;
+ datetime entryNow342=TimeCurrent();
+ bool entryChanged342=(entryState342!=builder_entry_last_state342);
+ bool entryInterval342=(builder_entry_last_log342==0 || entryNow342-builder_entry_last_log342>=60);
+ if(entryChanged342 || entryInterval342)
+ {
+  Print("[MA_BUILDER315_ENTRY_RUNTIME] slot=1 definition=",name,
+        " read=",(ArraySize(parts)==40?1:0)," interpreter=",(ok?1:0),
+        " RSI=",DoubleToString(rsi,2)," ATR1pts=",DoubleToString(atr1pts,1),
+        " ATR2pts=",DoubleToString(atr2pts,1),
+        " BUY=",(int)entryBuy315," SELL=",(int)entrySell315,
+        " reason=",why," path=WORKSPACE_SLOT01_TO_ENTRY_INTERPRETER",
+        " NO_ORDERS=1 VIRTUAL_NOT_FILL=1 ORDER_SEND_CALLED=0");
+  builder_entry_last_state342=entryState342;
+  builder_entry_last_log342=entryNow342;
+ }
+ builder_runtime_entry_logged315=true;
+ return ok;
+}
+
+bool builder_grid_allow340[2]={false,false};
+double builder_grid_next_lot340[2]={0.0,0.0};
+datetime builder_grid_bar340=0;
+
+datetime builder_grid_last_log339[2]={0,0};
+string builder_grid_last_state339[2]={"",""};
+
+bool RuntimeBuilderGrid324(const MqlTick &tick)
+{
+ string name="",parts[],params[];
+ if(!builder_slot_workspace.GetRole(1,1,name,parts,params))
+ {
+  if(!builder_runtime_grid_logged324)Print("[MA_BUILDER324_GRID_RUNTIME] slot=1 result=FAIL reason=WORKSPACE_READ NO_ORDERS=1 ORDER_SEND_CALLED=0");
+  builder_runtime_grid_logged324=true;return false;
+ }
+
+ bool spreadOK=(tick.ask>0.0&&tick.bid>0.0&&tick.ask>=tick.bid);
+ double balance=AccountInfoDouble(ACCOUNT_BALANCE),equity=AccountInfoDouble(ACCOUNT_EQUITY);
+ double ddPct=(balance>0.0?MathMax(0.0,(balance-equity)/balance*100.0):0.0);
+ bool ddOK=(ddPct<12.0);
+ bool timeOK=(runtime_cfg.allow_grid_outside_time||TimeOK());
+ bool newsOK=!NewsGridBlocked();
+ datetime bar=iTime(_Symbol,_Period,0);
+
+ bool allOK=true;
+ string sideName[2]={"BUY","SELL"};
+ for(int s=0;s<2;s++)
+ {
+  bool isBuy=(s==0);
+  int count=BuilderCount336(isBuy);
+  double lastPrice=BuilderLast336(isBuy);
+  double lastLot=(DemoExecution()?LiveLastLot(isBuy):(isBuy?LastLot(buy):LastLot(sell)));
+  double totalLots=(DemoExecution()?LiveLots(isBuy):(isBuy?Lots(buy):Lots(sell)));
+  double distancePts=Dist(count+1);
+  bool sideCountOK=(count>0);
+  bool maxOrdersOK=(count<runtime_cfg.max_orders);
+  bool trailingPauseOK=!(runtime_cfg.pause_grid_while_trailing&&(isBuy?bt.active:st.active));
+  bool oneBarOK=(!runtime_cfg.one_order_per_bar||((isBuy?lastBuyBar:lastSellBar)!=bar));
+  bool lastPriceOK=(lastPrice>0.0);
+  bool distanceOK=false;
+  if(lastPriceOK)
+   distanceOK=(isBuy?(tick.ask<=lastPrice-distancePts*_Point):(tick.bid>=lastPrice+distancePts*_Point));
+
+  double rawLot=(lastLot>0.0?lastLot:runtime_cfg.initial_lot)*runtime_cfg.lot_multiplier;
+  double nextLot=NormLot(rawLot);
+  double brokerMax=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MAX);
+  bool maxLotOK=(rawLot<=runtime_cfg.max_lot+1e-9 && (brokerMax<=0.0||nextLot<=brokerMax+1e-9));
+  bool maxTotalOK=(runtime_cfg.max_total_lots_per_side<=0.0||totalLots+nextLot<=runtime_cfg.max_total_lots_per_side+1e-9);
+
+  bool gate[];ArrayResize(gate,40);for(int i=0;i<40;i++)gate[i]=true;
+  gate[0]=sideCountOK;
+  gate[2]=maxOrdersOK;
+  gate[4]=ddOK;
+  gate[6]=trailingPauseOK;
+  gate[8]=timeOK;
+  gate[10]=newsOK;
+  gate[12]=spreadOK;
+  gate[14]=oneBarOK;
+  gate[16]=lastPriceOK;
+  gate[22]=distanceOK;
+  gate[26]=maxLotOK;
+  gate[28]=maxTotalOK;
+
+  bool addBuy=false,addSell=false;string stopAt="",why="";
+  int side=(isBuy?MA_GRID_SIDE_BUY100:MA_GRID_SIDE_SELL100);
+  bool interpreted=builder_runtime_grid324.Evaluate(parts,params,gate,side,addBuy,addSell,stopAt,why);
+  bool allow=(interpreted&&(isBuy?addBuy:addSell));
+  builder_grid_allow340[s]=allow;
+  builder_grid_next_lot340[s]=nextLot;
+  builder_grid_bar340=bar;
+  if(!interpreted)allOK=false;
+
+  string state339=IntegerToString(count)+"|"+IntegerToString(sideCountOK)+"|"+IntegerToString(maxOrdersOK)+"|"+
+                  IntegerToString(ddOK)+"|"+IntegerToString(trailingPauseOK)+"|"+IntegerToString(timeOK)+"|"+
+                  IntegerToString(newsOK)+"|"+IntegerToString(spreadOK)+"|"+IntegerToString(oneBarOK)+"|"+
+                  IntegerToString(lastPriceOK)+"|"+IntegerToString(distanceOK)+"|"+IntegerToString(maxLotOK)+"|"+
+                  IntegerToString(maxTotalOK)+"|"+IntegerToString(allow)+"|"+stopAt;
+  datetime now339=TimeCurrent();
+  bool changed339=(state339!=builder_grid_last_state339[s]);
+  bool interval339=(builder_grid_last_log339[s]==0 || now339-builder_grid_last_log339[s]>=60);
+  if(changed339 || interval339)
+  {
+   Print("[MA_BUILDER339_GRID_DECISION] slot=1 side=",sideName[s],
+         " count=",count," totalLots=",DoubleToString(totalLots,2),
+         " lastPrice=",DoubleToString(lastPrice,_Digits)," lastLot=",DoubleToString(lastLot,2),
+         " ddPct=",DoubleToString(ddPct,2)," distancePts=",DoubleToString(distancePts,1),
+         " rawLot=",DoubleToString(rawLot,2)," nextLot=",DoubleToString(nextLot,2),
+         " sideCountOK=",(sideCountOK?1:0)," maxOrdersOK=",(maxOrdersOK?1:0),
+         " ddOK=",(ddOK?1:0)," trailingPauseOK=",(trailingPauseOK?1:0),
+         " timeOK=",(timeOK?1:0)," newsOK=",(newsOK?1:0)," spreadOK=",(spreadOK?1:0),
+         " oneBarOK=",(oneBarOK?1:0)," lastPriceOK=",(lastPriceOK?1:0),
+         " distanceOK=",(distanceOK?1:0)," maxLotOK=",(maxLotOK?1:0)," maxTotalOK=",(maxTotalOK?1:0),
+         " allow=",(allow?1:0)," reason=",why," stopAt=",stopAt,
+         " logReason=",(changed339?"STATE_CHANGE":"60SEC"),
+         " dispatch=BLOCKED_NO_ORDERS path=LIVE_STATE_TO_CANONICAL_GRID_GUARDS",
+         " NO_ORDERS=1 VIRTUAL_NOT_FILL=1 ORDER_SEND_CALLED=0");
+   builder_grid_last_state339[s]=state339;
+   builder_grid_last_log339[s]=now339;
+  }
+ }
+ builder_runtime_grid_logged324=true;
+ return allOK;
+}
+
+// v3.36: one read path for Builder position state.
+// DEMO uses Execution Adapter owned Symbol+Magic state; non-DEMO preserves legacy virtual arrays.
+int BuilderCount336(const bool isBuy)
+{
+ if(DemoExecution())return execution_adapter.ManagedPositionsSide(isBuy?POSITION_TYPE_BUY:POSITION_TYPE_SELL);
+ if(isBuy)return C(buy);
+ return C(sell);
+}
+double BuilderAvg336(const bool isBuy)
+{
+ if(DemoExecution())return execution_adapter.WeightedAveragePrice(isBuy?POSITION_TYPE_BUY:POSITION_TYPE_SELL);
+ if(isBuy)return Avg(buy);
+ return Avg(sell);
+}
+double BuilderLast336(const bool isBuy)
+{
+ if(DemoExecution())return execution_adapter.NewestPositionPrice(isBuy?POSITION_TYPE_BUY:POSITION_TYPE_SELL);
+ if(isBuy)return LastPrice(buy);
+ return LastPrice(sell);
+}
+
+bool RuntimeBuilderManage325(const MqlTick &tick)
+{
+ string name="",parts[],params[];
+ if(!builder_slot_workspace.GetRole(1,2,name,parts,params))
+ {
+  if(!builder_runtime_manage_logged325)Print("[MA_BUILDER325_MANAGE_RUNTIME] slot=1 result=FAIL reason=WORKSPACE_READ NO_ORDERS=1 ORDER_SEND_CALLED=0");
+  builder_runtime_manage_logged325=true;return false;
+ }
+ int used=0;bool schemaOK=true;string why="";
+ for(int i=0;i<ArraySize(parts);i++)
+ {
+  if(parts[i]==""||parts[i]=="EMPTY")continue;
+  used++;
+  string partWhy="";
+  if(!MA103ValidatePart(MA_BUILDER_ROLE_MANAGE101,parts[i],params[i],partWhy))
+  {
+   schemaOK=false;
+   if(why!="")why+=" | ";
+   why+="slot "+IntegerToString(i+1)+" "+parts[i]+": "+partWhy;
+  }
+ }
+ int buyCount=BuilderCount336(true),sellCount=BuilderCount336(false);
+ double buyAvg=BuilderAvg336(true),sellAvg=BuilderAvg336(false);
+ double buyLast=BuilderLast336(true),sellLast=BuilderLast336(false);
+ double buyMove=(buyCount>0&&buyAvg>0.0)?(tick.bid-buyAvg)/_Point:0.0;
+ double sellMove=(sellCount>0&&sellAvg>0.0)?(sellAvg-tick.ask)/_Point:0.0;
+ bool pass=(schemaOK&&used==9&&ArraySize(parts)==40);
+ if(!builder_runtime_manage_logged325)
+  Print("[MA_BUILDER325_MANAGE_RUNTIME] slot=1 definition=",name,
+        " read=",(ArraySize(parts)==40?1:0)," schema=",(schemaOK?1:0),
+        " used=",used," expected=9",
+        " buyCount=",buyCount," sellCount=",sellCount,
+        " buyAvg=",DoubleToString(buyAvg,_Digits)," sellAvg=",DoubleToString(sellAvg,_Digits),
+        " buyLast=",DoubleToString(buyLast,_Digits)," sellLast=",DoubleToString(sellLast,_Digits),
+        " buyMovePts=",DoubleToString(buyMove,1)," sellMovePts=",DoubleToString(sellMove,1),
+        " result=",(pass?"PASS":"FAIL")," reason=",(why==""?"VALID":why),
+        " path=WORKSPACE_SLOT01_LIVE_STATE_TO_MANAGE_SCHEMA_RUNTIME",
+        " NO_ORDERS=1 VIRTUAL_NOT_FILL=1 ORDER_SEND_CALLED=0");
+ builder_runtime_manage_logged325=true;return pass;
+}
+
+
+
+bool RuntimeBuilderManageDecision329(const MqlTick &tick)
+{
+ string name="",parts[],params[];
+ if(!builder_slot_workspace.GetRole(1,2,name,parts,params))
+ {
+  if(!builder_runtime_manage_decision_logged329)Print("[MA_BUILDER329_MANAGE_DECISION] slot=1 result=FAIL reason=WORKSPACE_READ NO_ORDERS=1 ORDER_SEND_CALLED=0");
+  builder_runtime_manage_decision_logged329=true;return false;
+ }
+ int used=0;bool schemaOK=true;string why="";
+ bool overlapFound=false,overlapEnabled=false;int overlapOrder=0;double overlapPercent=0.0;
+ for(int i=0;i<ArraySize(parts);i++)
+ {
+  if(parts[i]==""||parts[i]=="EMPTY")continue;
+  used++;string partWhy="";
+  if(!MA103ValidatePart(MA_BUILDER_ROLE_MANAGE101,parts[i],params[i],partWhy))
+  {schemaOK=false;if(why!="")why+=" | ";why+="slot "+IntegerToString(i+1)+" "+parts[i]+": "+partWhy;}
+  if(parts[i]=="OVERLAP")
+  {
+   overlapFound=true;
+   string fields[];int n=StringSplit(params[i],';',fields);
+   for(int k=0;k<n;k++)
+   {
+    string kv[];if(StringSplit(fields[k],'=',kv)!=2)continue;
+    if(kv[0]=="ENABLED")overlapEnabled=(StringToInteger(kv[1])!=0);
+    else if(kv[0]=="ORDER")overlapOrder=(int)StringToInteger(kv[1]);
+    else if(kv[0]=="PERCENT")overlapPercent=StringToDouble(kv[1]);
+   }
+  }
+ }
+ int buyCount=BuilderCount336(true),sellCount=BuilderCount336(false);
+ double buyAvg=BuilderAvg336(true),sellAvg=BuilderAvg336(false),buyLast=BuilderLast336(true),sellLast=BuilderLast336(false);
+ double buyMove=(buyCount>0&&buyAvg>0.0)?(tick.bid-buyAvg)/_Point:0.0;
+ double sellMove=(sellCount>0&&sellAvg>0.0)?(sellAvg-tick.ask)/_Point:0.0;
+ bool buyOverlapReady=(overlapFound&&overlapEnabled&&overlapOrder>0&&buyCount>=overlapOrder);
+ bool sellOverlapReady=(overlapFound&&overlapEnabled&&overlapOrder>0&&sellCount>=overlapOrder);
+ bool pass=(schemaOK&&used==9&&ArraySize(parts)==40&&overlapFound&&overlapEnabled&&overlapOrder==8&&MathAbs(overlapPercent-3.0)<0.000001);
+ if(!builder_runtime_manage_decision_logged329)
+  Print("[MA_BUILDER329_MANAGE_DECISION] slot=1 definition=",name,
+        " read=",(ArraySize(parts)==40?1:0)," schema=",(schemaOK?1:0)," used=",used," expected=9",
+        " overlapFound=",(overlapFound?1:0)," enabled=",(overlapEnabled?1:0),
+        " order=",overlapOrder," percent=",DoubleToString(overlapPercent,1),
+        " buyCount=",buyCount," sellCount=",sellCount,
+        " buyAvg=",DoubleToString(buyAvg,_Digits)," sellAvg=",DoubleToString(sellAvg,_Digits),
+        " buyLast=",DoubleToString(buyLast,_Digits)," sellLast=",DoubleToString(sellLast,_Digits),
+        " buyMovePts=",DoubleToString(buyMove,1)," sellMovePts=",DoubleToString(sellMove,1),
+        " buyOverlapReady=",(buyOverlapReady?1:0)," sellOverlapReady=",(sellOverlapReady?1:0),
+        " result=",(pass?"PASS":"FAIL")," reason=",(why==""?"VALID":why),
+        " path=WORKSPACE_SLOT01_LIVE_STATE_TO_O01_MANAGE_OVERLAP_DECISION",
+        " NO_ORDERS=1 VIRTUAL_NOT_FILL=1 ORDER_SEND_CALLED=0");
+ builder_runtime_manage_decision_logged329=true;return pass;
+}
+
+bool RuntimeBuilderExit326(const MqlTick &tick)
+{
+ string name="",parts[],params[];
+ if(!builder_slot_workspace.GetRole(1,3,name,parts,params))
+ {
+  if(!builder_runtime_exit_logged326)Print("[MA_BUILDER326_EXIT_RUNTIME] slot=1 result=FAIL reason=WORKSPACE_READ NO_ORDERS=1 ORDER_SEND_CALLED=0");
+  builder_runtime_exit_logged326=true;return false;
+ }
+ int used=0;bool schemaOK=true;string why="";
+ for(int i=0;i<ArraySize(parts);i++)
+ {
+  if(parts[i]==""||parts[i]=="EMPTY")continue;
+  used++;
+  string partWhy="";
+  if(!MA103ValidatePart(MA_BUILDER_ROLE_EXIT101,parts[i],params[i],partWhy))
+  {
+   schemaOK=false;
+   if(why!="")why+=" | ";
+   why+="slot "+IntegerToString(i+1)+" "+parts[i]+": "+partWhy;
+  }
+ }
+ int buyCount=BuilderCount336(true),sellCount=BuilderCount336(false);
+ double buyAvg=BuilderAvg336(true),sellAvg=BuilderAvg336(false);
+ double buyMove=(buyCount>0&&buyAvg>0.0)?(tick.bid-buyAvg)/_Point:0.0;
+ double sellMove=(sellCount>0&&sellAvg>0.0)?(sellAvg-tick.ask)/_Point:0.0;
+ bool pass=(schemaOK&&used==19&&ArraySize(parts)==40);
+ if(!builder_runtime_exit_logged326)
+  Print("[MA_BUILDER326_EXIT_RUNTIME] slot=1 definition=",name,
+        " read=",(ArraySize(parts)==40?1:0)," schema=",(schemaOK?1:0),
+        " used=",used," expected=19",
+        " buyCount=",buyCount," sellCount=",sellCount,
+        " buyMovePts=",DoubleToString(buyMove,1)," sellMovePts=",DoubleToString(sellMove,1),
+        " result=",(pass?"PASS":"FAIL")," reason=",(why==""?"VALID":why),
+        " path=WORKSPACE_SLOT01_LIVE_STATE_TO_EXIT_SCHEMA_RUNTIME",
+        " NO_ORDERS=1 VIRTUAL_NOT_FILL=1 ORDER_SEND_CALLED=0");
+ builder_runtime_exit_logged326=true;return pass;
+}
+
+
+
+bool RuntimeBuilderExitDecision328(const MqlTick &tick)
+{
+ string name="",parts[],params[];
+ if(!builder_slot_workspace.GetRole(1,3,name,parts,params))
+ {
+  if(!builder_runtime_exit_decision_logged328)Print("[MA_BUILDER328_EXIT_DECISION] slot=1 result=FAIL reason=WORKSPACE_READ NO_ORDERS=1 ORDER_SEND_CALLED=0");
+  builder_runtime_exit_decision_logged328=true;return false;
+ }
+ int used=0;bool schemaOK=true;string why="";
+ for(int i=0;i<ArraySize(parts);i++)
+ {
+  if(parts[i]==""||parts[i]=="EMPTY")continue;
+  used++;string partWhy="";
+  if(!MA103ValidatePart(MA_BUILDER_ROLE_EXIT101,parts[i],params[i],partWhy))
+  {schemaOK=false;if(why!="")why+=" | ";why+="slot "+IntegerToString(i+1)+" "+parts[i]+": "+partWhy;}
+ }
+ int buyCount=BuilderCount336(true),sellCount=BuilderCount336(false);
+ double buyAvg=BuilderAvg336(true),sellAvg=BuilderAvg336(false);
+ double buyMove=(buyCount>0&&buyAvg>0.0)?(tick.bid-buyAvg)/_Point:0.0;
+ double sellMove=(sellCount>0&&sellAvg>0.0)?(sellAvg-tick.ask)/_Point:0.0;
+ SO01ExitConfig buyCfg,sellCfg;
+ adapter.ExitConfig(runtime_cfg,buyCount,buyCfg);
+ adapter.ExitConfig(runtime_cfg,sellCount,sellCfg);
+ ENUM_O01_EXIT_DECISION buyDecision=builder_runtime_exit_eval328.Evaluate(true,buyCount,buyMove,buyCfg,builder_exit_buy_trail328);
+ ENUM_O01_EXIT_DECISION sellDecision=builder_runtime_exit_eval328.Evaluate(false,sellCount,sellMove,sellCfg,builder_exit_sell_trail328);
+ bool pass=(schemaOK&&used==19&&ArraySize(parts)==40);
+ if(!builder_runtime_exit_decision_logged328)
+  Print("[MA_BUILDER328_EXIT_DECISION] slot=1 definition=",name,
+        " read=",(ArraySize(parts)==40?1:0)," schema=",(schemaOK?1:0)," used=",used," expected=19",
+        " buyCount=",buyCount," sellCount=",sellCount,
+        " buyMovePts=",DoubleToString(buyMove,1)," sellMovePts=",DoubleToString(sellMove,1),
+        " buyDecision=",EN(buyDecision)," sellDecision=",EN(sellDecision),
+        " buyTrail=",(builder_exit_buy_trail328.active?1:0)," sellTrail=",(builder_exit_sell_trail328.active?1:0),
+        " result=",(pass?"PASS":"FAIL")," reason=",(why==""?"VALID":why),
+        " path=WORKSPACE_SLOT01_LIVE_STATE_TO_O01_EXIT_DECISION_EVALUATOR",
+        " NO_ORDERS=1 VIRTUAL_NOT_FILL=1 ORDER_SEND_CALLED=0");
+ builder_runtime_exit_decision_logged328=true;return pass;
+}
+
+bool builder_demo_one_shot_sent334=false;
+
+bool RuntimeBuilderGridDispatch340(const bool fourRoleReady)
+{
+ if(!DemoExecution() || !fourRoleReady)return true;
+ if(execution_adapter.TransitionPending())return true;
+ for(int s=0;s<2;s++)
+ {
+  if(!builder_grid_allow340[s])continue;
+  bool isBuy=(s==0);
+  ENUM_POSITION_TYPE side=(isBuy?POSITION_TYPE_BUY:POSITION_TYPE_SELL);
+  int count=execution_adapter.ManagedPositionsSide(side);
+  if(count<=0)continue;
+  double lot=builder_grid_next_lot340[s];
+  if(lot<=0.0)continue;
+  datetime lastBar=(isBuy?lastBuyBar:lastSellBar);
+  if(runtime_cfg.one_order_per_bar && lastBar==builder_grid_bar340)continue;
+  string preReason="";
+  if(!RuntimeBuilderExecPreflight333())
+  {
+   Print("[MA_BUILDER340_GRID_DISPATCH] result=BLOCKED_PREFLIGHT side=",(isBuy?"BUY":"SELL"),
+         " count=",count," lot=",DoubleToString(lot,2)," ORDER_SEND_CALLED=0");
+   continue;
+  }
+  string reason="";
+  bool sent=execution_adapter.OpenMarket(side,lot,"BUILDER_GRID",reason);
+  Print("[MA_BUILDER340_GRID_DISPATCH] result=",(sent?"PASS":"FAIL"),
+        " side=",(isBuy?"BUY":"SELL")," beforeCount=",count,
+        " lot=",DoubleToString(lot,2)," reason=",(reason==""?"OK":reason),
+        " path=CANONICAL_GRID_ALLOW_TO_DEMO_EXEC_ADAPTER ORDER_SEND_CALLED=1");
+  if(sent){if(isBuy)lastBuyBar=builder_grid_bar340;else lastSellBar=builder_grid_bar340;}
+ }
+ return true;
+}
+
+bool RuntimeBuilderExecutionRequest330(const bool fourRoleReady)
+{
+ int buyCount=BuilderCount336(true),sellCount=BuilderCount336(false);
+ string request="NONE",side="NONE",source="NONE";
+ if(fourRoleReady && buyCount==0 && sellCount==0)
+ {
+  if(builder_entry_buy330){request="ENTRY";side="BUY";source="ENTRY";}
+  else if(builder_entry_sell330){request="ENTRY";side="SELL";source="ENTRY";}
+ }
+ bool requestBuilt=(request!="NONE");
+ if(requestBuilt && InpBuilderDemoOneShotArm && !builder_demo_one_shot_sent334)
+ {
+  string preReason="";
+  bool pre=RuntimeBuilderExecPreflight333();
+  double lot334=NormLot(runtime_cfg.initial_lot);
+  bool flat334=(execution_adapter.ManagedPositions()==0);
+  bool safe334=(pre && flat334 && lot334==0.01 && (side=="BUY" || side=="SELL"));
+  Print("[MA_BUILDER334_ONE_SHOT_GATE] armed=1 preflight=",(pre?1:0),
+        " flat=",(flat334?1:0)," lot=",DoubleToString(lot334,2),
+        " side=",side," safe=",(safe334?1:0),
+        " path=CANONICAL_ENTRY_TO_DEMO_ONE_SHOT");
+  if(safe334)
+  {
+   string sendReason="";
+   ENUM_POSITION_TYPE ps=(side=="BUY"?POSITION_TYPE_BUY:POSITION_TYPE_SELL);
+   bool sent334=execution_adapter.OpenMarket(ps,lot334,"BUILDER334",sendReason);
+   Print("[MA_BUILDER334_ONE_SHOT_RESULT] sent=",(sent334?1:0),
+         " side=",side," lot=",DoubleToString(lot334,2),
+         " reason=",(sendReason==""?"OK":sendReason),
+         " ORDER_SEND_CALLED=1");
+   if(sent334) builder_demo_one_shot_sent334=true;
+  }
+ }
+
+ if(!builder_exec_request_logged330 || requestBuilt)
+  Print("[MA_BUILDER330_EXEC_REQUEST] slot=1 fourRoleReady=",(fourRoleReady?1:0),
+        " buyCount=",buyCount," sellCount=",sellCount,
+        " entryBuy=",(builder_entry_buy330?1:0)," entrySell=",(builder_entry_sell330?1:0),
+        " request=",request," side=",side," source=",source,
+        " built=",(requestBuilt?1:0),
+        " dispatch=BLOCKED_NO_ORDERS",
+        " path=WORKSPACE_SLOT01_4ROLE_DECISION_TO_EXEC_REQUEST",
+        " NO_ORDERS=1 VIRTUAL_NOT_FILL=1 ORDER_SEND_CALLED=0");
+ if(requestBuilt && !builder_exec_entry_logged331)
+ {
+  Print("[MA_BUILDER331_ENTRY_REQUEST_GATE] slot=1 result=PASS",
+        " request=",request," side=",side," source=",source,
+        " entryBuy=",(builder_entry_buy330?1:0)," entrySell=",(builder_entry_sell330?1:0),
+        " built=1 dispatch=BLOCKED_NO_ORDERS",
+        " path=LIVE_CANONICAL_ENTRY_TO_EXEC_REQUEST",
+        " NO_ORDERS=1 VIRTUAL_NOT_FILL=1 ORDER_SEND_CALLED=0");
+  builder_exec_entry_logged331=true;
+ }
+ if(requestBuilt && !builder_exec_adapter_logged332)
+ {
+  double adapterLot332=NormLot(runtime_cfg.initial_lot);
+  string adapterSymbol332=strategy.symbol;
+  long adapterMagic332=strategy.magic;
+  bool payloadReady332=(adapterSymbol332!="" && adapterMagic332>0 && adapterLot332>0.0 && (side=="BUY" || side=="SELL"));
+  Print("[MA_BUILDER332_EXEC_ADAPTER_DRY] slot=1 result=",(payloadReady332?"PASS":"FAIL"),
+        " request=",request," side=",side,
+        " symbol=",adapterSymbol332,
+        " lot=",DoubleToString(adapterLot332,2),
+        " magic=",adapterMagic332,
+        " payloadReady=",(payloadReady332?1:0),
+        " adapterCall=BLOCKED_NO_ORDERS",
+        " dispatch=BLOCKED_NO_ORDERS",
+        " path=EXEC_REQUEST_TO_PRE_DISPATCH_ADAPTER_PAYLOAD",
+        " NO_ORDERS=1 VIRTUAL_NOT_FILL=1 ORDER_SEND_CALLED=0");
+  builder_exec_adapter_logged332=true;
+ }
+ builder_exec_request_logged330=true;
+ return true;
+}
+
+bool RuntimeBuilderFlow327(const MqlTick &tick,const double rsi,const double atr1pts,const double atr2pts)
+{
+ bool entryOK=RuntimeBuilderEntry315(tick,rsi,atr1pts,atr2pts);
+ bool gridOK=RuntimeBuilderGrid324(tick);
+ bool manageOK=RuntimeBuilderManage325(tick);
+ bool manageDecisionOK=RuntimeBuilderManageDecision329(tick);
+ bool exitOK=RuntimeBuilderExit326(tick);
+ bool exitDecisionOK=RuntimeBuilderExitDecision328(tick);
+ bool ready=(entryOK&&gridOK&&manageOK&&manageDecisionOK&&exitOK&&exitDecisionOK);
+ if(!builder_runtime_flow_logged327)
+  Print("[MA_BUILDER327_4ROLE_FLOW] slot=1 order=ENTRY->GRID->MANAGE->EXIT",
+        " ENTRY=",(entryOK?"PASS":"FAIL")," GRID=",(gridOK?"PASS":"FAIL"),
+        " MANAGE=",(manageOK?"PASS":"FAIL")," MANAGE_DECISION=",(manageDecisionOK?"PASS":"FAIL")," EXIT=",(exitOK?"PASS":"FAIL")," EXIT_DECISION=",(exitDecisionOK?"PASS":"FAIL"),
+        " result=",(ready?"PASS":"FAIL"),
+        " path=WORKSPACE_SLOT01_4ROLE_RUNTIME_FLOW",
+        " NO_ORDERS=1 VIRTUAL_NOT_FILL=1 ORDER_SEND_CALLED=0");
+ builder_runtime_flow_logged327=true;
+ RuntimeBuilderExecutionRequest330(ready);
+ RuntimeBuilderGridDispatch340(ready);
+ return ready;
+}
+
+
+// v3.35: Builder runtime must observe broker-owned positions, not the old virtual arrays,
+// before GRID/MANAGE/EXIT can be allowed to dispatch real demo actions.
+void RuntimeBuilderLiveState336()
+{
+ if(!DemoExecution())return;
+ static datetime lastLog=0;
+ datetime now=TimeCurrent();
+ if(lastLog!=0 && now-lastLog<60)return;
+ int bc=execution_adapter.ManagedPositionsSide(POSITION_TYPE_BUY);
+ int sc=execution_adapter.ManagedPositionsSide(POSITION_TYPE_SELL);
+ double bl=execution_adapter.ManagedLotsSide(POSITION_TYPE_BUY);
+ double sl=execution_adapter.ManagedLotsSide(POSITION_TYPE_SELL);
+ double ba=execution_adapter.WeightedAveragePrice(POSITION_TYPE_BUY);
+ double sa=execution_adapter.WeightedAveragePrice(POSITION_TYPE_SELL);
+ double bp=execution_adapter.NewestPositionPrice(POSITION_TYPE_BUY);
+ double sp=execution_adapter.NewestPositionPrice(POSITION_TYPE_SELL);
+ Print("[MA_BUILDER336_LIVE_STATE] slot=1 buyCount=",bc," sellCount=",sc,
+       " buyLots=",DoubleToString(bl,2)," sellLots=",DoubleToString(sl,2),
+       " buyAvg=",DoubleToString(ba,_Digits)," sellAvg=",DoubleToString(sa,_Digits),
+       " buyLast=",DoubleToString(bp,_Digits)," sellLast=",DoubleToString(sp,_Digits),
+       " source=EXEC_ADAPTER_OWNED_SYMBOL_MAGIC",
+       " GRID_DISPATCH=DEMO_CANONICAL EXIT_DISPATCH=BLOCKED");
+ lastLog=now;
+}
+
+void OnTick(){
+ RuntimeBuilderLiveState336();
+ if(DemoExecution())
+ {
+  static datetime last_audit_second=0;
+  static datetime last_audit_log=0;
+  datetime now=TimeCurrent();
+  if(now!=last_audit_second)
+  {
+   // Safety audit still runs once per second. Successful PASS logging is reduced to every 5 minutes.
+   // Failures remain immediate; broker lifecycle logs remain unchanged.
+   bool log_pass=(last_audit_log==0 || now-last_audit_log>=300);
+   string state_reason="";
+   if(!execution_adapter.AuditOwnedState(state_reason,log_pass))
+   {
+    Print("[MA_RUNTIME185_STATE_AUDIT_REJECT] phase=TICK reason=",state_reason," broker_actions_skipped=1");
+    return;
+   }
+   if(log_pass)last_audit_log=now;
+   last_audit_second=now;
+  }
+ }
+ static ulong diag_ticks=0; diag_ticks++;
+ if(diag_ticks==1 || diag_ticks%100000==0) Print("[O01_TICK_DIAG] ticks=",diag_ticks," time=",TimeToString(TimeCurrent(),TIME_DATE|TIME_SECONDS));
+ int pr=panel.PollButtons(runtime_cfg);
+ if(pr!=0){
+  Print("[O01_RUNTIME140_PANEL_POLL] result=",pr," EXECUTION=",MA140_ExecutionText(InpExecutionMode)," BROKER_ACTIONS_ARMED=",(DemoExecution()?1:0));
+  if(pr>0) RebuildIndicatorHandles();
+ }
+ ticks++;MqlTick t;if(!SymbolInfoTick(_Symbol,t))return;
+ // v3.20 diagnostic bridge: prove SLOT #01 Builder ENTRY can be read/evaluated
+ // before FULL_A10 route dispatch or O01 time/news/spread gates return early.
+ // Diagnostic only: NO_ORDERS / VIRTUAL_NOT_FILL behavior is unchanged.
+ double br315=B(rh),ba1315=B(a1h),ba2315=B(a2h);
+ if(br315!=EMPTY_VALUE && ba1315!=EMPTY_VALUE && ba2315!=EMPTY_VALUE)
+  RuntimeBuilderFlow327(t,br315,ba1315/_Point,ba2315/_Point);
+ SMA_ModuleSelection150 active_route_now=route_controller.Active();
+ if(active_route_now.structure==MA_STRUCTURE_FULL_V150 && active_route_now.full_module==MA_LOGIC_A10_V150)
+ {
+  SA10FullEvent100 fe={};
+  if(full_dispatcher.OnTick(active_route_now,t,fe) && fe.valid)
+   Print(fe.is_entry?"[MA_RUNTIME185_A10_FULL_ENTRY]":"[MA_RUNTIME185_A10_FULL_EXIT]",
+         " mode=",A10FullModeName175(fe.mode)," dir=",(fe.direction>0?"BUY":"SELL"),
+         " reason=",fe.reason," price=",DoubleToString(fe.price,_Digits)," ticket=",fe.ticket,
+         " NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1");
+  return;
+ }
+ if(active_route_now.structure==MA_STRUCTURE_SPLIT_V150 &&
+    active_route_now.entry_module==MA_LOGIC_A10_V150 &&
+    active_route_now.manage_module==MA_LOGIC_A10_V150 &&
+    active_route_now.exit_module==MA_LOGIC_A10_V150)
+ {
+  SA10SplitEvent185 se={};
+  if(a10_split_runtime.OnTick(t,se) && se.valid)
+   Print(se.is_entry?"[MA_RUNTIME185_A10_SPLIT_ENTRY]":"[MA_RUNTIME185_A10_SPLIT_EXIT]",
+         " mode=",A10FullModeName175(se.mode)," dir=",(se.direction>0?"BUY":"SELL"),
+         " reason=",se.reason," price=",DoubleToString(se.price,_Digits)," ticket=",se.ticket,
+         " NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1");
+  return;
+ }
+ Manage(true,buy,bt,t);Manage(false,sell,st,t);
+ double r=B(rh),a1=B(a1h),a2=B(a2h);if(r==EMPTY_VALUE||a1==EMPTY_VALUE||a2==EMPTY_VALUE)return;
+ if(!TimeOK()){if(r<runtime_cfg.rsi_lower||r>runtime_cfg.rsi_upper)timeBlocks++;return;}if(NewsNewBlocked()){newsBlocks++;return;}if(!SpreadOK()){spreadBlocks++;return;}
+ double p1=a1/_Point,p2=a2/_Point;
+ RuntimeBuilderEntry315(t,r,p1,p2);
+ if(!(p1>=runtime_cfg.atr1_min_points&&p1<=runtime_cfg.atr1_max_points&&p2>=runtime_cfg.atr2_min_points&&p2<=runtime_cfg.atr2_max_points)){filterBlocks++;return;}
+ SO01EntryConfig ec;adapter.EntryConfig(runtime_cfg,ec);SO01EntryContext x;x.emergency_lock=false;x.time_allowed=true;x.news_blocked=false;x.spread_ok=true;x.filters_ok=true;x.buy_count=(DemoExecution()?LiveCount(true):C(buy));x.sell_count=(DemoExecution()?LiveCount(false):C(sell));x.rsi=r;SMA_ModuleSelection150 active_route=route_controller.Active();ENUM_O01_ENTRY_SIGNAL sig=entry_dispatcher.Evaluate(active_route,core,ec,x,t.bid);datetime bar=iTime(_Symbol,_Period,0);
+ if(sig==O01_ENTRY_BUY&&(!runtime_cfg.one_order_per_bar||lastBuyBar!=bar)){double l=NormLot(runtime_cfg.initial_lot);bool opened=(!DemoExecution()||ExecOpen(true,l,"INITIAL"));if(opened){if(!DemoExecution())Add(buy,t.ask,l);lastBuyBar=bar;entries++;LO("BUY","INITIAL",t.ask,l,(DemoExecution()?LiveCount(true):C(buy)));}}
+ if(sig==O01_ENTRY_SELL&&(!runtime_cfg.one_order_per_bar||lastSellBar!=bar)){double l=NormLot(runtime_cfg.initial_lot);bool opened=(!DemoExecution()||ExecOpen(false,l,"INITIAL"));if(opened){if(!DemoExecution())Add(sell,t.bid,l);lastSellBar=bar;entries++;LO("SELL","INITIAL",t.bid,l,(DemoExecution()?LiveCount(false):C(sell)));}}
+}
+bool CommonFilterAllOff202(const SMA_CommonFilterConfig110 &c)
+{
+ return (!c.trading_time&&!c.news&&!c.fomc&&!c.nfp&&!c.cpi&&!c.month_end&&!c.month_start&&!c.quarter_end&&!c.year_end&&!c.rollover&&!c.friday&&!c.spread&&!c.volatility);
+}
+void PrintFilterRegression202()
+{
+ SMA_CommonFilterConfig110 c=filter_store.Get(1);
+ Print("[MA_FILTER202_OFF_GATE] slot=1 all_off=",(CommonFilterAllOff202(c)?1:0),
+       " runtime_connected=0 expected_behavior=IDENTICAL_TO_V2_01_BASELINE NO_ORDERS=1 VIRTUAL_NOT_FILL=1");
+}
+void RefreshCommonFilter202()
+{
+ if(left_tabs.FilterVisible())
+ {
+  SMA_CommonFilterConfig110 fc=filter_store.Get(slot_state.Selected());
+  filter_panel.Show(slot_state.Selected(),fc);filter_preset_panel.Hide();preset_action_panel.Hide();return;
+ }
+ filter_panel.Hide();filter_preset_panel.Hide();
+ if(left_tabs.PresetVisible())preset_action_panel.Show(slot_state.Selected());else preset_action_panel.Hide();
+}
+
+bool SaveFilterPreset205(const string name,string &reason)
+{
+ for(int i=1;i<=MA_FILTER_SLOT_COUNT_V110;i++){SMA_CommonFilterConfig110 c=filter_store.Get(i);if(!filter_preset.Set(i,c,reason))return false;}
+ return filter_preset.SaveNamed(name,reason);
+}
+bool LoadFilterPreset205(const string name,string &reason)
+{
+ if(!filter_preset.LoadNamed(name,reason))return false;
+ for(int i=1;i<=MA_FILTER_SLOT_COUNT_V110;i++)filter_store.Set(i,filter_preset.Get(i));
+ return true;
+}
+
+void PrintSelectedFilter210(const string phase)
+{
+ int slot=slot_state.Selected();
+ SMA_CommonFilterConfig110 c=filter_store.Get(slot);
+ Print("[MA_FILTER210_SLOT_VIEW] phase=",phase,
+       " slot=",slot,
+       " time=",(int)c.trading_time,
+       " start=",StringFormat("%02d:%02d",c.start_hour,c.start_minute),
+       " end=",StringFormat("%02d:%02d",c.end_hour,c.end_minute),
+       " news=",(int)c.news,
+       " fomc=",(int)c.fomc,
+       " spread=",(int)c.spread,
+       " max_spread=",DoubleToString(c.max_spread_points,1),
+       " volatility=",(int)c.volatility,
+       " atr_min=",DoubleToString(c.min_atr_points,1),
+       " atr_max=",DoubleToString(c.max_atr_points,1),
+       " runtime_connected=0 NO_ORDERS=1");
+}
+
+
+bool SeedCanonicalO01Builder314()
+{
+ string p[4][40],v[4][40];MAO01LoadCanonical102(p,v);
+ string names[4]={"O01_ENTRY_CANONICAL","O01_GRID_CANONICAL","O01_MANAGE_CANONICAL","O01_EXIT_CANONICAL"};
+ for(int role=0;role<4;role++)
+ {
+  free_slot_builder.BeginRoleImport(role,names[role]);
+  for(int i=0;i<40;i++) free_slot_builder.SetRoleItem(role,i,p[role][i],v[role][i]);
+ }
+ free_slot_builder.SetRole(0);
+ Print("[MA_O01_BUILDER314_SEED] source=O01_CANONICAL_40PARTS_v1_02 roles=ENTRY->GRID->MANAGE->EXIT target=SLOT#01 NO_ORDERS=1");
+ return true;
+}
+
+void SaveBuilderWorkspaceToSlot266(const int target)
+{
+ int rr=0;
+ int ii=0;
+ rr=0;
+ while(rr<4)
+ {
+  builder_slot_workspace.BeginRole(target,rr,free_slot_builder.DefinitionName(rr));
+  ii=0;
+  while(ii<40)
+  {
+   builder_slot_workspace.SetItem(target,rr,ii,free_slot_builder.PartAt(rr,ii),free_slot_builder.ParamsAt(rr,ii));
+   ii++;
+  }
+  rr++;
+ }
+ builder_slot_workspace.Commit(target);
+ Print("[MA_BUILDER266_WORKSPACE_SAVE] slot=",target," revision=",builder_slot_workspace.Revision(target)," NO_ORDERS=1");
+}
+void LoadBuilderWorkspaceFromSlot266(const int target)
+{
+ int rr=0;
+ int ii=0;
+ string dn="";
+ if(!builder_slot_workspace.Initialized(target))
+ {
+  rr=0;
+  while(rr<4)
+  {
+   if(rr==0) dn="BUILDER_ENTRY_SLOT"+IntegerToString(target);
+   else if(rr==1) dn="BUILDER_GRID_SLOT"+IntegerToString(target);
+   else if(rr==2) dn="BUILDER_MANAGE_SLOT"+IntegerToString(target);
+   else dn="BUILDER_EXIT_SLOT"+IntegerToString(target);
+   free_slot_builder.BeginRoleImport(rr,dn);
+   ii=0;
+   while(ii<40)
+   {
+    free_slot_builder.SetRoleItem(rr,ii,"EMPTY","");
+    ii++;
+   }
+   rr++;
+  }
+  SaveBuilderWorkspaceToSlot266(target);
+ }
+ else
+ {
+  rr=0;
+  while(rr<4)
+  {
+   free_slot_builder.BeginRoleImport(rr,builder_slot_workspace.RoleNameAt(target,rr));
+   ii=0;
+   while(ii<40)
+   {
+    free_slot_builder.SetRoleItem(rr,ii,builder_slot_workspace.PartAt(target,rr,ii),builder_slot_workspace.ParamsAt(target,rr,ii));
+    ii++;
+   }
+   rr++;
+  }
+ }
+ Print("[MA_BUILDER266_WORKSPACE_LOAD] slot=",target," revision=",builder_slot_workspace.Revision(target)," NO_ORDERS=1");
+}
+
+void SeedModuleLibraryUI275()
+{
+ string pp[],pv[]; ArrayResize(pp,40);ArrayResize(pv,40);
+ for(int r=0;r<4;r++)
+ {
+  for(int i=0;i<40;i++){pp[i]=free_slot_builder.PartAt(r,i);pv[i]=free_slot_builder.ParamsAt(r,i);}
+  module_library_store.SaveDefinition(r,0,free_slot_builder.DefinitionName(r),pp,pv,true);
+ }
+ Print("[MA_MODULEUI275_SEED] E=1 G=1 M=1 X=1 enabled=1 NO_ORDERS=1");
+}
+
+void ModuleLibraryStoreSelfTest274()
+{
+ string p1[],v1[],p2[],v2[]; ArrayResize(p1,40);ArrayResize(v1,40);ArrayResize(p2,40);ArrayResize(v2,40);
+ for(int i=0;i<40;i++){p1[i]="";v1[i]="";p2[i]="";v2[i]="";}
+ p1[0]="CYCLE_NEW"; p1[1]="BUY"; p2[0]="CYCLE_NEW"; p2[1]="SELL";
+ bool s1=module_library_store.SaveDefinition(MA_MODULE_ENTRY100,0,"TEST_ENTRY_01",p1,v1,true);
+ bool s2=module_library_store.SaveDefinition(MA_MODULE_ENTRY100,1,"TEST_ENTRY_02",p2,v2,false);
+ string n1="",n2="";string rp1[],rv1[],rp2[],rv2[];bool e1=false,e2=false;
+ bool l1=module_library_store.LoadDefinition(MA_MODULE_ENTRY100,0,n1,rp1,rv1,e1);
+ bool l2=module_library_store.LoadDefinition(MA_MODULE_ENTRY100,1,n2,rp2,rv2,e2);
+ bool independent=(l1&&l2&&n1=="TEST_ENTRY_01"&&n2=="TEST_ENTRY_02"&&rp1[1]=="BUY"&&rp2[1]=="SELL"&&e1&&!e2);
+ int enabled[];int ec=module_library_store.CollectEnabledSlots(MA_MODULE_ENTRY100,enabled);
+ bool filter_ok=(ec==1&&ArraySize(enabled)==1&&enabled[0]==1);
+ Print("[MA_MODULESTORE274_TEST] save01=",(int)s1," save02=",(int)s2," load01=",(int)l1," load02=",(int)l2,
+       " independent=",(int)independent," enabled_filter=",(int)filter_ok," enabled_count=",ec,
+       " slot01=",n1," slot02=",n2," NO_ORDERS=1");
+ module_library_store.ClearAll();
+ Print("[MA_MODULESTORE274_RESET] state01=",(int)module_library_store.State(MA_MODULE_ENTRY100,0),
+       " state02=",(int)module_library_store.State(MA_MODULE_ENTRY100,1)," expected=0 NO_ORDERS=1");
+}
+
+void SyncSelectedSlotDraft195()
+{
+ SMA_ModuleSelection150 d=slot_state.CurrentRoute();
+ route_panel.SetDraft(d);
+ bool reg=(d.structure==MA_STRUCTURE_FULL_V150?route_panel.DraftFullRegistered():(route_panel.DraftEntryRegistered()&&route_panel.DraftManageRegistered()&&route_panel.DraftExitRegistered()));
+
+ // LD-1D6: Strategy Dashboard owns the left LOGIC view during SLOT switching.
+ // Do not call legacy left_context / A10 restore-display helpers here; they add/remove old O01 blocks.
+ a10_full_panel.Hide();
+ panel.SetRouteDraftContext(MA150StructureName(d.structure),MA150LogicName(d.full_module),MA150LogicName(d.entry_module),MA150LogicName(d.manage_module),MA150LogicName(d.exit_module),reg);
+ SMA_SlotState195 dash_slot=slot_state.Current();
+ panel.SetStrategySlotInfo(dash_slot.slot_id,dash_slot.enabled,dash_slot.symbol,strategy.magic+(dash_slot.slot_id-1));
+ // Do NOT call left_tabs.Refresh() here: Logic() makes every legacy O01CFG160 field visible again.
+ ChartRedraw();
+ RefreshCommonFilter202();
+ PrintSelectedFilter210("SLOT_SWITCH");
+ Print("[MA_SLOT195_LOAD] slot=",slot_state.Selected()," route=",route_panel.DraftSummary()," runtime_changed=0 NO_ORDERS=1");
+}
+
+void OnChartEvent(const int id,const long &lparam,const double &dparam,const string &sparam){
+ int mu=module_library_panel.Event(id,sparam);
+ if(mu!=0)
+ {
+  Print("[MA_MODULEUI275_EVENT] event=",mu," role=",module_library_panel.RoleText()," module=#",module_library_panel.Selected()+1,
+        " state=",module_library_panel.StateText()," name=",module_library_panel.Name()," NO_ORDERS=1");
+  if(mu==4)
+  {
+   string nm="";string pp[],pv[];bool en=false;
+   if(module_library_store.LoadDefinition(module_library_panel.Role(),module_library_panel.Selected(),nm,pp,pv,en))
+   {
+    module_edit_role276=module_library_panel.Role();module_edit_slot276=module_library_panel.Selected();module_edit_active276=true;
+    free_slot_builder.ImportRole(module_edit_role276,nm,pp,pv);free_slot_builder.SetRole(module_edit_role276);
+    module_library_panel.Hide();free_slot_builder.Show();BuilderReadout243();module_edit_nav.Show(module_edit_role276,module_edit_slot276,nm);
+    Print("[MA_MODULEUI275_EDIT] role=",module_library_panel.RoleText()," module=#",module_library_panel.Selected()+1," loaded=1 NO_ORDERS=1");
+   }
+  }
+  return;
+}
+ int mn=module_edit_nav.Event(id,sparam);
+ if(mn!=0 && module_edit_active276)
+ {
+  int er=module_edit_role276,es=module_edit_slot276;
+  if(mn==1)
+  {
+   string pp[],pv[];free_slot_builder.ExportRole(er,pp,pv);
+   string nm=free_slot_builder.DefinitionName(er);
+   bool en=module_library_store.IsEnabled(er,es);
+   bool ok=module_library_store.SaveDefinition(er,es,nm,pp,pv,en); string vr=""; bool vok=builder_interpreter.Validate(pp,pv,vr); module_library_panel.SetLogicOK(er,es,vok);
+   string rn="";string rp[],rv[];bool ren=false;
+   bool rok=module_library_store.LoadDefinition(er,es,rn,rp,rv,ren);
+   bool verified=(ok&&rok&&rn==nm&&ren==en&&ArraySize(rp)>=40&&ArraySize(rv)>=40);
+   if(verified)for(int k=0;k<40;k++)if(rp[k]!=pp[k]||rv[k]!=pv[k]){verified=false;break;}
+   Print("[MA_MODULESTORE281_SAVE] role=",module_edit_nav.RoleText(er)," module=#",es+1,
+         " saved=",(int)ok," reload=",(int)rok," verified=",(int)verified,
+         " name=",rn," NO_ORDERS=1");
+   if(!verified){Print("[MA_MODULESTORE281_SAVE_REJECT] editor_kept_open=1 NO_ORDERS=1");return;}
+  }
+  else
+  {
+   Print("[MA_MODULESTORE281_CANCEL] role=",module_edit_nav.RoleText(er)," module=#",es+1,
+         " store_write=0 NO_ORDERS=1");
+  }
+  module_edit_active276=false;module_edit_nav.Hide();free_slot_builder.Hide();builder_readout.Hide();module_library_panel.Show();return;
+ }
+ int fb=free_slot_builder.OnChartEvent(id,lparam,dparam,sparam);
+ if(fb==2){builder_parts_picker.SetRole(free_slot_builder.Role());builder_parts_picker.SetSlot(free_slot_builder.Selected(),free_slot_builder.SelectedPart(),free_slot_builder.SelectedParams());right_tabs.Select(2);RefreshRightWorkspace221();return;}
+ if(fb==5){BuilderReadout243();if(module_edit_active276)module_edit_nav.Show(module_edit_role276,module_edit_slot276,free_slot_builder.DefinitionName(module_edit_role276));return;}
+ if(fb==1){if(module_edit_active276)module_edit_nav.Show(module_edit_role276,module_edit_slot276,free_slot_builder.DefinitionName(module_edit_role276));return;}
+ // v2.68: SAVE/LOAD commits the visible Builder board back to the selected SLOT workspace.
+ if(fb==3){SaveBuilderWorkspaceToSlot266(slot_state.Selected());AssignBuilderRoleToSelectedSlot264();BuilderReadout243();return;}
+ if(fb==4){SaveBuilderWorkspaceToSlot266(slot_state.Selected());EmbedAllBuilderRolesToSelectedSlot264();BuilderReadout243();return;}
+ int bp=builder_parts_picker.OnChartEvent(id,sparam);
+ // v2.68: EA PARTS APPLY/DELETE is SLOT-local and auto-committed immediately.
+ // This prevents an edit in SLOT #01 from leaking into #02 and prevents loss on SLOT switching.
+ if(bp==2){if(free_slot_builder.PutSelected(builder_parts_picker.Chosen(),builder_parts_picker.Parameters())){SaveBuilderWorkspaceToSlot266(slot_state.Selected());AssignBuilderRoleToSelectedSlot264();right_tabs.Select(1);RefreshRightWorkspace221();}return;}
+ if(bp==3){right_tabs.Select(1);RefreshRightWorkspace221();return;}
+ if(bp==4){if(free_slot_builder.DeleteSelected()){SaveBuilderWorkspaceToSlot266(slot_state.Selected());AssignBuilderRoleToSelectedSlot264();}right_tabs.Select(1);RefreshRightWorkspace221();return;}
+ if(bp==1)return;
+ int rw=right_tabs.Event(id,sparam);
+ if(rw!=0){RefreshRightWorkspace221();return;}
+ if(!right_tabs.SlotVisible()){
+  // Builder workspaces are UI-only in v2.21. Existing SLOT/route/runtime behavior is untouched.
+  return;
+ }
+ int sr=slot_panel.Event(id,sparam,lparam,dparam);
+ if(sr!=0)
+ {
+  left_slot_badge.Set(slot_state.Selected());
+  if(sr==1){LoadBuilderWorkspaceFromSlot266(slot_state.Selected());SyncSelectedSlotDraft195();}
+  return;
+ }
+ if(left_tabs.Event(id,sparam)!=0){if(!left_tabs.LogicVisible()){a10_full_panel.Hide();a10_panel.ShowModeButton(false);ObjectDelete(0,"O01CFG160_A10_FULL_MODE_NEXT");ObjectDelete(0,"O01CFG160_A10_MODE_NEXT");}else{SMA_ModuleSelection150 dv=route_panel.Draft();if(dv.structure==MA_STRUCTURE_FULL_V150&&dv.full_module==MA_LOGIC_A10_V150)a10_full_panel.Display(a10_full_cfg);else if(dv.structure==MA_STRUCTURE_SPLIT_V150&&dv.entry_module==MA_LOGIC_A10_V150)a10_panel.Display(a10_entry_cfg);}RefreshCommonFilter202();return;}
+ int fpr=filter_preset_panel.Event(id,sparam);
+ if(fpr!=0)
+ {
+  string preset_reason="";string preset_name=filter_preset_panel.Name();bool ok=false;
+  if(fpr==1)ok=SaveFilterPreset205(preset_name,preset_reason);else ok=LoadFilterPreset205(preset_name,preset_reason);
+  if(ok){filter_preset_panel.Status(fpr==1?"SAVED 50 SLOTS":"LOADED 50 SLOTS",true);if(fpr==2)RefreshCommonFilter202();Print("[MA_FILTER_PRESET205_",fpr==1?"SAVE":"LOAD","] name=",preset_name," slots=50 runtime_connected=0");}
+  else {filter_preset_panel.Status("ERROR: "+preset_reason,false);Print("[MA_FILTER_PRESET205_FAIL] action=",(fpr==1?"SAVE":"LOAD")," name=",preset_name," reason=",preset_reason);}
+  return;
+ }
+ int par=preset_action_panel.Event(id,sparam);
+ if(par!=0)
+ {
+  string n=(par==6||par==7)?preset_action_panel.FilterName():(par==4||par==5)?preset_action_panel.AllName():preset_action_panel.SlotName(),why="";bool ok=false;
+  if(par==6)ok=SaveFilterPreset205(n,why);
+  else if(par==7)ok=LoadFilterPreset205(n,why);
+  else {preset_action_panel.Status("UI READY - STORAGE WIRING NEXT",false);Print("[MA_PRESET212_UI] action=",par," slot=",slot_state.Selected()," NO_ORDERS=1 broker_actions_changed=0");return;}
+  if(ok){preset_action_panel.Status(par==6?"FILTER SAVED (50)":"FILTER LOADED (50)",true);if(par==7)RefreshCommonFilter202();Print("[MA_PRESET212_FILTER] action=",(par==6?"SAVE":"LOAD")," name=",n," slots=50 NO_ORDERS=1");}
+  else {preset_action_panel.Status("ERROR: "+why,false);Print("[MA_PRESET212_FILTER_FAIL] action=",par," name=",n," reason=",why);}
+  return;
+ }
+ SMA_CommonFilterConfig110 fc_evt=filter_store.Get(slot_state.Selected());
+ if(filter_panel.Event(id,sparam,fc_evt)!=0){filter_store.Set(slot_state.Selected(),fc_evt);RefreshCommonFilter202();Print("[MA_FILTER202_EDIT] slot=",slot_state.Selected()," runtime_connected=0");return;}
+ string route_reason="";SMA_RouteState150 route_state=LiveRouteState();
+ int rr=route_panel.Event(id,sparam,route_state,route_reason,lparam,dparam);
+ if(rr==1 || rr==2){
+   if(rr==1)slot_state.SetCurrentRoute(route_panel.Draft());
+   SMA_ModuleSelection150 d=route_panel.Draft();
+   bool draft_registered=(d.structure==MA_STRUCTURE_FULL_V150?route_panel.DraftFullRegistered():(route_panel.DraftEntryRegistered()&&route_panel.DraftManageRegistered()&&route_panel.DraftExitRegistered()));panel.SetRouteDraftContext(MA150StructureName(d.structure),MA150LogicName(d.full_module),MA150LogicName(d.entry_module),MA150LogicName(d.manage_module),MA150LogicName(d.exit_module),draft_registered);
+   if(!draft_registered){a10_full_panel.Hide();left_context.Unregistered(MA150LogicName(d.full_module));}
+   else if(d.structure==MA_STRUCTURE_FULL_V150 && d.full_module==MA_LOGIC_A10_V150){left_context.A10Full();a10_full_panel.Display(a10_full_cfg);}
+   else if(d.structure==MA_STRUCTURE_SPLIT_V150){
+     left_context.Split(MA150LogicName(d.entry_module),MA150LogicName(d.manage_module),MA150LogicName(d.exit_module));a10_full_panel.Hide();
+     if(d.entry_module==MA_LOGIC_A10_V150)a10_panel.Display(a10_entry_cfg);else a10_panel.RestoreO01Labels();
+     if(d.manage_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayManage(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreManageO01(runtime_cfg);
+     if(d.exit_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayExit(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreExitO01(runtime_cfg);
+   }
+   else {left_context.Restore();a10_full_panel.Hide();a10_panel.RestoreO01Labels();}
+   bool route_registered=(d.structure==MA_STRUCTURE_FULL_V150?route_panel.DraftFullRegistered():(route_panel.DraftEntryRegistered()&&route_panel.DraftManageRegistered()&&route_panel.DraftExitRegistered()));
+   string sync=(route_registered?"REGISTERED ROUTE - DETAIL PANEL CONTEXT":"NOT REGISTERED - O01 SETTINGS PRESERVED");
+   left_header_spacing.Apply();
+   left_tabs.Refresh();
+   Print("[O01_RUNTIME156_DRAFT_SYNC] draft=",route_panel.DraftSummary()," left_panel=",sync," EXECUTION=",MA140_ExecutionText(InpExecutionMode)," BROKER_ACTIONS_ARMED=",(DemoExecution()?1:0)," VIRTUAL_NOT_FILL=",(DemoExecution()?0:1));
+ }
+ if(rr==-3){SMA_ModuleSelection150 d=route_panel.Draft();bool draft_registered=(d.structure==MA_STRUCTURE_FULL_V150?route_panel.DraftFullRegistered():(route_panel.DraftEntryRegistered()&&route_panel.DraftManageRegistered()&&route_panel.DraftExitRegistered()));panel.SetRouteDraftContext(MA150StructureName(d.structure),MA150LogicName(d.full_module),MA150LogicName(d.entry_module),MA150LogicName(d.manage_module),MA150LogicName(d.exit_module),draft_registered);
+   if(!draft_registered){a10_full_panel.Hide();left_context.Unregistered(MA150LogicName(d.full_module));}
+   else if(d.structure==MA_STRUCTURE_FULL_V150 && d.full_module==MA_LOGIC_A10_V150){left_context.A10Full();a10_full_panel.Display(a10_full_cfg);}
+   else if(d.structure==MA_STRUCTURE_SPLIT_V150){
+     left_context.Split(MA150LogicName(d.entry_module),MA150LogicName(d.manage_module),MA150LogicName(d.exit_module));a10_full_panel.Hide();
+     if(d.entry_module==MA_LOGIC_A10_V150)a10_panel.Display(a10_entry_cfg);else a10_panel.RestoreO01Labels();
+     if(d.manage_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayManage(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreManageO01(runtime_cfg);
+     if(d.exit_module==MA_LOGIC_A10_V150)a10_split_detail_panel.DisplayExit(true,a10_full_cfg,0);else a10_split_detail_panel.RestoreExitO01(runtime_cfg);
+   }
+   else {left_context.Restore();a10_full_panel.Hide();a10_panel.RestoreO01Labels();}}
+ if(rr==3)slot_state.SetCurrentRoute(route_panel.Draft());
+ if(rr!=0){SMA_ModuleSelection150 ar=route_controller.Active();Print("[O01_RUNTIME153_ROUTE_PANEL] event=",rr," reason=",route_reason," active_structure=",MA150StructureName(ar.structure)," full=",MA150LogicName(ar.full_module)," entry=",MA150LogicName(ar.entry_module)," manage=",MA150LogicName(ar.manage_module)," exit=",MA150LogicName(ar.exit_module)," positions=",route_state.managed_positions," cycle_none=",(int)route_state.cycle_none," transition_pending=",(int)route_state.execution_transition_pending," EXECUTION=",MA140_ExecutionText(InpExecutionMode)," BROKER_ACTIONS_ARMED=",(DemoExecution()?1:0)," VIRTUAL_NOT_FILL=",(DemoExecution()?0:1));return;}
+ // v1.71: suppress unhandled/background chart-event noise. Actionable route/panel events above remain logged.
+ SMA_ModuleSelection150 draft_now=route_panel.Draft();
+ if(draft_now.structure==MA_STRUCTURE_FULL_V150 && draft_now.full_module==MA_LOGIC_A10_V150){
+  if(a10_full_panel.HandleClick(sparam,a10_full_cfg))return;
+  if(id==CHARTEVENT_OBJECT_CLICK && sparam=="O01CFG160_APPLY"){
+   if(a10_full_panel.Pull(a10_full_cfg)){double ts=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_SIZE);if(full_dispatcher.InitA10(a10_full_cfg,ts))Print("[MA_RUNTIME185_A10_FULL_PANEL] APPLY valid=1 reinitialized=1");else Print("[MA_RUNTIME185_A10_FULL_PANEL] APPLY init_failed=1");}
+   else Print("[MA_RUNTIME185_A10_FULL_PANEL] APPLY valid=0");
+   return;
+  }
+ }
+ if(draft_now.structure==MA_STRUCTURE_SPLIT_V150 && draft_now.entry_module==MA_LOGIC_A10_V150){
+  if(a10_panel.HandleClick(sparam,a10_entry_cfg))return;
+  if(id==CHARTEVENT_OBJECT_CLICK && sparam=="O01CFG160_APPLY"){
+   if(a10_panel.Pull(a10_entry_cfg)){double ts=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_SIZE);if(entry_dispatcher.InitA10(a10_entry_cfg,ts)&&a10_split_runtime.Init(a10_entry_cfg,a10_full_cfg,ts))Print("[MA_RUNTIME185_A10_PANEL] APPLY valid=1 split_reinitialized=1");else Print("[MA_RUNTIME185_A10_PANEL] APPLY init_failed=1");}
+   else Print("[MA_RUNTIME161_A10_PANEL] APPLY valid=0");
+   return;
+  }
+ }
+ SO01RuntimeSettings110 before=runtime_cfg;
+ int r=panel.Event(id,sparam,runtime_cfg);
+ if(r!=0)
+ {
+  bool ok=adapter.Validate(runtime_cfg);
+  if(!ok){runtime_cfg=before;Print("[O01_RUNTIME140_PANEL] result=",r," valid=0 rolled_back=1");return;}
+  bool handleChanged=(before.rsi_period!=runtime_cfg.rsi_period||before.atr1_period!=runtime_cfg.atr1_period||before.atr2_period!=runtime_cfg.atr2_period||before.atr2_timeframe!=runtime_cfg.atr2_timeframe);
+  if(handleChanged&&!RebuildIndicatorHandles()){runtime_cfg=before;RebuildIndicatorHandles();Print("[O01_RUNTIME140_PANEL] result=",r," valid=1 handles=FAIL rolled_back=1");return;}
+  Print("[O01_RUNTIME140_PANEL] result=",r," valid=1 handles_rebuilt=",(int)handleChanged," EXECUTION=",MA140_ExecutionText(InpExecutionMode)," BROKER_ACTIONS_ARMED=",(DemoExecution()?1:0));
+ }
+}

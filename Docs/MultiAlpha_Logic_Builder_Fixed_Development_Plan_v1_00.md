@@ -376,3 +376,36 @@ After Architecture Freeze:
 - Git history/archive may retain old versions, but only files listed in the Production Dependency Manifest are considered required for the current release.
 - Local MetaEditor 0 errors / 0 warnings remains the only Compile PASS.
 - Local MT5/demo behavior remains the Runtime PASS.
+
+
+---
+
+## Current highest-priority execution policy — v3.45 dual track (2026-10-07)
+
+The immediate mainline priority is governed by:
+
+`Docs/MultiAlpha_v3_45_Dual_Track_Development_Priority_v1_00.md`
+
+Common integrated baseline:
+
+`Parity_Tests/MultiAlpha/MA_LD2A_O01BuilderBridge_v3_45.mq5`
+
+Until the first O01 Builder construction/runtime convergence proof is accepted, the two highest-priority development streams are:
+
+1. **Track A — O01 Reference vs Builder Runtime / Demo Parity**
+   - continue demo evidence from v3.45,
+   - compare reference O01 and Builder at event/decision/lifecycle level,
+   - preserve attribution by Symbol/Magic/comment/log,
+   - close repeated-cycle, restart, state recovery and safety evidence gates.
+
+2. **Track B — LOGIC SLOT / LOGIC PARTS Construction Completeness**
+   - verify the normal `LOGIC SLOT -> EDIT -> EA LOGIC / EA PARTS -> SAVE -> LOAD -> Interpreter -> Runtime` path,
+   - inventory every O01-required generic Part,
+   - treat missing UI selection, parameter editing, persistence, Interpreter support or Runtime context as incomplete,
+   - prove four-role ENTRY / GRID / MANAGE / EXIT definitions can be constructed without hidden O01-specific fallback.
+
+The two tracks converge only when saved definitions created through the Builder are proven to be the definitions consumed by Generic Runtime and reproduce the reference O01 behavior in demo evidence.
+
+This priority does not cancel the longer-term new-panel, multi-instance, Broker/Symbol, Risk, A10-A15 or new-Alpha plans. It controls immediate implementation order to prevent architectural drift.
+
+Before future development work, check the dual-track policy and identify the work as Track A, Track B, or convergence.

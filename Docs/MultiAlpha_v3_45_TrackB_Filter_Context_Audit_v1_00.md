@@ -616,3 +616,26 @@ Gate:
 - B-P0-2F test source: **PASS**
 - B-P0-2F local compile: **NOT TESTED**
 - B-P0-2F visible UI runtime round trip: **NOT TESTED**
+
+
+## B-P0-2G observed MT5 runtime evidence — 2026-10-08 08:01:08
+
+Test: `MultiAlpha_SavedRole_FilterRef_NoOrders_v1_00`, XAUUSD-m M1.
+
+All 13 `[MA_SAVED2G_CASE]` checks reported PASS:
+ENTRY_REF_SCHEMA, GRID_REF_SCHEMA, ENTRY_WRONG_ROLE, GRID_WRONG_ROLE,
+SAVE_ENTRY, SAVE_GRID, LOAD_ENTRY, LOAD_GRID, NEW_ALLOW_SIGNAL,
+NEW_BLOCK_SIGNAL, NEW_ALLOW_NO_SIGNAL, SAVED_GRID_ADD_BLOCK,
+SAVED_GRID_ADD_ALLOW.
+
+Interpreter traces:
+- permission allowed + RSI signal: `B0=TRUE => TRUE BUY=TRUE SELL=FALSE`
+- permission denied: `B0=FALSE => FALSE BUY=FALSE SELL=FALSE`
+- RSI signal absent: `B0=FALSE => FALSE BUY=FALSE SELL=FALSE`.
+
+Terminal marker:
+`[MA_SAVED2G_PASS] save_load=PASS filter_refs=PASS entry_interpreter=PASS grid_context=PASS NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`
+
+Gate **B-P0-2G deterministic NoOrders runtime PASS**. Scope: in-memory Workspace Store PutRole/GetRole, FILTER_NEW_OK / FILTER_ADD_OK and ENTRY Interpreter; GRID permission context was checked directly, not a full generic GRID action Interpreter. Not yet proven: disk persistence, visible LOGIC SLOT editing, complete UI-to-runtime E2E, v3.45 demo integration. No changes to v3.45 DEMO execution.
+
+Next: inspect existing role-specific LOGIC SLOT save/load and validation contracts, design a minimal NoOrders persistence/reload test reusable by the future one-panel UI; preserve UI-independent data models and avoid any production order path changes.

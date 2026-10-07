@@ -5,6 +5,10 @@
 **Baseline:** `Parity_Tests/MultiAlpha/MA_LD2A_O01BuilderBridge_v3_45.mq5`  
 **Parent policy:** `Docs/MultiAlpha_v3_45_Dual_Track_Development_Priority_v1_00.md`
 
+> **Architecture correction / governing classification (2026-10-07):**  
+> This matrix must be read together with `Docs/MultiAlpha_v3_45_Logic_Filter_GlobalSafety_Responsibility_v1_00.md`.  
+> The earlier audit correctly identified that several canonical O01 gates are absent from the EA PARTS picker, but absence does **not** automatically mean they must be added as ordinary strategy Parts. Each item must first be classified as Logic (L), Filter reference (F), Global Safety (G), or Host/Execution (H). Filter configuration belongs to FILTER Panel; Logic Parts only reference `FILTER_*_OK` at the role/branch where the filter applies. Warning 8%, Grid Pause 12%, Emergency Close 15% and emergency protection belong to Global Safety / Expert Properties and are not user-removable Logic Parts.
+
 ## 1. Gate objective
 
 Determine whether O01 can actually be reconstructed through the normal editable Builder path:
@@ -180,12 +184,18 @@ v3.45 uses the O01-specific exit evaluator `CMultiAlphaBuilderO01ExitEvaluator10
 
 Recommended Track B implementation order:
 
-### B-P0-1 — Picker completeness for canonical O01
-Add missing selectable Parts and parameter editors without changing Runtime trading behavior:
-- ENTRY: EMERGENCY_UNLOCKED, NEWS_CLEAR, SPREAD_OK; review ONE_ORDER_PER_BAR, INITIAL_LOT
-- GRID: DD_BELOW, GRID_TIME_ALLOWED, GRID_NEWS_CLEAR, SPREAD_OK, DISTANCE_REACHED
-- MANAGE: LAST_PRICE, OVERLAP
-- EXIT: POSITION_COUNT correct mapping, BASKET_FIXED_TP, SINGLE_MONEY_TP, CLOSE_OPPOSITE
+### B-P0-1 — Responsibility classification, then picker completeness
+Before adding anything to EA PARTS, classify every O01 behavior as **L / F / G / H** under the governing responsibility document.
+
+Current direction:
+- ENTRY shared Time/News/Spread checks -> **F** references such as FILTER_TIME_OK / FILTER_NEWS_OK / FILTER_SPREAD_OK.
+- GRID shared Time/News/Spread checks -> **F** references where O01 timing requires them.
+- Warning 8%, Grid Pause 12%, Emergency Close 15% and emergency protection -> **G**, not user-placed Parts.
+- MANAGE LAST_PRICE / OVERLAP and genuine strategy mechanics -> **L** candidates.
+- EXIT POSITION_COUNT, BASKET_FIXED_TP, SINGLE_MONEY_TP, CLOSE_OPPOSITE -> **L** candidates subject to source/parity confirmation.
+- ONE_ORDER_PER_BAR / INITIAL_LOT / broker normalization -> classify ownership explicitly before implementation.
+
+Only after classification, add missing **L/F** picker items and parameter/reference editors without changing verified DEMO trading behavior.
 
 ### B-P0-2 — Schema/picker identity test
 For every picker button, verify emitted canonical Part ID is accepted by the role schema with the emitted parameter string.
@@ -223,7 +233,7 @@ Prove Runtime consumes the saved UI-built definitions rather than a separately s
 
 ## 12. Next gate
 
-**B-P0-1: Picker completeness for canonical O01.**
+**B-P0-1: O01 responsibility classification (L/F/G/H), then picker completeness for L/F items only.**
 
 This gate must be implementation-only on the Builder/UI definition path. It must not alter v3.45's verified DEMO decision/dispatch behavior.
 

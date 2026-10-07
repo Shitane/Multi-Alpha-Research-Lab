@@ -434,3 +434,30 @@ Status:
 - local MetaEditor compile: **NOT TESTED**
 - deterministic runtime: **NOT TESTED**
 - production v3.45 DEMO connection: **NOT CHANGED / NOT TESTED**
+
+
+## 15. B-P0-2E local compile evidence — v1.00 runtime path FAIL / v1.01 correction
+
+User MetaEditor screenshot on 2026-10-07 showed:
+`file 'Modules\\Common\\MultiAlpha_Common_Filter_Evaluator_v1_11.mqh' not found`
+with 1 error, 0 warnings.
+
+This exposed an important repository/runtime layout distinction.
+
+The known compiling v3.45 baseline includes Common Filter files from:
+`../../../Include/Common/...`
+
+Therefore the MetaEditor runtime include location is `MQL5/Include/Common/`, even though recovered/reference Common sources also exist in GitHub under `Modules/Common/`.
+
+Correction:
+- preserve `Modules/Common/MultiAlpha_Common_Filter_Evaluator_v1_11.mqh` as source/history evidence,
+- add runtime include copy `Include/Common/MultiAlpha_Common_Filter_Evaluator_v1_11.mqh`,
+- create `MultiAlpha_Filter_Store_Evaluator_Builder_NoOrders_v1_01.mq5`,
+- v1.01 changes only evaluator include from `../../../Modules/Common/...` to `../../../Include/Common/...`,
+- other Builder/Common includes already use `Include/...`.
+
+Gate:
+- B-P0-2E test v1.00 local compile: **FAIL — runtime include path only**
+- runtime evaluator Include/Common source: **PASS**
+- test v1.01 source fix: **PASS**
+- test v1.01 local compile: **NOT TESTED**

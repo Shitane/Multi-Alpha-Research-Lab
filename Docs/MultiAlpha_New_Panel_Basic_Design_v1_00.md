@@ -291,3 +291,55 @@ The following are intentionally not fixed by this document unless separately agr
 - detailed FILTER Parts list and FILTER panel layout
 
 These details must not be invented during implementation; confirm them when their development gate is reached.
+
+
+## 15. Confirmed green-lamp validity rules and GRID OFF Part (2026-10-08)
+
+This section supplements the user-confirmed new-panel mockups and takes precedence over any older interpretation that GRID must contain an active grid-addition algorithm to be VALID. It does not alter the four-role requirement or global DD safety.
+
+### 15.1 LOGIC SLOT row lamp
+
+Each role-specific LOGIC SLOT row (#001-#100) has a lamp in the blank space immediately next to its slot number, as shown in the LOGIC SLOT mockup.
+
+- **Green ON**: the slot contains a saved, Interpreter-validated, usable logic definition.
+- **Red ON**: a saved definition exists but is INVALID, consistent with section 6.3.
+- **Lamp OFF**: no saved definition.
+- Evaluate independently for ENTRY, GRID, MANAGE and EXIT. Matching slot numbers in different roles are independent.
+- Recompute immediately on SAVE SLOT/validation and on LOAD/restore. A green lamp must not be inferred merely from nonempty text, a slot number, or an ON switch.
+
+### 15.2 EA SLOT LOGIC lamp
+
+The EA SLOT list has a LOGIC indicator space for each EA SLOT row, as shown in the EA SLOT mockup.
+
+The indicator is **green only if all four referenced role-specific LOGIC SLOT definitions are usable**:
+`ENTRY VALID && GRID VALID && MANAGE VALID && EXIT VALID`.
+
+- If any referenced slot is absent, unsaved, INVALID or otherwise unusable, the EA SLOT LOGIC indicator must **not** be green.
+- EA SLOT ON/OFF is independent of this LOGIC validity indicator. An OFF EA SLOT can still display green if its four referenced logic definitions are valid.
+- This is a visual summary of logic completeness, not an execution authorization by itself. Runtime still applies EA SLOT ON/OFF, Filter, global safety and execution gates.
+- Update immediately when any referenced LOGIC SLOT validity changes, or when the EA SLOT's role references change, and after saved state is restored.
+- Do not substitute another LOGIC SLOT to make the lamp green.
+
+### 15.3 Explicit GRID ON/OFF Logic Part
+
+EA PARTS must provide a dedicated **GRID ON/OFF** Part for the GRID role, allowing a strategy with no averaging/grid additions to have a valid GRID LOGIC SLOT.
+
+- A GRID definition containing **one valid `GRID OFF` Part** is a complete, valid no-grid definition, even when no other GRID Parts are present.
+- SAVE SLOT and Interpreter validation must accept this definition as VALID, light the GRID LOGIC SLOT lamp green, and allow the EA SLOT LOGIC lamp to be green if ENTRY, MANAGE and EXIT are also valid.
+- At runtime, `GRID OFF` must deterministically disable all grid-addition decisions/actions for that GRID definition; it must not disable ENTRY, MANAGE or EXIT.
+- `GRID ON` selects grid-enabled behavior, but does **not** by itself establish a complete valid grid-addition strategy; its required supporting conditions/actions must still pass Interpreter validation.
+- Avoid contradictory configurations: when `GRID OFF` is present, it has precedence over other GRID addition Parts; validation and runtime must not permit any GRID ADD order from that definition. The detailed editing UX for contradictory Parts can be decided at implementation time, but safety behavior is fixed.
+- `GRID OFF` is a strategy-level choice and is **distinct** from the global 12% DD Grid Pause. Global Safety remains mandatory and cannot be bypassed by GRID ON/OFF.
+
+### 15.4 Acceptance gates
+
+The following are design requirements, **not yet implementation PASS claims**:
+
+1. Save a GRID LOGIC SLOT containing only `GRID OFF` -> Interpreter VALID -> GRID row lamp green.
+2. Reference that GRID slot from an EA SLOT whose other three roles are VALID -> EA SLOT LOGIC lamp green.
+3. Make any one of the four role references INVALID -> EA SLOT LOGIC lamp not green.
+4. Turn EA SLOT OFF while keeping all four roles VALID -> LOGIC lamp remains green; execution remains disabled.
+5. NoOrders/runtime decision test with `GRID OFF` -> GRID addition always denied; ENTRY/MANAGE/EXIT remain unaffected.
+6. SAVE/LOAD/restart -> same GRID OFF definition, validation and lamp states restored.
+
+Keep the current O01/Builder completion and NoOrders gates as the active development priority; implement these panel rules when the relevant Builder validation/persistence and new-panel gates are reached.

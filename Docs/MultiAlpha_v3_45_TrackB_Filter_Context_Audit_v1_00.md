@@ -210,3 +210,63 @@ No MQL5 behavior code is changed in this gate.
 Reason: implementing guessed Filter fields would violate the evidence-first policy and could create a second incompatible filter model.
 
 The Filter source has now been recovered in GitHub under `Modules/Common/`. The next correct action is B-P0-2B/C: preserve the existing schema/scope contract, reconcile the repository include path deliberately, and add a NoOrders Filter Context/Interpreter bridge before any DEMO runtime replacement.
+
+## 9. B-P0-2B/C implementation — 2026-10-07
+
+Versioned NoOrders components added without changing v3.45 DEMO runtime:
+
+- `Include/Builder/MultiAlpha_Builder_Filter_Context_v1_00.mqh`
+- `Include/Builder/MultiAlpha_Builder_Part_Schema_v1_04.mqh`
+- `Parity_Tests/MultiAlpha/MultiAlpha_Filter_Context_Builder_NoOrders_v1_00.mq5`
+
+### Design decision
+
+The first generic Builder bridge uses **permission references**, not duplicated individual filter settings:
+
+- `FILTER_NEW_OK` — ENTRY-only reference to `SMA_FilterPermission110.new_entry`
+- `FILTER_ADD_OK` — GRID-only reference to `SMA_FilterPermission110.add_entry`
+
+This deliberately reuses the existing Filter system's NEW / ADD / BOTH scope semantics.
+
+Why this is preferable at this gate:
+- Filter Panel already owns TIME/NEWS/FOMC/NFP/CPI/calendar/rollover/Friday/spread/volatility settings.
+- Each existing Filter has NEW/ADD/BOTH scope.
+- Logic Builder does not need to duplicate those numeric settings.
+- ENTRY and GRID can independently reference the resulting permission.
+- EXIT and Global Safety remain unaffected.
+
+A future requirement to reference a specific individual filter independently inside arbitrary branch logic may justify additional typed Parts, but it is not invented here.
+
+### Schema rules
+
+`FILTER_NEW_OK` is allowed only in ENTRY.
+`FILTER_ADD_OK` is allowed only in GRID.
+Both must have an empty parameter string. A saved Part such as `FILTER_NEW_OK;START=10` is rejected because Filter parameters belong to Filter Panel.
+
+### Deterministic NoOrders source test
+
+The new test verifies:
+1. schema accepts ENTRY `FILTER_NEW_OK`,
+2. schema accepts GRID `FILTER_ADD_OK`,
+3. duplicated Filter parameters are rejected,
+4. Filter permission true + signal true => BUY true,
+5. Filter permission false + signal true => BUY false,
+6. Filter permission true + signal false => BUY false,
+7. no broker operations are present.
+
+**Source implementation: PASS.**
+**MetaEditor compile/runtime test: NOT TESTED until user executes it locally.**
+
+### Important boundary
+
+This test starts from an already evaluated `SMA_FilterPermission110`. The repository currently contains the Filter config/store/UI/preset contract, but the production evaluator that converts TIME/NEWS/SPREAD/etc current market/calendar state into `SMA_FilterPermission110` still needs to be identified or implemented as the next sub-gate.
+
+### Next gate — B-P0-2D/E
+
+1. inspect repository for an existing Common Filter evaluator,
+2. if one exists, reuse it;
+3. otherwise implement a strategy-neutral NoOrders evaluator from the confirmed `SMA_CommonFilterConfig110` schema,
+4. connect selected EA SLOT's `filter_store.Get(slot)` to that evaluator,
+5. prove config -> permission -> FILTER_NEW_OK/FILTER_ADD_OK decision,
+6. only after that add Picker buttons in a new Picker version,
+7. keep v3.45 DEMO runtime unchanged.

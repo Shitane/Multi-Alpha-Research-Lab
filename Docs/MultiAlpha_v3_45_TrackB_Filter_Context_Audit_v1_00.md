@@ -326,3 +326,41 @@ Gate status:
 - test v1_02 local compile: **NOT TESTED**
 
 No DEMO runtime behavior changed.
+
+
+## 12. Local MetaEditor compile evidence — v1.02 PASS
+
+User MetaEditor screenshot evidence on 2026-10-07 confirms:
+
+`MultiAlpha_Filter_Context_Builder_NoOrders_v1_02.mq5`
+
+Compile result:
+- **0 errors**
+- **0 warnings**
+- 1416 msec elapsed
+- cpu = AVX2 + FMA3
+
+Loaded dependency chain visible in MetaEditor:
+- `MultiAlpha_Builder_Part_Schema_v1_04.mqh`
+- `MultiAlpha_Builder_Part_Schema_v1_03.mqh`
+- `MultiAlpha_Builder_Part_Schema_v1_02.mqh`
+- `MultiAlpha_Builder_Part_Schema_v1_01.mqh`
+- `MultiAlpha_Builder_Filter_Context_v1_01.mqh`
+- `MultiAlpha_Builder_Interpreter_v1_05.mqh`
+- `MultiAlpha_Builder_Interpreter_v1_02.mqh`
+
+Gate update:
+- Builder Filter Context v1.01 compile integration: **PASS**
+- Part Schema v1.04 compile integration: **PASS**
+- Interpreter v1.05 compile integration with FILTER_NEW_OK test definition: **PASS**
+- B-P0-2D compile gate: **PASS**
+- B-P0-2D deterministic runtime log gate: **NOT TESTED**
+
+Next evidence required:
+attach/run the compiled NoOrders test and confirm:
+- `[MA_FILTERCTX102_CASE] filter=1 signal=1 BUY=1`
+- `[MA_FILTERCTX102_CASE] filter=0 signal=1 BUY=0`
+- `[MA_FILTERCTX102_CASE] filter=1 signal=0 BUY=0`
+- `[MA_FILTERCTX102_PASS] ... NO_ORDERS=1 ...`
+
+No DEMO execution path is changed by this compile PASS.

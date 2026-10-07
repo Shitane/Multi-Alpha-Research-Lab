@@ -343,3 +343,20 @@ The following are design requirements, **not yet implementation PASS claims**:
 6. SAVE/LOAD/restart -> same GRID OFF definition, validation and lamp states restored.
 
 Keep the current O01/Builder completion and NoOrders gates as the active development priority; implement these panel rules when the relevant Builder validation/persistence and new-panel gates are reached.
+
+
+## 16. Mandatory migration-ready development rule (2026-10-08)
+
+**All current O01 / Builder / Filter / LOGIC SLOT / EA PARTS development must be designed for eventual migration to the confirmed new single-left-panel UI.** This is a binding architecture constraint now, not a request to switch the UI immediately.
+
+- Current development remains evidence-gated (NoOrders -> compile -> runtime -> demo where explicitly authorized), and v3.45 DEMO remains untouched unless separately approved.
+- Keep logic evaluation, role-specific saved definitions, validation, Filter Store/Context, EA SLOT configuration, persistence, safety and execution independent from visual controls and object names.
+- Implement reusable APIs/contracts that both the current UI and future new panel can call. The new panel should primarily replace the presentation/event-routing layer, **not rewrite verified Builder/Interpreter/Runtime internals**.
+- Preserve canonical ENTRY / GRID / MANAGE / EXIT role identity, independent LOGIC SLOT definitions, EA SLOT references, Filter ownership and global safety boundaries.
+- Expose explicit validity/status outputs usable by the future LOGIC SLOT and EA SLOT green lamps. A single GRID OFF Part must validate as a complete no-grid role, as specified in section 15.
+- Any new component/change must state its migration destination: EA SLOT, LOGIC SLOT, EA LOGIC, EA PARTS, FILTER, or shared headless service. Avoid new hard-coded coupling to the old two-panel geometry.
+- SAVE/LOAD and runtime must consume the same canonical data models. Do not make panel-only state the source of truth.
+- Before accepting a development gate, check (1) functional evidence, (2) future-panel reuse, (3) unchanged NoOrders/DEMO safety, and (4) absence of duplicate legacy/new-panel business logic.
+- UI construction itself remains scheduled **after** O01 Builder and runtime validation. Migration readiness is mandatory **during** current development.
+
+This rule governs current B-P0-2G and subsequent work and supplements sections 1, 7, 12 and 15.

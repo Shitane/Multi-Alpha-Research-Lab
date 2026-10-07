@@ -367,3 +367,18 @@ New-panel UI work should consume these proven mechanisms. Cosmetic consolidation
 
 - **Track A:** keep v3.45 demo/reference comparison running and capture the next matching or divergent cycle with exact diagnostic evidence.
 - **Track B:** build the complete O01-required Parts implementation matrix from the actual v3.45 source and linked Builder/Registry/Schema/Interpreter/Persistence files; then close missing/partial items one evidence-backed gate at a time.
+
+
+## 8. Governing responsibility split — Logic / Filter / Global Safety
+
+Track B and convergence work must also read:
+
+`Docs/MultiAlpha_v3_45_Logic_Filter_GlobalSafety_Responsibility_v1_00.md`
+
+Fixed model:
+
+`ENTRY + GRID + MANAGE + EXIT + FILTER Panel = EA LOGIC`
+
+Shared filter configuration belongs to FILTER Panel. Logic Parts reference typed `FILTER_*_OK` states to specify where/when a filter applies. Warning 8%, Grid Pause 12%, Emergency Close 15% and mandatory emergency protection belong to Expert Properties / Global Safety and remain effective independently of user-built Logic Slots.
+
+Do not add an O01 source gate to EA PARTS until it is classified as Logic (L), Filter reference (F), Global Safety (G), or Host/Execution (H).

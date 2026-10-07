@@ -364,3 +364,30 @@ attach/run the compiled NoOrders test and confirm:
 - `[MA_FILTERCTX102_PASS] ... NO_ORDERS=1 ...`
 
 No DEMO execution path is changed by this compile PASS.
+
+
+## 13. B-P0-2D deterministic runtime evidence — PASS
+
+User MT5 runtime evidence on 2026-10-07 at 23:29:17.857:
+
+```text
+[MA_FILTERCTX102_CASE] filter=1 signal=1 BUY=1 B0=TRUE => TRUE BUY=TRUE SELL=FALSE
+[MA_FILTERCTX102_CASE] filter=0 signal=1 BUY=0 B0=FALSE => FALSE BUY=FALSE SELL=FALSE filter_reason=TEST_FILTER_BLOCK
+[MA_FILTERCTX102_CASE] filter=1 signal=0 BUY=0 B0=FALSE => FALSE BUY=FALSE SELL=FALSE
+[MA_FILTERCTX102_PASS] schema=PASS context=PASS interpreter=PASS NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1
+```
+
+Strict result:
+- filter permission TRUE + strategy signal TRUE -> BUY TRUE: **PASS**
+- filter permission FALSE + strategy signal TRUE -> BUY FALSE: **PASS**
+- filter permission TRUE + strategy signal FALSE -> BUY FALSE: **PASS**
+- schema -> Builder Filter Context -> Interpreter chain: **PASS**
+- NoOrders safety declaration: **PASS**
+- broker actions armed = 0: **PASS**
+- virtual not fill = 1: **PASS**
+
+**B-P0-2D: PASS.**
+
+This proves an evaluated Filter permission can deterministically participate in generic Builder branch decisions. It does not yet prove the visible FILTER Panel/store produces that permission.
+
+Next gate: **B-P0-2E — actual Filter Panel/Store -> evaluator/permission -> Builder Context round trip.**

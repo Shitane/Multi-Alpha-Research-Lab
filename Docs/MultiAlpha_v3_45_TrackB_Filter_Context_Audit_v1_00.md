@@ -461,3 +461,33 @@ Gate:
 - runtime evaluator Include/Common source: **PASS**
 - test v1.01 source fix: **PASS**
 - test v1.01 local compile: **NOT TESTED**
+
+
+## 16. B-P0-2E local compile evidence — v1.01 Adapter path FAIL / v1.02 correction
+
+User MetaEditor screenshot on 2026-10-07 showed 29 errors, 0 warnings after the top-level evaluator path was corrected.
+
+Source inspection identified the remaining path inconsistency inside:
+`Include/Common/MultiAlpha_Filter_To_Builder_Adapter_v1_00.mqh`
+
+It still included:
+`../../Modules/Common/MultiAlpha_Common_Filter_v1_10.mqh`
+
+while the confirmed runtime layout is `MQL5/Include/Common/`.
+
+Because the Adapter failed to establish its Common Filter dependency, later calls to `MAFilterPermissionToBuilder100` appeared undeclared and generated cascading parse errors.
+
+Correction:
+- preserve Adapter v1_00 and test v1_01 as failed evidence,
+- add `Include/Common/MultiAlpha_Filter_To_Builder_Adapter_v1_01.mqh`,
+- v1_01 uses same-directory `#include "MultiAlpha_Common_Filter_v1_10.mqh"`,
+- Builder Context include remains `../Builder/MultiAlpha_Builder_Filter_Context_v1_01.mqh`,
+- add test `MultiAlpha_Filter_Store_Evaluator_Builder_NoOrders_v1_02.mq5` using Adapter v1_01.
+
+No evaluator logic, scope semantics, test expectations, or DEMO runtime behavior changed.
+
+Gate:
+- test v1_01 local compile: **FAIL — nested Adapter include path**
+- Adapter v1_01 source fix: **PASS**
+- test v1_02 source fix: **PASS**
+- test v1_02 local compile: **NOT TESTED**

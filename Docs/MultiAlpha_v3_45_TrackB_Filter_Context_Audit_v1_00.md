@@ -573,3 +573,46 @@ This does NOT yet prove the visible FILTER Panel edits and persists the same Sto
 Next gate:
 **B-P0-2F — visible FILTER Panel / UI edit -> Store persistence -> Evaluator permission round trip, NoOrders.**
 After that, connect the proven chain to saved Builder role definitions and only later to DEMO runtime.
+
+
+## 19. B-P0-2F source audit and visible Panel harness
+
+v3.45 source audit confirms the existing UI write path already exists:
+
+`filter_store.Get(selected slot) -> filter_panel.Event(...) -> filter_store.Set(selected slot, edited config) -> RefreshCommonFilter202()`
+
+Slot switching also reloads the selected slot's Filter config.
+
+However v3.45 explicitly logs `runtime_connected=0`; therefore Panel->Store exists, but Store->new Evaluator->Builder Context is not yet connected to production runtime.
+
+Repository reproducibility issue found:
+v3.45 includes Filter UI files from `Include/Common/`, while GitHub only retained some copies under `Modules/Common/`. To make GitHub reproduce the runtime layout, mirrored without behavior changes:
+- `Include/Common/MultiAlpha_Filter_Panel_v1_11.mqh`
+- `Include/Common/MultiAlpha_Filter_Preset_Panel_v1_26.mqh`
+
+Added NoOrders harness:
+`Parity_Tests/MultiAlpha/MultiAlpha_Filter_Panel_Store_Evaluator_NoOrders_v1_00.mq5`
+
+Purpose:
+- display the real Filter Panel v1.11,
+- use the real Filter Store110,
+- route actual panel click/end-edit events through the same Get -> Event -> Set pattern,
+- evaluate resulting Store config through Evaluator v1.11,
+- convert permission through Adapter v1.01 to Builder Context v1.01,
+- log state after every UI edit,
+- no broker calls.
+
+For deterministic visible verification, NEWS and SPREAD scopes are set to BOTH and external NEWS/SPREAD block states are TRUE inside this test only. Therefore:
+- NEWS OFF + SPREAD OFF -> allow,
+- click NEWS ON -> NEW/ADD blocked, reason NEWS,
+- NEWS OFF -> allow again,
+- click SPREAD ON -> NEW/ADD blocked, reason SPREAD.
+
+This test does not change v3.45 production runtime.
+
+Gate:
+- existing v3.45 Panel -> Store source path: **PASS**
+- GitHub runtime Filter Panel layout reproducibility: **PASS after mirror**
+- B-P0-2F test source: **PASS**
+- B-P0-2F local compile: **NOT TESTED**
+- B-P0-2F visible UI runtime round trip: **NOT TESTED**

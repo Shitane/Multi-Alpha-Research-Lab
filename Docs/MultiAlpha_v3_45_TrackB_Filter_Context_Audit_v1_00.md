@@ -296,3 +296,33 @@ Gate status:
 - v1.00 local compile: **FAIL — include path only**
 - v1.01 source fix: **PASS**
 - v1.01 local compile: **NOT TESTED**
+
+
+## 11. Local compile evidence — v1.01 type visibility FAIL / architecture correction
+
+User MetaEditor evidence on 2026-10-07:
+- include-depth failure from v1.00 is resolved,
+- v1.01 test reaches source parsing,
+- first error: `undeclared identifier 'SMA_BuilderFilterContext100'`,
+- subsequent 25 errors / 2 warnings are cascading from unavailable Filter Context declarations.
+
+Source review found `MultiAlpha_Builder_Filter_Context_v1_00.mqh` directly included `Modules/Common/MultiAlpha_Common_Filter_v1_10.mqh` and exposed `SMA_FilterPermission110` in the Builder API.
+
+This is rejected as the final dependency direction: Builder should not require the concrete Filter UI/store module merely to represent evaluated permission.
+
+Correction:
+- keep Context v1_00 and test v1_01 as failed evidence,
+- add `MultiAlpha_Builder_Filter_Context_v1_01.mqh`,
+- Builder context now owns only typed evaluated values: new_entry_ok, add_entry_ok, new_reason, add_reason,
+- remove direct Common Filter include/dependency from Builder Context,
+- add setter `MABuilderFilterContextSet101(...)`,
+- production Filter->Builder conversion will be a separate adapter boundary,
+- add `MultiAlpha_Filter_Context_Builder_NoOrders_v1_02.mq5`.
+
+Gate status:
+- test v1_01 local compile: **FAIL — Builder/Common dependency/type visibility**
+- Builder Filter Context v1_01 source: **PASS**
+- test v1_02 source: **PASS**
+- test v1_02 local compile: **NOT TESTED**
+
+No DEMO runtime behavior changed.

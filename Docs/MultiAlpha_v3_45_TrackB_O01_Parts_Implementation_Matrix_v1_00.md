@@ -243,3 +243,22 @@ After source implementation:
 3. visually confirm all canonical Parts are selectable,
 4. confirm parameter editors emit schema-valid strings,
 5. only then proceed to SAVE/LOAD round-trip.
+
+
+## 13. B-P0-1 classification result (2026-10-07)
+
+Detailed classification is now fixed in:
+
+`Docs/MultiAlpha_v3_45_TrackB_O01_LFGH_Classification_v1_00.md`
+
+**B-P0-1 architecture classification: PASS.**
+
+This is not a Picker/UI completion PASS. It establishes ownership before implementation.
+
+Immediate consequence:
+- TIME / NEWS / SPREAD -> Filter Panel configuration + F-reference Parts.
+- DD Warning 8% / Grid Pause 12% / Emergency Close 15% -> Global Safety / Expert Properties.
+- indicator / position / distance / lot / trailing / TP / SL strategy mechanics -> Logic Parts unless explicitly classified otherwise.
+- broker execution / Symbol+Magic ownership / normalization / retcodes -> Host/Execution.
+
+Next gate is **B-P0-2: inspect the existing FILTER Panel implementation and define the smallest typed Filter Context/API before adding FILTER_* reference Parts.**

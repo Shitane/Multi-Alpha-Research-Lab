@@ -491,3 +491,35 @@ Gate:
 - Adapter v1_01 source fix: **PASS**
 - test v1_02 source fix: **PASS**
 - test v1_02 local compile: **NOT TESTED**
+
+
+## 17. B-P0-2E MetaEditor compile evidence — v1.02 PASS
+
+User MetaEditor screenshot evidence on 2026-10-07 confirms:
+
+`MultiAlpha_Filter_Store_Evaluator_Builder_NoOrders_v1_02.mq5`
+
+Compile result:
+- **0 errors**
+- **0 warnings**
+- 548 ms elapsed
+- cpu = AVX2 + FMA3
+
+Visible dependency chain:
+- `MultiAlpha_Common_Filter_Evaluator_v1_11.mqh`
+- `MultiAlpha_Common_Filter_v1_10.mqh`
+- `MultiAlpha_Filter_To_Builder_Adapter_v1_01.mqh`
+- `MultiAlpha_Builder_Filter_Context_v1_01.mqh`
+
+Strict gate update:
+- runtime Include/Common layout: **PASS**
+- Filter Evaluator v1.11 compile integration: **PASS**
+- Filter -> Builder Adapter v1.01 compile integration: **PASS**
+- Builder Filter Context v1.01 compile integration: **PASS**
+- B-P0-2E compile gate: **PASS**
+- B-P0-2E deterministic runtime gate: **NOT TESTED**
+
+Next evidence required is the NoOrders runtime output from v1.02. Expected cases include ALL_OFF, NEWS NEW/ADD/BOTH, TIME inside/outside, SPREAD BOTH, followed by:
+`[MA_FILTERE100_PASS] store=PASS evaluator=PASS scope=PASS adapter=PASS NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`
+
+No v3.45 DEMO execution behavior has been changed.

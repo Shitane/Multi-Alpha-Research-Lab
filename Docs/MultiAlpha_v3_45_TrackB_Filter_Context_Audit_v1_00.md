@@ -523,3 +523,53 @@ Next evidence required is the NoOrders runtime output from v1.02. Expected cases
 `[MA_FILTERE100_PASS] store=PASS evaluator=PASS scope=PASS adapter=PASS NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`
 
 No v3.45 DEMO execution behavior has been changed.
+
+
+## 18. B-P0-2E deterministic runtime evidence — PASS
+
+User MT5 runtime evidence on 2026-10-07 at 23:50:08.964 from:
+`MultiAlpha_Filter_Store_Evaluator_Builder_NoOrders_v1_02`
+
+Confirmed cases:
+- ALL_OFF_NEW = 1: **PASS**
+- ALL_OFF_ADD = 1: **PASS**
+- NEWS_NEW_NEW = 0: **PASS**
+- NEWS_NEW_ADD = 1: **PASS**
+- NEWS_ADD_NEW = 1: **PASS**
+- NEWS_ADD_ADD = 0: **PASS**
+- NEWS_BOTH_NEW = 0: **PASS**
+- NEWS_BOTH_ADD = 0: **PASS**
+- TIME_INSIDE_NEW = 1: **PASS**
+- TIME_OUTSIDE_NEW = 0: **PASS**
+- TIME_OUTSIDE_ADD_UNSCOPED = 1: **PASS**
+- SPREAD_BOTH_NEW = 0: **PASS**
+- SPREAD_BOTH_ADD = 0: **PASS**
+
+Final runtime line:
+`[MA_FILTERE100_PASS] store=PASS evaluator=PASS scope=PASS adapter=PASS NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`
+
+Strict result:
+- Filter Store round trip: **PASS**
+- Evaluator permission generation: **PASS**
+- NEW / ADD / BOTH scope semantics: **PASS**
+- Filter -> Builder Adapter: **PASS**
+- Builder Filter Context handoff: **PASS**
+- NoOrders safety: **PASS**
+- broker actions armed = 0: **PASS**
+- virtual not fill = 1: **PASS**
+
+Combined with B-P0-2D runtime evidence at 23:29:17.857:
+- Builder Filter Context -> generic Logic Interpreter decision participation: **PASS**
+
+Therefore the currently proven NoOrders chain is:
+
+`Filter Store -> Evaluator -> NEW/ADD Scope -> Filter Permission -> Builder Context -> FILTER reference predicate -> Logic Interpreter decision`
+
+**B-P0-2E: PASS.**
+
+Important boundary:
+This does NOT yet prove the visible FILTER Panel edits and persists the same Store values, nor that v3.45 DEMO runtime consumes this new chain. Those remain separate gates.
+
+Next gate:
+**B-P0-2F — visible FILTER Panel / UI edit -> Store persistence -> Evaluator permission round trip, NoOrders.**
+After that, connect the proven chain to saved Builder role definitions and only later to DEMO runtime.

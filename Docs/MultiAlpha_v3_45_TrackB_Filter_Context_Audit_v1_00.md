@@ -391,3 +391,46 @@ Strict result:
 This proves an evaluated Filter permission can deterministically participate in generic Builder branch decisions. It does not yet prove the visible FILTER Panel/store produces that permission.
 
 Next gate: **B-P0-2E — actual Filter Panel/Store -> evaluator/permission -> Builder Context round trip.**
+
+
+## 14. B-P0-2E source implementation — Filter Store -> Evaluator -> Builder Context
+
+Repository inspection found `Modules/Common/MultiAlpha_Common_Filter_v1_00.mqh` already contains the earlier evaluator semantics:
+- `MAFilterScopeBlocks100`
+- `MAFilterTimeInside100`
+- `MAFilterBlock100`
+- `MAFilterEvaluate100`
+
+v1.10 expanded the Filter schema but retained only config/external-state/permission/store contracts. Therefore the v1.00 evaluator semantics were migrated forward in a new versioned component rather than modifying v1.10 in place.
+
+Added:
+- `Modules/Common/MultiAlpha_Common_Filter_Evaluator_v1_11.mqh`
+- `Include/Common/MultiAlpha_Filter_To_Builder_Adapter_v1_00.mqh`
+- `Parity_Tests/MultiAlpha/MultiAlpha_Filter_Store_Evaluator_Builder_NoOrders_v1_00.mq5`
+
+Evaluator v1.11 handles the confirmed v1.10 enabled flags/scopes:
+TIME, NEWS, FOMC, NFP, CPI, MONTH END, MONTH START, QUARTER END, YEAR END, ROLLOVER, FRIDAY, SPREAD, VOLATILITY.
+
+Responsibility boundary:
+- TIME uses config + supplied datetime.
+- NEWS/FOMC/NFP/CPI/calendar/rollover/Friday/spread/volatility use `SMA_FilterExternalState110`.
+- The evaluator does not invent calendar/news/spread/ATR data acquisition.
+- Scope NEW/ADD/BOTH controls which permission is blocked.
+- first enabled blocking condition supplies the reason.
+- all filters OFF remains neutral/ALLOW.
+
+Adapter converts `SMA_FilterPermission110` to the independent `SMA_BuilderFilterContext101`.
+
+NoOrders test covers:
+- all OFF -> NEW/ADD allow,
+- NEWS NEW -> NEW blocked / ADD allowed,
+- NEWS ADD -> NEW allowed / ADD blocked,
+- NEWS BOTH -> both blocked,
+- TIME NEW 10:00-14:00 -> 11:00 allow / 15:00 NEW block / ADD unaffected,
+- SPREAD BOTH external block -> both blocked.
+
+Status:
+- source implementation: **PASS**
+- local MetaEditor compile: **NOT TESTED**
+- deterministic runtime: **NOT TESTED**
+- production v3.45 DEMO connection: **NOT CHANGED / NOT TESTED**

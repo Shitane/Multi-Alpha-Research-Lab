@@ -270,3 +270,29 @@ This test starts from an already evaluated `SMA_FilterPermission110`. The reposi
 5. prove config -> permission -> FILTER_NEW_OK/FILTER_ADD_OK decision,
 6. only after that add Picker buttons in a new Picker version,
 7. keep v3.45 DEMO runtime unchanged.
+
+
+## 10. Local compile evidence — v1.00 include-depth FAIL / v1.01 fix
+
+User MetaEditor evidence on 2026-10-07 showed:
+
+`file 'Experts\\Include\\Builder\\MultiAlpha_Builder_Part_Schema_v1_04.mqh' not found`
+
+with 1 error, 0 warnings.
+
+Root cause is source-proven path depth in the NoOrders test:
+- test location: `MQL5/Experts/Parity_Tests/MultiAlpha/`
+- v1.00 used `../../Include/...`
+- that resolves to `MQL5/Experts/Include/...`, matching the MetaEditor error.
+- correct repository/runtime depth is `../../../Include/...`, the same depth pattern used by v3.45.
+
+Resolution:
+- keep v1.00 as failed evidence,
+- create `Parity_Tests/MultiAlpha/MultiAlpha_Filter_Context_Builder_NoOrders_v1_01.mq5`,
+- change only the three Builder include paths from `../../Include/` to `../../../Include/`,
+- no Filter/Interpreter/decision behavior changed.
+
+Gate status:
+- v1.00 local compile: **FAIL — include path only**
+- v1.01 source fix: **PASS**
+- v1.01 local compile: **NOT TESTED**

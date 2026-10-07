@@ -69,7 +69,52 @@ Current endpoint:
 
 This is exactly the missing boundary that B-P0-2 must solve.
 
-## 4. Repository completeness issue discovered
+## 4. Repository location correction / source recovered
+
+Follow-up recursive Git tree inspection found the exact Filter implementation under:
+
+- `Modules/Common/MultiAlpha_Common_Filter_v1_10.mqh`
+- `Modules/Common/MultiAlpha_Filter_Panel_v1_11.mqh`
+- `Modules/Common/MultiAlpha_Slot_Filter_Preset_v1_20.mqh`
+- `Modules/Common/MultiAlpha_Filter_Preset_Panel_v1_26.mqh`
+
+The earlier lookup only checked `Include/Common/...` because that is the relative include target visible in v3.45. The source is therefore **recovered in GitHub**, not absent.
+
+However, there is a repository/path-layout inconsistency to preserve as evidence: v3.45 includes `../../../Include/Common/...`, while the tracked implementation is under `Modules/Common/...`. Do not silently rewrite this until the user's actual MetaEditor include layout is reconciled.
+
+### Exact Filter schema now confirmed
+
+`SMA_CommonFilterConfig110` supports:
+- TIME
+- NEWS
+- FOMC
+- NFP
+- CPI
+- MONTH END
+- MONTH START
+- QUARTER END
+- YEAR END
+- ROLLOVER
+- FRIDAY
+- SPREAD
+- VOLATILITY
+
+Each filter also has a scope:
+- `MA_FILTER_NEW_V110`
+- `MA_FILTER_ADD_V110`
+- `MA_FILTER_BOTH_V110`
+
+This is directly compatible with the architecture decision that Filter Panel owns configuration while strategy/runtime decides when the filter applies.
+
+The existing `SMA_FilterPermission110` already defines:
+- `new_entry`
+- `add_entry`
+- `new_reason`
+- `add_reason`
+
+Therefore the typed Filter Context should build on this existing contract instead of inventing a parallel boolean model.
+
+## 4A. Prior blocked statement superseded
 
 v3.45 includes these files through a relative path that resolves outside the repository root used by the checked-in EA path:
 
@@ -78,13 +123,7 @@ v3.45 includes these files through a relative path that resolves outside the rep
 - `../../../Include/Common/MultiAlpha_Slot_Filter_Preset_v1_20.mqh`
 - `../../../Include/Common/MultiAlpha_Filter_Preset_Panel_v1_26.mqh`
 
-The GitHub repository currently does not expose these files at `Include/Common/...` through the connector/API lookup used in this audit.
-
-Therefore the exact fields inside `SMA_CommonFilterConfig110` and exact UI controls in `CMultiAlphaFilterPanel111` cannot be safely inferred from GitHub alone at this gate.
-
-**Do not invent the Filter config schema.**
-
-Before implementing a typed Runtime Filter Context, the missing Common filter include sources must be located/checked into the repository or their actual repository path must be identified.
+The exact files are now located under `Modules/Common/`. The earlier BLOCKED reason is resolved. The remaining issue is the `Include/Common` vs `Modules/Common` path/layout mismatch, which must be handled deliberately rather than guessed.
 
 ## 5. Required target interface
 
@@ -134,7 +173,7 @@ Safe migration sequence:
 ## 7. B-P0-2 sub-gates
 
 ### B-P0-2A — locate and audit existing Filter implementation
-Current status: **BLOCKED by missing/unresolved Common include source in GitHub.**
+Current status: **PASS by source.** Exact Filter config/panel/preset sources were recovered under `Modules/Common/`.
 
 Required files:
 - `MultiAlpha_Common_Filter_v1_10.mqh`
@@ -143,7 +182,17 @@ Required files:
 - `MultiAlpha_Filter_Preset_Panel_v1_26.mqh`
 
 ### B-P0-2B — define typed Filter Context
-Not started until 2A is resolved.
+**DESIGN READY.** Reuse the existing `SMA_FilterPermission110` contract as the minimum runtime permission boundary.
+
+Initial mapping:
+- Filter engine evaluates all enabled configured filters.
+- Scope NEW affects `permission.new_entry`.
+- Scope ADD affects `permission.add_entry`.
+- Scope BOTH affects both.
+- Disabled filters are neutral/pass.
+- EXIT and Global Safety are unaffected.
+
+For Logic Builder integration, do not duplicate every filter parameter into a Part. The first generic bridge should expose filter permission/state to the Interpreter. Exact Part granularity (single aggregate permission Part vs named per-filter reference Parts) must be decided from the desired Builder composition semantics before code change.
 
 ### B-P0-2C — add F-reference Parts to schema/picker
 Not started until 2B.
@@ -160,4 +209,4 @@ No MQL5 behavior code is changed in this gate.
 
 Reason: implementing guessed Filter fields would violate the evidence-first policy and could create a second incompatible filter model.
 
-The next correct action is to recover/locate the exact Common filter include files used by the user's compiling v3.45 environment and place/identify them in GitHub.
+The Filter source has now been recovered in GitHub under `Modules/Common/`. The next correct action is B-P0-2B/C: preserve the existing schema/scope contract, reconcile the repository include path deliberately, and add a NoOrders Filter Context/Interpreter bridge before any DEMO runtime replacement.

@@ -122,3 +122,17 @@ Final: `[MA_DISK100_PASS] disk_roundtrip=PASS corrupt_fail_closed=PASS NO_ORDERS
 **Gate A6 PASS for same-run EA SLOT-only disk roundtrip and truncated-file rejection.** The test rewrites its test file to a deliberately truncated fixture, and deletes it afterward. Actual terminal restart/reinitialization persistence, full LOGIC SLOT (100 Parts) definitions, FILTER data, arbitrary corruption/checksum validation, crash-safe rename guarantees, and live runtime remain **NOT PROVEN**. v3_45 untouched.
 
 **Next:** inspect and implement LOGIC SLOT 100×100 versioned persistence with fail-closed loading, followed by multi-run restart evidence; avoid declaring the full workspace persistence complete based on this gate.
+
+
+## Gate A7 — LOGIC SLOT 4 roles × 100 slots × 100 Parts disk roundtrip (2026-10-08)
+
+Source: `Include/Builder/MultiAlpha_LogicSlot_Disk_v1_00.mqh`.
+Test: `Parity_Tests/MultiAlpha/MultiAlpha_LogicSlot100_Disk_NoOrders_v1_00.mq5`.
+User MetaEditor screenshot: **0 errors, 0 warnings** (656 ms).
+User MT5 tester log: **2026.10.08 21:09:29.440–.460**, XAUUSD-m,M1, **12/12 [MA_LOGICDISK100_CASE] PASS**:
+SAVE_GRID_SLOT100, SAVE_MANAGE_SLOT51, DISK_WRITE, DISK_READ, RESTORE_GRID_PART100, RESTORE_MANAGE_41_100, ROLE_ISOLATION, UNSAVED_99, BAD_FILENAME_REJECT, CORRUPT_FIXTURE, TRUNCATED_REJECT, FAILED_LOAD_PRESERVES_GRID.
+Final: `[MA_LOGICDISK100_PASS] roles=4 slots_per_role=100 parts=100 disk_roundtrip=PASS truncated_fail_closed=PASS NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**Gate A7 PASS for representative LOGIC SLOT in-run disk roundtrip and truncated-file rejection only.** No all-400-populated stress proof, checksum/bit-flip detection, restart proof, FILTER persistence, multi-file transactional consistency, role Interpreter runtime validity, or real orders. Test uses placeholder Parts to verify storage, not validated trading grammar. v3_45 unchanged.
+
+**Next:** versioned checksums/bit-flip tests, multi-file consistency between EA SLOT refs and LOGIC definitions, and restart proof; preserve fail-closed semantics.

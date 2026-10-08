@@ -187,3 +187,13 @@ Final: `[MA_VERIFIED_LOAD_PASS] verify_before_load=PASS reject_preserves_destina
 **Gate A11 PASS for tested NoOrders fixtures only.** The separate verified-pair loader verifies manifest, stages EA and LOGIC parsing, reverifies manifest, and then applies both stores. Wrong generation, changed EA snapshot, and missing manifest are rejected while existing settings remain. **NOT PROVEN:** actual startup path calling this loader, concurrent modification during commit, process crash atomicity, semantic role validity, GRID OFF orange lamp, generic GRID runtime, live orders, or full O01 parity. v3_45 unchanged.
 
 **Next:** test GRID OFF semantic validity + orange lamp in the saved four-role aggregation without treating structural resolution alone as runnable proof.
+
+
+## Gate A12 — Saved GRID OFF lamp / EA preview aggregation (2026-10-08)
+
+Sources: `Include/Builder/MultiAlpha_Saved_Grid_Lamp100_v1_00.mqh`, `Parity_Tests/MultiAlpha/MultiAlpha_SavedGridLamp100_NoOrders_v1_00.mq5`.
+User MetaEditor screenshot: **0 errors, 0 warnings** (1634 ms).
+User MT5 Strategy Tester log: **2026.10.08 21:48:02.940**, XAUUSD-m,M1, **15/15 [MA_GRID_LAMP100_CASE] PASS**: UNSAVED_OFF, INVALID_REF_RED, SAVE_GRID_OFF, GRID_ORANGE, EA_UNSAVED, EA_SAVE, EA_PREVIEW_ORANGE, NOT_RUNNABLE, SAVE_CONFLICT, CONFLICT_RED, EA_CONFLICT_RED, SAVE_DISABLED, DISABLED_RED, EA_OFF_SAVE, EA_OFF_LAMP.
+Final: `[MA_GRID_LAMP100_PASS] cases=15 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**Gate A12 PASS only for tested saved-definition lamp classification and EA preview.** GRID OFF is ORANGE, unsaved OFF, invalid/conflicting/disabled RED; EA preview inherits GRID OFF orange while not asserting runnable when other role semantics remain unproven. **NOT PROVEN:** actual UI lamp rendering, complete ENTRY/MANAGE/EXIT runtime semantics, generic GRID ON execution, live orders, or original O01 parity. v3_45 unchanged.

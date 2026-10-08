@@ -174,3 +174,16 @@ EA_SETUP; LOGIC_SETUP; EA_SNAPSHOT_WRITE; LOGIC_SNAPSHOT_WRITE; MANIFEST_WRITE_G
 Final: `[MA_PAIR100_PASS] generation_gate=PASS bitflip_detection=PASS NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
 
 **Gate A10 PASS (tested fixture only).** Manifest binds the EA and LOGIC snapshots with generation and size/Adler32 fingerprints, rejecting stale snapshot, wrong expected generation, single-byte change, or missing manifest. **NOT PROVEN:** startup fail-closed integration, power-loss/partial-write recovery, cryptographic tamper resistance, multi-process concurrency, comprehensive 100x400 persistence stress, semantic role validation, GRID OFF orange lamp, broker trading, or original O01 parity. v3_45 unchanged.
+
+
+## Gate A11 — Verified pair load and destination preservation (2026-10-08)
+
+Sources: `Include/Builder/MultiAlpha_Verified_Pair_Load_v1_00.mqh` and `Parity_Tests/MultiAlpha/MultiAlpha_VerifiedPairLoad_NoOrders_v1_00.mq5`.
+User MetaEditor screenshot: **0 errors, 0 warnings** (922 ms).
+User MT5 Strategy Tester log: **2026.10.08 21:38:31.815–.846**, XAUUSD-m,M1, **17/17 [MA_VERIFIED_LOAD_CASE] PASS**:
+SOURCE_EA; SOURCE_GRID; DISK_EA; DISK_LOGIC; MANIFEST; DEST_SENTINEL; WRONG_GEN_REJECT; WRONG_GEN_PRESERVES; VALID_LOAD; VALID_EA_REPLACED; VALID_GRID_RESTORED; SOURCE_EA_CHANGE; STALE_DISK_WRITE; STALE_REJECT; STALE_PRESERVES_BOTH; MISSING_MANIFEST_REJECT; MISSING_PRESERVES.
+Final: `[MA_VERIFIED_LOAD_PASS] verify_before_load=PASS reject_preserves_destinations=PASS NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**Gate A11 PASS for tested NoOrders fixtures only.** The separate verified-pair loader verifies manifest, stages EA and LOGIC parsing, reverifies manifest, and then applies both stores. Wrong generation, changed EA snapshot, and missing manifest are rejected while existing settings remain. **NOT PROVEN:** actual startup path calling this loader, concurrent modification during commit, process crash atomicity, semantic role validity, GRID OFF orange lamp, generic GRID runtime, live orders, or full O01 parity. v3_45 unchanged.
+
+**Next:** test GRID OFF semantic validity + orange lamp in the saved four-role aggregation without treating structural resolution alone as runnable proof.

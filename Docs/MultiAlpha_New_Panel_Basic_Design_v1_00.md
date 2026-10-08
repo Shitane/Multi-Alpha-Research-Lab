@@ -377,3 +377,23 @@ This section supersedes any earlier assumption that GRID OFF is primarily a brok
 - Status/lamp evaluation is UI-independent and reusable in the future left-side single panel. Existing Builder/runtime completion comes first; avoid UI rewrite before core proof.
 - The experimental `MultiAlpha_Grid_Off_Gate_v1_00.mqh` and `MultiAlpha_GridOff_Guard_NoOrders_v1_00.mq5` are **superseded, not approved for production integration**. Do not connect their extra veto to the v3_45 demo.
 - Next development gate: versioned GRID mode/validity/lamp evaluator + NoOrders tests, followed by independent four-role semantic validity, saved-slot integration, and later actual generic runtime behavior. Do not mark UI lamps or live execution PASS from unit tests.
+
+
+## 16. FIXED FOUNDATION — Multi-Alpha 100 SLOT / 100 PARTS (user-confirmed 2026-10-08)
+
+**This section supersedes all earlier capacity figures throughout this document. It is a fixed product requirement, not a claim of completed implementation.**
+
+- EA SLOT: **100** independent EA configuration slots, IDs #001–#100 (replaces #01–#60).
+- LOGIC SLOT: **100 per role**, independently for ENTRY, GRID, MANAGE, EXIT; **400 total**, IDs #001–#100 each.
+- EA PARTS: **100 ordered Parts per LOGIC SLOT** for each role (replaces 40).
+- EA SLOT and LOGIC SLOT identities are separate. EA SLOT references four independent role-specific LOGIC SLOT IDs.
+- EA SLOT and LOGIC SLOT paging: 20 visible per page, five pages (#001–#020, #021–#040, #041–#060, #061–#080, #081–#100).
+- EA PARTS editor may page 20 per view; all 100 Parts must be editable, savable, restorable, and interpretable in order.
+- EA SLOT SAVE ALL covers all **100** EA SLOT configurations, including FILTER settings. LOGIC SLOT SAVE ALL covers all **400** role-specific definitions, each with **100** ordered Parts and parameters.
+- Preserve existing GRID OFF ORANGE semantics, independent ON/OFF, fail-closed validity, no substitution, global DD safety, portable backup and restoration requirements.
+- Common centralized capacity constants are required for **new implementation**; avoid independent hardcoded 40/50/60/100 assumptions. Use explicit bounds and consistent 1-based UI IDs vs 0-based storage.
+- Migration: existing 40-Part definitions map to Parts #001–#040 unchanged; Parts #041–#100 default EMPTY with blank parameters. Never silently truncate or change Part order. Old 50-slot/60-slot persisted formats require explicit migration/version checks rather than implicit reinterpretation.
+- Compatibility gates: source inventory; 1st/40th/41st/100th Part and 1st/50th/51st/60th/61st/100th slot boundary tests; save/load/roundtrip; 40→100 behavioral parity; interpreter order and AND/OR correctness; role isolation; invalid reference fail-closed; restore/backup; panel paging; runtime NoOrders. Do not claim production ready before evidence.
+- Capacity **does not** imply 100 simultaneous trading strategies are performance-validated.
+- Preserve the current v3_45 demo EA unchanged. Implement new versioned modules and NoOrders tests; only integrate into live runtime after compile, NoOrders, compatibility and demo validation.
+- Current B-P0-2K structural grammar is 40-Part based and **must be migrated and revalidated** before it is relied upon in the 100-Part foundation.

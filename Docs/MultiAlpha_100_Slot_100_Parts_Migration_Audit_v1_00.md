@@ -214,3 +214,12 @@ Final: `[MA_FOUR_ROLE100_PASS] cases=15 structural_only=1 runtime_certified=0 NO
 Test: `Parity_Tests/MultiAlpha/MultiAlpha_SavedEntry100_Evaluate_NoOrders_v1_00.mq5`; MetaEditor screenshot 0 errors / 0 warnings (713 ms). User MT5 tester XAUUSD-m,M1, 2026.10.08 22:02:25.144–.145: **12/12 `[MA_SAVED_ENTRY100_CASE]` PASS**: UNSAVED_REJECT, SAVE_SLOT100, BUY_BRANCH, SELL_BRANCH, BOTH_BRANCHES, NEITHER_BRANCH, SAVE_PART100, PART100_BUY, SAVE_ACTION_ONLY, ACTION_ONLY_REJECT, SAVE_DISABLED, DISABLED_REJECT. Final `[MA_SAVED_ENTRY100_PASS] cases=12 saved_entry_vector_evaluation=PASS indicator_values_external=1 runtime_certified=0 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
 
 **A14-1 PASS only for saved ENTRY truth-vector evaluation.** Indicator values are supplied externally as booleans; actual RSI/ATR computation, live order handling, original O01 parity, MANAGE/EXIT runtime semantics and EA SLOT GREEN/runnable are **NOT PROVEN**. Stable v3_45 unchanged.
+
+
+## Gate A14-2 — MANAGE / EXIT 100-Part intent-only evaluation (2026-10-08)
+
+Sources: `Include/Builder/MultiAlpha_Manage_Exit_Intent100_v1_00.mqh`, `Parity_Tests/MultiAlpha/MultiAlpha_ManageExit100_Intent_NoOrders_v1_00.mq5`.
+MetaEditor screenshot: **0 errors / 0 warnings** (1307 ms). User Strategy Tester log: **2026.10.08 23:33:07.240**, XAUUSD-m,M1, **10/10 `[MA_ME_INTENT100_CASE]` PASS**: MANAGE_TRUE, MANAGE_FALSE, EXIT_TRUE, EXIT_FALSE, OR_REJECT, MULTI_ACTION_REJECT, ACTION_FIRST_REJECT, SHORT_FLAGS_REJECT, WRONG_ROLE_REJECT, EXIT_RECOVERY.
+Final: `[MA_ME_INTENT100_PASS] cases=10 intent_only=1 runtime_certified=0 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**A14-2 PASS for limited boolean-condition-to-action-intent semantics only.** This implementation conservatively rejects OR and multiple actions, and does not execute trailing, basket management, close, position modification, or orders. Conditions are supplied as external truth flags, not calculated from market or position state. Saved-definition integration, original O01 parity, full runtime semantics and GREEN/runnable certification **NOT PROVEN**. v3_45 unchanged.

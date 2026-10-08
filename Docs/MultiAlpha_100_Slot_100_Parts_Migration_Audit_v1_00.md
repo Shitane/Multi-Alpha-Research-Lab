@@ -80,3 +80,17 @@ Final: `[MA_ROLE100_PASS] structural_only=PASS RUNTIME_SEMANTICS_PROVEN=0 NO_ORD
 **Gate A3 structural-only PASS.** MANAGE and EXIT generic runtime action semantics, GREEN validity, full AND/OR semantics, and O01 parity **NOT PROVEN**. Prior ENTRY A2 10/10 PASS reconfirmed from same user log.
 
 **Next:** inspect and version GRID 100-Part validation/decision. Legacy GRID interpreter is fixed 40 and enforces one exact 33-Part O01 plan; GRID OFF is a distinct valid no-grid mode with ORANGE status, not a generic addition veto. Do not certify generic GRID until evidence.
+
+
+## Gate A4 — GRID 100-Part compatibility gate (2026-10-08)
+
+Source: `Include/Builder/MultiAlpha_Grid100_Compatibility_Gate_v1_00.mqh`.
+Test: `Parity_Tests/MultiAlpha/MultiAlpha_Grid100_Compatibility_NoOrders_v1_00.mq5`.
+User MetaEditor screenshot: **0 errors, 0 warnings** (1176 ms).
+User MT5 log: **2026.10.08 20:53:58.697–.698**, XAUUSD-m,M1, **10/10 [MA_GRID100_CASE] PASS**:
+GRID_OFF_AT_PART100, GRID_OFF_NO_ADD, GRID_OFF_SELL_NO_ADD, GRID_OFF_CONFLICT, GRID_OFF_DUPLICATE, UNPROVEN_PART41_REJECT, GRID_OFF_PARAMS_REJECT, EMPTY_PARAMS_REJECT, EMPTY_GRID_REJECT, SHORT_40_REJECT.
+Final: `[MA_GRID100_PASS] grid_off=PASS fail_closed=PASS LEGACY_O01_RUNTIME_PARITY_PROVEN=0 GENERIC_GRID_RUNTIME_PROVEN=0 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**Gate A4 PASS only for GRID OFF and conservative fail-closed rejection tests.** Legacy O01 GRID runtime parity and arbitrary generic 100-Part GRID semantics **NOT PROVEN**. The test does not certify generic GRID green-lamp eligibility or live trading. v3_45 untouched.
+
+**Next priority:** implement/verify independent 100 EA SLOT configuration storage and four-role references, with 100th EA SLOT and 50/51/60/61 boundary tests. Avoid conflating EA SLOT count with the already-tested 100-per-role LOGIC SLOT store.

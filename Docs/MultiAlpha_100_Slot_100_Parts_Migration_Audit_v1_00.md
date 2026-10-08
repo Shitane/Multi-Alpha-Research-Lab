@@ -108,3 +108,17 @@ Final: `[MA_EASLOT100_PASS] ea_slots=100 refs=4 boundaries=PASS NO_ORDERS=1 BROK
 **Gate A5 PASS for in-memory EA SLOT storage only.** LOGIC SLOT definition resolution, four-role Interpreter semantic validity, FILTER mapping, disk persistence/restart restore, multi-slot runtime, and live orders **NOT PROVEN**. v3_45 unchanged.
 
 **Next gate A6:** design and verify disk persistence/reload with schema version and atomicity/fail-closed handling, preserving separate EA SLOT IDs and per-role LOGIC SLOT IDs; do not wire to v3_45 until verified.
+
+
+## Gate A6 — EA SLOT 100 disk roundtrip and truncated-file rejection (2026-10-08)
+
+Source: `Include/Builder/MultiAlpha_EASlot_Disk_v1_00.mqh`.
+Test: `Parity_Tests/MultiAlpha/MultiAlpha_EASlot100_Disk_NoOrders_v1_00.mq5`.
+User MetaEditor screenshot: **0 errors, 0 warnings** (624 ms).
+User MT5 tester log: **2026.10.08 21:01:27.428–.447**, XAUUSD-m,M1, **11/11 [MA_DISK100_CASE] PASS**:
+SAVE_SLOT100_MEMORY, SAVE_SLOT51_MEMORY, DISK_WRITE, DISK_READ, RESTORE_100, RESTORE_51, UNSAVED_99, INVALID_FILENAME_REJECT, CORRUPT_FIXTURE_WRITE, TRUNCATED_REJECT, FAILED_LOAD_PRESERVES_100.
+Final: `[MA_DISK100_PASS] disk_roundtrip=PASS corrupt_fail_closed=PASS NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**Gate A6 PASS for same-run EA SLOT-only disk roundtrip and truncated-file rejection.** The test rewrites its test file to a deliberately truncated fixture, and deletes it afterward. Actual terminal restart/reinitialization persistence, full LOGIC SLOT (100 Parts) definitions, FILTER data, arbitrary corruption/checksum validation, crash-safe rename guarantees, and live runtime remain **NOT PROVEN**. v3_45 untouched.
+
+**Next:** inspect and implement LOGIC SLOT 100×100 versioned persistence with fail-closed loading, followed by multi-run restart evidence; avoid declaring the full workspace persistence complete based on this gate.

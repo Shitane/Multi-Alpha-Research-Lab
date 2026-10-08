@@ -150,3 +150,16 @@ Final: `[MA_REF100_PASS] structural_refs=PASS semantics_proven=0 NO_ORDERS=1 BRO
 **Gate A8 PASS for in-memory structural reference resolution only.** EA LOGIC references are 1..100 and LOGIC library indices 0..99. The gate rejects missing/disabled roles and EA OFF. This does NOT establish Interpreter semantics, GRID OFF valid orange handling, persistence integrity across separate files, filter resolution, or runnable/live execution. v3_45 unchanged.
 
 **Next:** address semantic validity and GRID OFF behavior explicitly before using structural resolution for runnable/lamp gating; separately test restored EA/LOGIC snapshots together and corruption/consistency.
+
+
+## Gate A9 — Restored EA SLOT + LOGIC SLOT cross-file references (2026-10-08)
+
+Test: `Parity_Tests/MultiAlpha/MultiAlpha_RestoredRef100_NoOrders_v1_00.mq5`.
+User MetaEditor screenshot: **0 errors, 0 warnings** (866 ms).
+User MT5 tester log: **2026.10.08 21:21:50.262–.277**, XAUUSD-m,M1, **26/26 [MA_RESTORE_REF_CASE] PASS**:
+EA100_SOURCE_SAVE; ROLE_SOURCE_SAVE_0..3; EA_DISK_SAVE; LOGIC_DISK_SAVE; EA_DISK_RESTORE; LOGIC_DISK_RESTORE; RESTORED_FOUR_REFS; RESTORED_STRUCTURAL_ONLY; GRID_OFF_PART100_PRESERVED; GRID_OFF_NOT_UNSAVED; GRID_OFF_NOT_GENERIC_OFF; REMOVE_REFERENCED_EXIT; MISSING_EXIT_REJECT; MISSING_EXIT_REASON; RESTORE_EXIT_MEMORY; DISABLE_MANAGE; DISABLED_MANAGE_REJECT; DISABLED_MANAGE_REASON; RE_ENABLE_MANAGE; EA_DISABLE; EA_OFF_REJECT; EA_OFF_REASON.
+Final: `[MA_RESTORE_REF_PASS] cross_file_refs=PASS grid_off_storage=PASS semantics_proven=0 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**Gate A9 PASS only for representative same-run restored cross-file structural references.** GRID OFF storage remains saved/enabled, but GRID OFF semantic validation/orange lamp is NOT proven. No checksum or cross-generation snapshot consistency, terminal restart, complete 400-definition stress, FILTER persistence, or live orders. v3_45 unchanged.
+
+**Next:** snapshot generation consistency and integrity checks, then GRID OFF semantic/lamp integration before runnable certification.

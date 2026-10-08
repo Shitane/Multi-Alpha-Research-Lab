@@ -163,3 +163,14 @@ Final: `[MA_RESTORE_REF_PASS] cross_file_refs=PASS grid_off_storage=PASS semanti
 **Gate A9 PASS only for representative same-run restored cross-file structural references.** GRID OFF storage remains saved/enabled, but GRID OFF semantic validation/orange lamp is NOT proven. No checksum or cross-generation snapshot consistency, terminal restart, complete 400-definition stress, FILTER persistence, or live orders. v3_45 unchanged.
 
 **Next:** snapshot generation consistency and integrity checks, then GRID OFF semantic/lamp integration before runnable certification.
+
+
+## Gate A10 — Snapshot pair generation and accidental corruption detection (2026-10-08)
+
+Sources: `Include/Builder/MultiAlpha_Snapshot_Manifest_v1_00.mqh` (warning fix commit `74da6c1`), `Parity_Tests/MultiAlpha/MultiAlpha_SnapshotPair100_NoOrders_v1_00.mq5`.
+User MetaEditor screenshot: **0 errors / 0 warnings** (761 ms).
+User MT5 Strategy Tester log: **2026.10.08 21:33:13.729–.766**, XAUUSD-m,M1, **15/15 [MA_PAIR100_CASE] PASS**:
+EA_SETUP; LOGIC_SETUP; EA_SNAPSHOT_WRITE; LOGIC_SNAPSHOT_WRITE; MANIFEST_WRITE_G1; PAIR_G1_VALID; WRONG_GENERATION_REJECT; EA_CHANGE; EA_REWRITE; STALE_EA_REJECT; MANIFEST_WRITE_G2; PAIR_G2_VALID; BITFLIP_FIXTURE; BITFLIP_REJECT; MISSING_MANIFEST_REJECT.
+Final: `[MA_PAIR100_PASS] generation_gate=PASS bitflip_detection=PASS NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**Gate A10 PASS (tested fixture only).** Manifest binds the EA and LOGIC snapshots with generation and size/Adler32 fingerprints, rejecting stale snapshot, wrong expected generation, single-byte change, or missing manifest. **NOT PROVEN:** startup fail-closed integration, power-loss/partial-write recovery, cryptographic tamper resistance, multi-process concurrency, comprehensive 100x400 persistence stress, semantic role validation, GRID OFF orange lamp, broker trading, or original O01 parity. v3_45 unchanged.

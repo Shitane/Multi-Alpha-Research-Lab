@@ -52,3 +52,17 @@ Observed cases: SAVE_SLOT_100, LOAD_SLOT_100, PART_BOUNDARIES, META_PRESERVED, R
 **Gate A1 PASS — in-memory store test only.** This does not certify EA SLOT configuration capacity, disk persistence, restart restore, UI, Interpreter 100-Part evaluation, four-role runtime execution, or 40→100 strategy-decision parity. Legacy 2G/2H/2I/2J PASS logs were also provided, but those are legacy 40-Part gates and must not be used as 100-Part proof.
 
 **Next gate A2:** audit and version 100-Part ENTRY Interpreter; compare 40→100 branch/action outcomes and boundaries, NoOrders. Preserve v3_45 unchanged.
+
+
+## Gate A2 — ENTRY 100-Part Interpreter evidence (2026-10-08)
+
+Test: `Parity_Tests/MultiAlpha/MultiAlpha_Entry100_Interpreter_NoOrders_v1_00.mq5`.
+Source: `Include/Builder/MultiAlpha_Builder_Interpreter_v1_06.mqh`.
+User MetaEditor screenshot: **0 errors, 0 warnings** (783 ms).
+User MT5 log: **2026.10.08 20:42:29.103**, XAUUSD-m,M1, **10/10 [MA_ENTRY100_CASE] PASS**:
+LEGACY_40_EVALUATES, EXTENDED_100_EVALUATES, LEGACY_40_TO_100_PARITY, SELL_BRANCH_PARITY, PART_100_ACTION, PART_100_SELL, CROSS_40_41_BOUNDARY, TRAILING_OR_REJECT, ACTION_ONLY_REJECT, SHORT_40_REJECT.
+Final line: `[MA_ENTRY100_PASS] legacy_parity=PASS part100=PASS NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**Gate A2 PASS for tested ENTRY branches and boundaries only.** This does not prove full O01 source parity, 100-Part schema coverage, live trading, persistence, GRID/MANAGE/EXIT Interpreter semantics, or UI wiring. v3_45 unchanged.
+
+**Next gate:** inspect existing GRID/MANAGE/EXIT schema and runtime action evaluators; migrate structural grammar to 100 Parts without prematurely marking semantic validity GREEN. EA SLOT 100 configuration still pending.

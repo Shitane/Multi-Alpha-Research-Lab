@@ -37,3 +37,18 @@ E. Versioned disk persistence and restore/portable backup.
 F. UI paging and actual runtime wiring; NoOrders, demo parity, performance tests.
 
 Every step requires explicit compile and runtime evidence before marking PASS.
+
+
+## Gate A1 — user-provided MetaEditor and MT5 evidence (2026-10-08)
+
+Test EA: `Parity_Tests/MultiAlpha/MultiAlpha_Capacity100_Store_NoOrders_v1_00.mq5`.
+Source under test: `Include/Builder/MultiAlpha_Module_Library_Store_v1_01.mqh`.
+MetaEditor screenshot: **0 errors, 0 warnings** (578 ms).
+Runtime user log: **2026.10.08 20:35:27.424**, XAUUSD-m,M1, **13/13 [MA_CAP100_CASE] PASS**, final:
+`[MA_CAP100_PASS] role_slots=100 parts=100 legacy_import=PASS NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+Observed cases: SAVE_SLOT_100, LOAD_SLOT_100, PART_BOUNDARIES, META_PRESERVED, ROLE_ISOLATED, SLOT_101_REJECTED, SLOT_ZERO_INDEX_VALID, WRONG_ROLE_REJECTED, IMPORT_40, LOAD_IMPORT, LEGACY_40_PLUS_EMPTY_60, ROLE_SLOT_INDEPENDENT, REJECT_40_DIRECT_SAVE.
+
+**Gate A1 PASS — in-memory store test only.** This does not certify EA SLOT configuration capacity, disk persistence, restart restore, UI, Interpreter 100-Part evaluation, four-role runtime execution, or 40→100 strategy-decision parity. Legacy 2G/2H/2I/2J PASS logs were also provided, but those are legacy 40-Part gates and must not be used as 100-Part proof.
+
+**Next gate A2:** audit and version 100-Part ENTRY Interpreter; compare 40→100 branch/action outcomes and boundaries, NoOrders. Preserve v3_45 unchanged.

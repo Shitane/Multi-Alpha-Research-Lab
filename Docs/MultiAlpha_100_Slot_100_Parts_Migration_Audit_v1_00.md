@@ -66,3 +66,17 @@ Final line: `[MA_ENTRY100_PASS] legacy_parity=PASS part100=PASS NO_ORDERS=1 BROK
 **Gate A2 PASS for tested ENTRY branches and boundaries only.** This does not prove full O01 source parity, 100-Part schema coverage, live trading, persistence, GRID/MANAGE/EXIT Interpreter semantics, or UI wiring. v3_45 unchanged.
 
 **Next gate:** inspect existing GRID/MANAGE/EXIT schema and runtime action evaluators; migrate structural grammar to 100 Parts without prematurely marking semantic validity GREEN. EA SLOT 100 configuration still pending.
+
+
+## Gate A3 — MANAGE / EXIT 100-Part structural grammar (2026-10-08)
+
+Source: `Include/Builder/MultiAlpha_Manage_Exit_Grammar_v1_01.mqh`.
+Test: `Parity_Tests/MultiAlpha/MultiAlpha_ManageExit100_Grammar_NoOrders_v1_00.mq5`.
+User MetaEditor screenshot: **0 errors, 0 warnings** (1229 ms).
+User MT5 Runtime log **2026.10.08 20:49:46.768**, XAUUSD-m,M1: **10/10 [MA_ROLE100_CASE] PASS**:
+MANAGE_EMPTY, MANAGE_PART100, MANAGE_WRONG_ROLE, EXIT_CROSS_40_41, EXIT_TRAILING_OPERATOR, EXIT_ACTION_ONLY, EXIT_CONDITION_ONLY, INVALID_ROLE, SHORT_40_REJECT, EMPTY_PARAMS_REJECT.
+Final: `[MA_ROLE100_PASS] structural_only=PASS RUNTIME_SEMANTICS_PROVEN=0 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**Gate A3 structural-only PASS.** MANAGE and EXIT generic runtime action semantics, GREEN validity, full AND/OR semantics, and O01 parity **NOT PROVEN**. Prior ENTRY A2 10/10 PASS reconfirmed from same user log.
+
+**Next:** inspect and version GRID 100-Part validation/decision. Legacy GRID interpreter is fixed 40 and enforces one exact 33-Part O01 plan; GRID OFF is a distinct valid no-grid mode with ORANGE status, not a generic addition veto. Do not certify generic GRID until evidence.

@@ -11,8 +11,9 @@ class CMultiAlphaSnapshotManifest100
  {
   int h=FileOpen(filename,FILE_READ|FILE_BIN);
   if(h==INVALID_HANDLE)return false;
-  bytes=FileSize(h);
-  if(bytes<=0){FileClose(h);return false;}
+  ulong file_bytes=FileSize(h);
+  if(file_bytes==0 || file_bytes>9223372036854775807){FileClose(h);return false;}
+  bytes=(long)file_bytes;
   ulong a=1,b=0;
   for(long i=0;i<bytes;i++)
   {

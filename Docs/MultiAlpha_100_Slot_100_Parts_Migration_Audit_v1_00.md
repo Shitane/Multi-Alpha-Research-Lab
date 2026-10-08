@@ -231,3 +231,16 @@ Sources: `Include/Builder/MultiAlpha_Saved_Manage_Exit_Intent100_v1_00.mqh`, `Pa
 User MetaEditor screenshot: **0 errors / 0 warnings** (1428 ms). User MT5 Strategy Tester log: **2026.10.08 23:38:21.664**, XAUUSD-m,M1, **18/18 `[MA_SAVED_ME100_CASE]` PASS**: UNSAVED_REJECT, SAVE_MANAGE100, MANAGE_TRUE, MANAGE_FALSE, SAVE_EXIT100, EXIT_TRUE, EXIT_FALSE, ROLE_MISMATCH_UNSAVED, WRONG_ROLE_REJECT, INDEX_100_REJECT, INDEX_NEGATIVE_REJECT, SHORT_FLAGS_REJECT, SAVE_DISABLED, DISABLED_REJECT, SAVE_INVALID, INVALID_REJECT, RECOVERY_SAVE, RECOVERY_EVALUATE.
 Final: `[MA_SAVED_ME100_PASS] cases=18 saved_intent_only=1 runtime_certified=0 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
 **A14-3 PASS limited saved in-memory definition -> external condition flags -> action intent only.** Not a proof of actual indicator/position condition evaluation, broker operations, full MANAGE/EXIT runtime semantics, restored disk-to-runtime execution, O01 original parity, or GREEN/runnable eligibility. Keep v3_45 unchanged.
+
+
+## Gate A14-9 — Existing owned-position cross-check (2026-10-09)
+
+Source: `Parity_Tests/MultiAlpha/MultiAlpha_MEOwnedMatch_NoOrders_v1_00.mq5`, using `Include/Builder/MultiAlpha_Saved_ME_Metrics_Gate_v1_00.mqh`.
+User MetaEditor screenshot: **0 errors, 0 warnings** (1474 ms).
+User MT5 tester log: **2026.10.09 00:36:12.672–.673**, XAUUSD-m,M1, **13/13 [MA_OWNED_MATCH_CASE] PASS**: METRICS_READ, BUY_COUNT_MATCH, SELL_COUNT_MATCH, BUY_LOTS_MATCH, SELL_LOTS_MATCH, SAVE_MANAGE, MANAGE_MATCH_TRUE, SAVE_MANAGE_FALSE, MANAGE_MATCH_FALSE, SAVE_EXIT, EXIT_MATCH_TRUE, SAVE_EXIT_FALSE, EXIT_MATCH_FALSE.
+Info: `symbol=XAUUSD-m magic=987654321 buy=0 sell=0 other_positions=1 account_positions=1`.
+Final: `[MA_OWNED_MATCH_INCONCLUSIVE] cases=13 zero_owned_positions=1 real_matching_positions_proven=0 runtime_certified=0 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0`.
+
+**Gate A14-9 INCONCLUSIVE for real matching owned-position coverage, despite 13/13 fixture assertions PASS.** The account had one position but none matched BOTH the tested symbol and magic; the true/false predicates were exercised at zero owned counts only. Do not label this real-position matching PASS, runtime certified, GREEN/runnable, or trading execution. Existing v3_45 unchanged. No new orders should be created just for this test.
+
+**Next:** prove nonzero owned-count/lot scenarios using read-only existing matching positions when available, or a separate deterministic synthetic snapshot test clearly labeled as synthetic (never a substitute for actual owned-position evidence). Then continue semantic/O01 parity and runtime gating.

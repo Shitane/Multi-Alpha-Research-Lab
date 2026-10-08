@@ -197,3 +197,13 @@ User MT5 Strategy Tester log: **2026.10.08 21:48:02.940**, XAUUSD-m,M1, **15/15 
 Final: `[MA_GRID_LAMP100_PASS] cases=15 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
 
 **Gate A12 PASS only for tested saved-definition lamp classification and EA preview.** GRID OFF is ORANGE, unsaved OFF, invalid/conflicting/disabled RED; EA preview inherits GRID OFF orange while not asserting runnable when other role semantics remain unproven. **NOT PROVEN:** actual UI lamp rendering, complete ENTRY/MANAGE/EXIT runtime semantics, generic GRID ON execution, live orders, or original O01 parity. v3_45 unchanged.
+
+
+## Gate A13 — Saved four-role structural audit and fail-closed lamps (2026-10-08)
+
+Sources: `Include/Builder/MultiAlpha_Saved_Four_Role_Audit100_v1_00.mqh`, `Parity_Tests/MultiAlpha/MultiAlpha_SavedFourRole100_NoOrders_v1_00.mq5`.
+User MetaEditor screenshot: **0 errors / 0 warnings** (1660 ms).
+User MT5 Strategy Tester log: **2026.10.08 21:56:32.006**, XAUUSD-m,M1. **16/16 printed `[MA_FOUR_ROLE100_CASE]` lines PASS**: UNSAVED_ENTRY_OFF; UNSAVED_MANAGE_OFF; INVALID_REF_RED; SAVE_GRID_OFF; GRID_ORANGE; SAVE_BAD_ENTRY; ENTRY_BAD_RED; SAVE_EMPTY_MANAGE; MANAGE_EMPTY_RED; SAVE_EMPTY_EXIT; EXIT_EMPTY_RED; EA_SAVE; FOUR_ROLE_NOT_RUNNABLE; FOUR_ROLE_LAMPS; EA_OFF_SAVE; EA_OFF_REJECT.
+Final: `[MA_FOUR_ROLE100_PASS] cases=15 structural_only=1 runtime_certified=0 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**Gate A13 PASS for 16 printed fixture assertions only.** The final `cases=15` string is an incorrect hardcoded case count and must be corrected to 16; it does not alter the observed 16 PASS assertions. Structural audit marks GRID OFF ORANGE and refuses to certify saved ENTRY/MANAGE/EXIT runtime semantics, correctly keeping the combined EA non-runnable. **NOT PROVEN:** interpreter runtime equivalence, UI rendering, generic GRID ON, broker orders, or original O01 parity. v3_45 unchanged.

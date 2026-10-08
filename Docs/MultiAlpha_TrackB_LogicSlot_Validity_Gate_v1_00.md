@@ -57,3 +57,10 @@ Final runtime line:
 Scope: in-memory store roundtrip, headless status logic, GRID OFF semantic acceptance, four-boolean EA SLOT aggregate. Not proven: actual new-panel lamp rendering, real GRID dispatch suppression, durable disk persistence, full four-role Interpreter validation, 100-role-slot/60-EA-slot capacity, or production demo wiring.
 
 Next gate: improve four-role semantic validation and test GRID OFF at the actual generic GRID decision boundary, maintaining NoOrders and future-panel-independent services. Preserve v3_45 demo execution.
+
+
+## 2026-10-08 architecture correction (authoritative)
+
+Read `Docs/MultiAlpha_New_Panel_Basic_Design_v1_00.md`, extension "GRID OFF is a valid no-grid strategy". GRID OFF is a valid no-grid module and orange lamp, not a standalone global order-rejection filter. The earlier proposed "test GRID OFF at actual generic GRID decision boundary" must be interpreted as verifying **absence of GRID addition actions** in a valid no-grid strategy, not adding a veto. The experimental GRID OFF guard is superseded and must not be wired into v3_45.
+
+Next gate B-P0-2I revised: classify role validity and mode independently; verify ORANGE for valid GRID OFF, GREEN for valid active GRID, invalid RED and unsaved OFF; EA SLOT aggregate ORANGE iff four roles valid and GRID OFF, GREEN iff four valid and GRID active. Validate GRID OFF cannot coexist with active-grid actions. NoOrders tests first.

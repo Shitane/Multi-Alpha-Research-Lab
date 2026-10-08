@@ -223,3 +223,11 @@ MetaEditor screenshot: **0 errors / 0 warnings** (1307 ms). User Strategy Tester
 Final: `[MA_ME_INTENT100_PASS] cases=10 intent_only=1 runtime_certified=0 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
 
 **A14-2 PASS for limited boolean-condition-to-action-intent semantics only.** This implementation conservatively rejects OR and multiple actions, and does not execute trailing, basket management, close, position modification, or orders. Conditions are supplied as external truth flags, not calculated from market or position state. Saved-definition integration, original O01 parity, full runtime semantics and GREEN/runnable certification **NOT PROVEN**. v3_45 unchanged.
+
+
+## Gate A14-3 — Saved MANAGE / EXIT 100-Part intent integration (2026-10-08)
+
+Sources: `Include/Builder/MultiAlpha_Saved_Manage_Exit_Intent100_v1_00.mqh`, `Parity_Tests/MultiAlpha/MultiAlpha_SavedManageExit100_Intent_NoOrders_v1_00.mq5`.
+User MetaEditor screenshot: **0 errors / 0 warnings** (1428 ms). User MT5 Strategy Tester log: **2026.10.08 23:38:21.664**, XAUUSD-m,M1, **18/18 `[MA_SAVED_ME100_CASE]` PASS**: UNSAVED_REJECT, SAVE_MANAGE100, MANAGE_TRUE, MANAGE_FALSE, SAVE_EXIT100, EXIT_TRUE, EXIT_FALSE, ROLE_MISMATCH_UNSAVED, WRONG_ROLE_REJECT, INDEX_100_REJECT, INDEX_NEGATIVE_REJECT, SHORT_FLAGS_REJECT, SAVE_DISABLED, DISABLED_REJECT, SAVE_INVALID, INVALID_REJECT, RECOVERY_SAVE, RECOVERY_EVALUATE.
+Final: `[MA_SAVED_ME100_PASS] cases=18 saved_intent_only=1 runtime_certified=0 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+**A14-3 PASS limited saved in-memory definition -> external condition flags -> action intent only.** Not a proof of actual indicator/position condition evaluation, broker operations, full MANAGE/EXIT runtime semantics, restored disk-to-runtime execution, O01 original parity, or GREEN/runnable eligibility. Keep v3_45 unchanged.

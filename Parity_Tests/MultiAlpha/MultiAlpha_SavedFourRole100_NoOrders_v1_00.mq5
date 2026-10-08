@@ -38,7 +38,7 @@ int OnInit()
  Check("FOUR_ROLE_LAMPS",e==MA_SAVED_RED100&&g==MA_SAVED_ORANGE100&&m==MA_SAVED_RED100&&x==MA_SAVED_RED100);
  Check("EA_OFF_SAVE",ea.Save(100,"OFF",refs,false));
  Check("EA_OFF_REJECT",!MAAuditFourRole100(ea,logic,100,e,g,m,x,why)&&why=="EA_OFF");
- if(failures==0)Print("[MA_FOUR_ROLE100_PASS] cases=15 structural_only=1 runtime_certified=0 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1");
+ if(failures==0)Print("[MA_FOUR_ROLE100_PASS] cases=16 structural_only=1 runtime_certified=0 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1");
  else Print("[MA_FOUR_ROLE100_FAIL] count=",failures);
  return INIT_SUCCEEDED;
 }

@@ -37,3 +37,23 @@ Create a **headless** role validity evaluator and deterministic NoOrders tests f
 Tests required: EMPTY; saved-invalid; saved-valid ENTRY; GRID OFF alone valid; GRID ON alone incomplete; EA SLOT four-role aggregate; invalid one role -> aggregate not green; EA SLOT disabled but four valid -> green; save/load retains semantic identity.
 
 Do not claim disk persistence or 100/60 capacities until implemented and tested. Use versioned files and preserve v3_45 demo unchanged.
+
+
+## B-P0-2H runtime evidence (2026-10-08 17:30:39, XAUUSD-m M1)
+
+MetaEditor compile evidence: 0 errors, 0 warnings (user screenshot).
+Test EA: `MultiAlpha_Logic_Validity_NoOrders_v1_00.mq5`.
+
+Ten `[MA_VALID100_CASE]` checks PASS:
+UNSAVED_OFF; SAVED_EMPTY_INVALID; GRID_OFF_VALID; STORE_GRID_OFF;
+LOAD_GRID_OFF; RELOADED_GRID_OFF_VALID; GRID_ON_ALONE_INVALID;
+EA_FOUR_VALID; EA_ONE_INVALID; EA_DISABLED_BUT_VALID.
+
+Final runtime line:
+`[MA_VALID100_PASS] grid_off=PASS states=PASS memory_roundtrip=PASS aggregate=PASS NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**B-P0-2H deterministic NoOrders runtime: PASS.**
+
+Scope: in-memory store roundtrip, headless status logic, GRID OFF semantic acceptance, four-boolean EA SLOT aggregate. Not proven: actual new-panel lamp rendering, real GRID dispatch suppression, durable disk persistence, full four-role Interpreter validation, 100-role-slot/60-EA-slot capacity, or production demo wiring.
+
+Next gate: improve four-role semantic validation and test GRID OFF at the actual generic GRID decision boundary, maintaining NoOrders and future-panel-independent services. Preserve v3_45 demo execution.

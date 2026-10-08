@@ -244,3 +244,13 @@ Final: `[MA_OWNED_MATCH_INCONCLUSIVE] cases=13 zero_owned_positions=1 real_match
 **Gate A14-9 INCONCLUSIVE for real matching owned-position coverage, despite 13/13 fixture assertions PASS.** The account had one position but none matched BOTH the tested symbol and magic; the true/false predicates were exercised at zero owned counts only. Do not label this real-position matching PASS, runtime certified, GREEN/runnable, or trading execution. Existing v3_45 unchanged. No new orders should be created just for this test.
 
 **Next:** prove nonzero owned-count/lot scenarios using read-only existing matching positions when available, or a separate deterministic synthetic snapshot test clearly labeled as synthetic (never a substitute for actual owned-position evidence). Then continue semantic/O01 parity and runtime gating.
+
+
+## Gate A14-15 — MANAGE/EXIT read-only adapter preview (2026-10-09)
+
+Sources: `Include/Builder/MultiAlpha_ME_Adapter_Preview_v1_00.mqh` and `Parity_Tests/MultiAlpha/MultiAlpha_MEAdapter_NoOrders_v1_00.mq5`.
+User MetaEditor screenshot: **0 errors / 0 warnings** (497 ms).
+User MT5 log, XAUUSD-m,M1, **2026.10.09 07:56:28.260–.261**: **15/15 `[MA_ME_ADAPTER_CASE]` PASS**: BLOCKED_REJECT, IDLE_ACCEPT, IDLE_ACTION_REJECT, MANAGE_ACCEPT, ARMED_REJECT, EMPTY_SYMBOL_REJECT, NEGATIVE_MAGIC_REJECT, EXIT_ACCEPT, EXIT_MANAGE_REJECT, MANAGE_EXIT_REJECT, ENTRY_ROLE_REJECT, SLOT_OUT_OF_RANGE, UNKNOWN_STATE_REJECT, EXIT_OPPOSITE_ACCEPT, MANAGE_OVERLAP_ACCEPT.
+Final: `[MA_ME_ADAPTER_PASS] cases=15 preview_only=PASS runtime_certified=0 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**A14-15 PASS for in-memory read-only adapter preview and fail-closed request validation only.** No broker calls, order modifications, trailing/basket execution, real EXIT, full end-to-end saved-definition integration, runtime certification, or original O01 parity proven. Stable v3_45 unchanged. Next gate: saved MANAGE/EXIT -> read-only decision -> request -> preview end-to-end handoff, still NoOrders.

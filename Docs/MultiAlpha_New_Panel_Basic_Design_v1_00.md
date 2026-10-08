@@ -360,3 +360,20 @@ Keep the current O01/Builder completion and NoOrders gates as the active develop
 - UI construction itself remains scheduled **after** O01 Builder and runtime validation. Migration readiness is mandatory **during** current development.
 
 This rule governs current B-P0-2G and subsequent work and supplements sections 1, 7, 12 and 15.
+
+
+## Confirmed extension — GRID OFF is a valid no-grid strategy (2026-10-08)
+
+This section supersedes any earlier assumption that GRID OFF is primarily a broker-order rejection filter.
+
+- Four required role references remain ENTRY, GRID, MANAGE, EXIT. Every role must be saved and semantically valid for EA SLOT runtime eligibility.
+- GRID OFF is a complete **valid GRID module definition** expressing a strategy with no grid additions. It is not an absent or invalid GRID role.
+- GRID ON requires a complete validated grid-addition definition; an ON marker alone is incomplete.
+- GRID OFF means the generic role dispatcher has no grid-addition action to evaluate. It does not introduce an extra global veto or change ENTRY, MANAGE, EXIT.
+- LOGIC SLOT lamps: unsaved OFF, saved invalid RED, saved valid normal GREEN, saved valid GRID OFF ORANGE.
+- EA SLOT LOGIC lamp: if any required role invalid/missing, not GREEN/ORANGE; if all four valid and GRID is OFF, ORANGE; if all four valid and GRID is active, GREEN. EA SLOT ON/OFF controls execution independently of lamp validity.
+- A single GRID OFF Part may define a complete valid GRID role; it must not coexist with contradictory active-grid actions in the same saved definition. Interpreter must enforce this.
+- Filter Panel conditions remain separate from role validity; global DD 8/12/15 safety remains non-bypassable.
+- Status/lamp evaluation is UI-independent and reusable in the future left-side single panel. Existing Builder/runtime completion comes first; avoid UI rewrite before core proof.
+- The experimental `MultiAlpha_Grid_Off_Gate_v1_00.mqh` and `MultiAlpha_GridOff_Guard_NoOrders_v1_00.mq5` are **superseded, not approved for production integration**. Do not connect their extra veto to the v3_45 demo.
+- Next development gate: versioned GRID mode/validity/lamp evaluator + NoOrders tests, followed by independent four-role semantic validity, saved-slot integration, and later actual generic runtime behavior. Do not mark UI lamps or live execution PASS from unit tests.

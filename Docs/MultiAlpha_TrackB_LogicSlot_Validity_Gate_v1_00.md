@@ -87,3 +87,22 @@ Final: `[MA_LAMP2I_PASS] modes=PASS aggregate=PASS NO_ORDERS=1 BROKER_ACTIONS_AR
 Limitations: EA aggregate tests use supplied lamp enums rather than independently loaded/validated four role definitions. GRID active GREEN is not proof of complete generic GRID Interpreter. No real panel lamp UI, persistent disk storage, or broker execution was exercised. `MultiAlpha_Grid_Off_Gate_v1_00.mqh` remains superseded and not for production wiring.
 
 Next: audit and implement saved four-role semantic status aggregation, with fail-closed MANAGE/EXIT until validated. Preserve v3_45.
+
+
+## B-P0-2J runtime evidence (2026-10-08 19:52:06, XAUUSD-m M1)
+
+Test EA: `Parity_Tests/MultiAlpha/MultiAlpha_Saved_Four_Role_Status_NoOrders_v1_00.mq5`.
+MetaEditor compilation: 0 errors / 0 warnings (user screenshot, 2026-10-08 19:50).
+All twelve `[MA_SAVED2J_CASE]` checks PASS:
+MISSING_GRID_OFF; INVALID_REF_OFF; SAVE_GRID_OFF; LOADED_GRID_ORANGE;
+EA_MISSING_ROLES_RED; EA_MISSING_ROLES_NOT_RUN; EA_OFF_NOT_RUN;
+EA_ON_VALID_ORANGE_RUN; EA_ON_VALID_GREEN_RUN; EA_ON_INVALID_RED_NOT_RUN;
+SAVE_CONFLICT; LOADED_CONFLICT_RED.
+
+Final: `[MA_SAVED2J_PASS] loaded_status=PASS fail_closed=PASS NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**B-P0-2J headless saved-slot / fail-closed unit runtime: PASS.**
+
+Limits: GREEN/ORANGE runnable checks pass pre-supplied lamp values; four real saved roles were not all independently proven valid. MANAGE/EXIT full semantic Interpreter, complete active GRID validation, disk persistence, real panel lamps and broker actions remain unproven. Continue fail-closed. v3_45 unchanged.
+
+Next B-P0-2K: source-audit existing MANAGE/EXIT grammar and runtime paths before defining a safe, evidence-backed semantic validator; test using NoOrders and saved role definitions. Do not accept 'saved' or 'enabled' alone as semantic validity.

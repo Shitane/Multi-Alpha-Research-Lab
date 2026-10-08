@@ -94,3 +94,17 @@ Final: `[MA_GRID100_PASS] grid_off=PASS fail_closed=PASS LEGACY_O01_RUNTIME_PARI
 **Gate A4 PASS only for GRID OFF and conservative fail-closed rejection tests.** Legacy O01 GRID runtime parity and arbitrary generic 100-Part GRID semantics **NOT PROVEN**. The test does not certify generic GRID green-lamp eligibility or live trading. v3_45 untouched.
 
 **Next priority:** implement/verify independent 100 EA SLOT configuration storage and four-role references, with 100th EA SLOT and 50/51/60/61 boundary tests. Avoid conflating EA SLOT count with the already-tested 100-per-role LOGIC SLOT store.
+
+
+## Gate A5 — 100 EA SLOT independent four-role reference store (2026-10-08)
+
+Source: `Include/Builder/MultiAlpha_EA_Slot_Store_v1_00.mqh`.
+Test: `Parity_Tests/MultiAlpha/MultiAlpha_EASlot100_Store_NoOrders_v1_00.mq5`.
+User MetaEditor screenshot: **0 errors, 0 warnings** (548 ms).
+User MT5 log: **2026.10.08 20:58:00.484**, XAUUSD-m,M1, **15/15 [MA_EASLOT100_CASE] PASS**:
+SAVE_SLOT_100, LOAD_SLOT_100, FOUR_REFS_INDEPENDENT, NAME_ENABLED_ROUNDTRIP, UNSAVED_99_OFF, SLOT_0_REJECT, SLOT_101_REJECT, BOUNDARIES_1_50_51_60_61_100, REF_0_REJECT, REF_101_REJECT, REF_COUNT_REJECT, SAVE_DISABLED, DISABLED_NOT_ENABLED, CLEAR_100, INVALID_SAVE_ATOMIC.
+Final: `[MA_EASLOT100_PASS] ea_slots=100 refs=4 boundaries=PASS NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**Gate A5 PASS for in-memory EA SLOT storage only.** LOGIC SLOT definition resolution, four-role Interpreter semantic validity, FILTER mapping, disk persistence/restart restore, multi-slot runtime, and live orders **NOT PROVEN**. v3_45 unchanged.
+
+**Next gate A6:** design and verify disk persistence/reload with schema version and atomicity/fail-closed handling, preserving separate EA SLOT IDs and per-role LOGIC SLOT IDs; do not wire to v3_45 until verified.

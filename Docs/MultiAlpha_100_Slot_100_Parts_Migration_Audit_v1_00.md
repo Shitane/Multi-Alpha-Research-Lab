@@ -207,3 +207,10 @@ User MT5 Strategy Tester log: **2026.10.08 21:56:32.006**, XAUUSD-m,M1. **16/16 
 Final: `[MA_FOUR_ROLE100_PASS] cases=15 structural_only=1 runtime_certified=0 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
 
 **Gate A13 PASS for 16 printed fixture assertions only.** The final `cases=15` string is an incorrect hardcoded case count and must be corrected to 16; it does not alter the observed 16 PASS assertions. Structural audit marks GRID OFF ORANGE and refuses to certify saved ENTRY/MANAGE/EXIT runtime semantics, correctly keeping the combined EA non-runnable. **NOT PROVEN:** interpreter runtime equivalence, UI rendering, generic GRID ON, broker orders, or original O01 parity. v3_45 unchanged.
+
+
+## Gate A14-1 — Saved ENTRY 100-Part vector evaluation (2026-10-08)
+
+Test: `Parity_Tests/MultiAlpha/MultiAlpha_SavedEntry100_Evaluate_NoOrders_v1_00.mq5`; MetaEditor screenshot 0 errors / 0 warnings (713 ms). User MT5 tester XAUUSD-m,M1, 2026.10.08 22:02:25.144–.145: **12/12 `[MA_SAVED_ENTRY100_CASE]` PASS**: UNSAVED_REJECT, SAVE_SLOT100, BUY_BRANCH, SELL_BRANCH, BOTH_BRANCHES, NEITHER_BRANCH, SAVE_PART100, PART100_BUY, SAVE_ACTION_ONLY, ACTION_ONLY_REJECT, SAVE_DISABLED, DISABLED_REJECT. Final `[MA_SAVED_ENTRY100_PASS] cases=12 saved_entry_vector_evaluation=PASS indicator_values_external=1 runtime_certified=0 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**A14-1 PASS only for saved ENTRY truth-vector evaluation.** Indicator values are supplied externally as booleans; actual RSI/ATR computation, live order handling, original O01 parity, MANAGE/EXIT runtime semantics and EA SLOT GREEN/runnable are **NOT PROVEN**. Stable v3_45 unchanged.

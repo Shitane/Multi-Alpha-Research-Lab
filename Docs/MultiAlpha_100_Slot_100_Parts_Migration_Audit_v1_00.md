@@ -136,3 +136,17 @@ Final: `[MA_LOGICDISK100_PASS] roles=4 slots_per_role=100 parts=100 disk_roundtr
 **Gate A7 PASS for representative LOGIC SLOT in-run disk roundtrip and truncated-file rejection only.** No all-400-populated stress proof, checksum/bit-flip detection, restart proof, FILTER persistence, multi-file transactional consistency, role Interpreter runtime validity, or real orders. Test uses placeholder Parts to verify storage, not validated trading grammar. v3_45 unchanged.
 
 **Next:** versioned checksums/bit-flip tests, multi-file consistency between EA SLOT refs and LOGIC definitions, and restart proof; preserve fail-closed semantics.
+
+
+## Gate A8 — EA SLOT → four role LOGIC SLOT reference integrity (2026-10-08)
+
+Source: `Include/Builder/MultiAlpha_Saved_Ref_Gate_v1_00.mqh`.
+Test: `Parity_Tests/MultiAlpha/MultiAlpha_SavedRef100_NoOrders_v1_00.mq5`.
+User MetaEditor screenshot: **0 errors, 0 warnings** (618 ms).
+User MT5 tester log: **2026.10.08 21:17:26.908**, XAUUSD-m,M1, **18/18 [MA_REF100_CASE] PASS**:
+UNSAVED_EA_REJECT, SAVE_EA100, UNSAVED_ROLE_REJECT, SAVE_ROLE_0, SAVE_ROLE_1, SAVE_ROLE_2, SAVE_ROLE_3, FOUR_REFS_RESOLVE, RESOLVE_NOT_SEMANTIC_CERTIFICATION, ROLE_3_INDEX99, ROLE_3_INDEX100_REJECT, DISABLE_REFERENCED_ROLE, ROLE_OFF_REJECT, RE_ENABLE_ROLE, EA_OFF_SAVE, EA_OFF_REJECT, INVALID_EA0_REJECT, INVALID_EA101_REJECT.
+Final: `[MA_REF100_PASS] structural_refs=PASS semantics_proven=0 NO_ORDERS=1 BROKER_ACTIONS_ARMED=0 VIRTUAL_NOT_FILL=1`.
+
+**Gate A8 PASS for in-memory structural reference resolution only.** EA LOGIC references are 1..100 and LOGIC library indices 0..99. The gate rejects missing/disabled roles and EA OFF. This does NOT establish Interpreter semantics, GRID OFF valid orange handling, persistence integrity across separate files, filter resolution, or runnable/live execution. v3_45 unchanged.
+
+**Next:** address semantic validity and GRID OFF behavior explicitly before using structural resolution for runnable/lamp gating; separately test restored EA/LOGIC snapshots together and corruption/consistency.
